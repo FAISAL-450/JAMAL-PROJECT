@@ -121,8 +121,8 @@
           </a>
         </li>
 
-        <!-- 👷 Jasim & Lemon: Construction Access -->
-        {% if email in ['jasim@dzignscapeprofessionals.onmicrosoft.com', 'lemon@dzignscapeprofessionals.onmicrosoft.com'] %}
+        {% if email == 'jasim@dzignscapeprofessionals.onmicrosoft.com' or email == 'lemon@dzignscapeprofessionals.onmicrosoft.com' %}
+          <!-- 👷 Jasim & Lemon: Construction -->
           <li class="dropdown">
             <a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
               <span><i class="fas fa-hard-hat"></i> Construction</span>
@@ -134,8 +134,8 @@
           </li>
         {% endif %}
 
-        <!-- 📈 Based & Dulal: Sales & Marketing Access -->
-        {% if email in ['based@dzignscapeprofessionals.onmicrosoft.com', 'dulal@dzignscapeprofessionals.onmicrosoft.com'] %}
+        {% if email == 'based@dzignscapeprofessionals.onmicrosoft.com' or email == 'dulal@dzignscapeprofessionals.onmicrosoft.com' %}
+          <!-- 📈 Based & Dulal: Sales & Marketing -->
           <li class="dropdown">
             <a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
               <span><i class="fas fa-chart-line"></i> Sales & Marketing</span>
@@ -147,8 +147,8 @@
           </li>
         {% endif %}
 
-        <!-- 💰 Raton: Finance Access -->
         {% if email == 'raton@dzignscapeprofessionals.onmicrosoft.com' %}
+          <!-- 💰 Raton: Finance -->
           <li class="dropdown">
             <a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
               <span><i class="fas fa-coins"></i> Finance</span>
@@ -168,8 +168,8 @@
           </li>
         {% endif %}
 
-        <!-- 🛡️ Admin: Full Access -->
         {% if email == 'admin@dzignscapeprofessionals.onmicrosoft.com' %}
+          <!-- 🛡️ Admin: Full Access -->
           <!-- Construction -->
           <li class="dropdown">
             <a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
@@ -205,7 +205,6 @@
     </ul>
   </div>
 {% endif %}
-
 
   <div class="main-content">
     {% block content %}{% endblock %}
