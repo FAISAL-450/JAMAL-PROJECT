@@ -107,6 +107,7 @@
 </head>
 <body>
 
+
 {% if request.user.is_authenticated %}
   <div class="sidebar">
     <div class="sidebar-header">ERP SOLUTION</div>
@@ -120,8 +121,8 @@
           </a>
         </li>
 
-        {% if email == 'jasim@dzignscapeprofessionals.onmicrosoft.com' or email == 'lemon@dzignscapeprofessionals.onmicrosoft.com' %}
-          <!-- 👤 Jasim & Lemon Access-Construction -->
+        <!-- 👷 Jasim & Lemon: Construction Access -->
+        {% if email in ['jasim@dzignscapeprofessionals.onmicrosoft.com', 'lemon@dzignscapeprofessionals.onmicrosoft.com'] %}
           <li class="dropdown">
             <a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
               <span><i class="fas fa-hard-hat"></i> Construction</span>
@@ -131,21 +132,23 @@
               <li><a href="{% url 'project_dashboard' %}?department=construction">Project Detailed</a></li>
             </ul>
           </li>
+        {% endif %}
 
-{% if email == 'based@dzignscapeprofessionals.onmicrosoft.com' or email == 'dulal@dzignscapeprofessionals.onmicrosoft.com' %}
-  <!-- 👤 Based & Dulal Access-Sales & Marketing -->
-  <li class="dropdown">
-    <a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
-      <span><i class="fas fa-hard-hat"></i> Sales & Marketing</span>
-      <i class="fa fa-chevron-down toggle-icon"></i>
-    </a>
-    <ul class="dropdown-menu">
-      <li><a href="{% url 'customerdetailed_dashboard' %}?department=salesmarketing">Customer Detailed</a></li>
-    </ul>
-  </li>
+        <!-- 📈 Based & Dulal: Sales & Marketing Access -->
+        {% if email in ['based@dzignscapeprofessionals.onmicrosoft.com', 'dulal@dzignscapeprofessionals.onmicrosoft.com'] %}
+          <li class="dropdown">
+            <a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
+              <span><i class="fas fa-chart-line"></i> Sales & Marketing</span>
+              <i class="fa fa-chevron-down toggle-icon"></i>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="{% url 'customerdetailed_dashboard' %}?department=salesmarketing">Customer Detailed</a></li>
+            </ul>
+          </li>
+        {% endif %}
 
-        {% elif email == 'raton@dzignscapeprofessionals.onmicrosoft.com' %}
-          <!-- 👤 Raton's Access-Finance -->
+        <!-- 💰 Raton: Finance Access -->
+        {% if email == 'raton@dzignscapeprofessionals.onmicrosoft.com' %}
           <li class="dropdown">
             <a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
               <span><i class="fas fa-coins"></i> Finance</span>
@@ -163,10 +166,11 @@
               </li>
             </ul>
           </li>
+        {% endif %}
 
-        {% elif email == 'admin@dzignscapeprofessionals.onmicrosoft.com' %}
-          <!-- 👤 Admin's Access-(Azure Admin User) -->
-          <!-- 👷 Admin: Construction -->
+        <!-- 🛡️ Admin: Full Access -->
+        {% if email == 'admin@dzignscapeprofessionals.onmicrosoft.com' %}
+          <!-- Construction -->
           <li class="dropdown">
             <a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
               <span><i class="fas fa-hard-hat"></i> Construction</span>
@@ -177,7 +181,7 @@
             </ul>
           </li>
 
-          <!-- 💰 Admin: Finance -->
+          <!-- Finance -->
           <li class="dropdown">
             <a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
               <span><i class="fas fa-coins"></i> Finance</span>
@@ -195,7 +199,6 @@
               </li>
             </ul>
           </li>
-        {% endif %}
         {% endif %}
 
       {% endwith %}
