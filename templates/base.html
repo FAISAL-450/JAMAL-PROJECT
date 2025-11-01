@@ -132,6 +132,18 @@
             </ul>
           </li>
 
+{% if email == 'based@dzignscapeprofessionals.onmicrosoft.com' or email == 'dulal@dzignscapeprofessionals.onmicrosoft.com' %}
+  <!-- 👤 Based & Dulal Access-Sales & Marketing -->
+  <li class="dropdown">
+    <a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
+      <span><i class="fas fa-hard-hat"></i> Sales & Marketing</span>
+      <i class="fa fa-chevron-down toggle-icon"></i>
+    </a>
+    <ul class="dropdown-menu">
+      <li><a href="{% url 'customerdetailed_dashboard' %}?department=salesmarketing">Customer Detailed</a></li>
+    </ul>
+  </li>
+
         {% elif email == 'raton@dzignscapeprofessionals.onmicrosoft.com' %}
           <!-- 👤 Raton's Access-Finance -->
           <li class="dropdown">
@@ -183,6 +195,7 @@
               </li>
             </ul>
           </li>
+        {% endif %}
         {% endif %}
 
       {% endwith %}
