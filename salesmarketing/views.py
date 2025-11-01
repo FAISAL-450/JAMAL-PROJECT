@@ -27,3 +27,16 @@ def salesmarketing_doc_list(request):
         'query': query
     })
 
+# 🏗️ Sales & Marketing Lead Detailed List View
+def salesmarketing_ld_list(request):
+    query = request.GET.get('q', '').strip()
+    leads = leads.objects.filter(department='salesmarketing')
+    if query:
+        leads = leads.filter(name__icontains=query)
+
+    leads_page = get_paginated_queryset(request, leads, per_page=10)
+
+    return render(request, 'salesmarketing/salesmarketing_ld_list.html', {
+        'leads': leads_page,
+        'query': query
+    })
