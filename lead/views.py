@@ -81,7 +81,7 @@ def lead_admin_dashboard(request):
     return render(request, "lead/lead_dashboard.html", {
         "leads": leads_page,
         "query": query,
-        "form": LeadForm(user=request.user),
+        "form": LeadForm(user=request.user),   # Admin can view form but not submit
         "mode": "admin",
         "readonly": True
     })
