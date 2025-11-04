@@ -45,7 +45,7 @@
           <button type="submit" class="btn green">
             {% if mode == "edit" %}✏️ Update{% else %}💾 Save{% endif %}
           </button>
-          {% if mode != "list" %}
+          {% if mode == "edit" %}
             <a href="{% url 'customerdetailed_dashboard' %}?q={{ query }}" class="btn gray">Cancel</a>
           {% endif %}
         </div>
