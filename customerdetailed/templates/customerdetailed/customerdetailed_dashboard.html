@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Customer Detailed Dishoard{% endblock %}
+{% block title %}Customer Detailed Dashboard{% endblock %}
 {% block content %}
 
-<!-- 📦 Main Dishoard Container -->
+<!-- 📦 Main Dashboard Container -->
 <div class="dashboard-wrapper">
 
   <!-- 🔔 Flash Messages -->
@@ -17,10 +17,14 @@
   {% endif %}
 
   <!-- 📝 Customer Form Section -->
-  {% if not readonly %}
+  {% if form %}
   <section class="form-section">
     <header class="form" onclick="toggleForm()">
-      <h2><i class="fas fa-user-plus"></i> CUSTOMER FORM <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span></h2>
+      <h2>
+        <i class="fas fa-user-plus"></i>
+        {% if mode == "edit" %}EDIT CUSTOMER{% else %}CUSTOMER FORM{% endif %}
+        <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span>
+      </h2>
     </header>
 
     <div id="formContent" class="form-content" style="display: block;">
@@ -36,14 +40,16 @@
           <div class="form-cell">{{ form.company.label_tag }}{{ form.company }}</div>
         </div>
 
+        {% if not readonly %}
         <div class="form-actions">
           <button type="submit" class="btn green">
-            {% if mode == 'edit' %}Update{% else %}Save{% endif %}
+            {% if mode == "edit" %}Update{% else %}Save{% endif %}
           </button>
-          {% if mode != 'list' %}
+          {% if mode != "list" %}
             <a href="{% url 'customerdetailed_dashboard' %}?q={{ query }}" class="btn gray">Cancel</a>
           {% endif %}
         </div>
+        {% endif %}
       </form>
     </div>
   </section>
