@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Customer Detailed Dashboard{% endblock %}
+{% block title %}Customer Detailed Dishoard{% endblock %}
 {% block content %}
 
-<!-- 📦 Main Dashboard Container -->
+<!-- 📦 Main Dishoard Container -->
 <div class="dashboard-wrapper">
 
   <!-- 🔔 Flash Messages -->
@@ -17,14 +17,10 @@
   {% endif %}
 
   <!-- 📝 Customer Form Section -->
-  {% if form %}
+  {% if not readonly %}
   <section class="form-section">
     <header class="form" onclick="toggleForm()">
-      <h2>
-        <i class="fas fa-user-plus"></i>
-        {% if mode == "edit" %}✏️ EDIT CUSTOMER{% else %}➕ ADD CUSTOMER{% endif %}
-        <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span>
-      </h2>
+      <h2><i class="fas fa-user-plus"></i> CUSTOMER FORM <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span></h2>
     </header>
 
     <div id="formContent" class="form-content" style="display: block;">
@@ -40,16 +36,14 @@
           <div class="form-cell">{{ form.company.label_tag }}{{ form.company }}</div>
         </div>
 
-        {% if not readonly %}
         <div class="form-actions">
           <button type="submit" class="btn green">
-            {% if mode == "edit" %}✏️ Update{% else %}💾 Save{% endif %}
+            {% if mode == 'edit' %}Update{% else %}Save{% endif %}
           </button>
-          {% if mode == "edit" %}
+          {% if mode != 'list' %}
             <a href="{% url 'customerdetailed_dashboard' %}?q={{ query }}" class="btn gray">Cancel</a>
           {% endif %}
         </div>
-        {% endif %}
       </form>
     </div>
   </section>
@@ -94,12 +88,12 @@
             <td>
               {% if not readonly and customer.created_by == request.user %}
                 <a href="{% url 'edit_customer' customer.pk %}?q={{ query }}" class="btn yellow action-btn">
-                  <i class="fas fa-edit"></i> ✏️ Edit
+                  <i class="fas fa-edit"></i> Edit
                 </a>
                 <form method="post" action="{% url 'delete_customer' customer.pk %}?q={{ query }}" style="display:inline;">
                   {% csrf_token %}
-                  <button type="submit" class="btn red action-btn" onclick="return confirm('Are you sure you want to delete this customer?');">
-                    <i class="fas fa-trash-alt"></i> 🗑️ Delete
+                  <button type="submit" class="btn red action-btn" onclick="return confirm('Delete this customer?');">
+                    <i class="fas fa-trash-alt"></i> Delete
                   </button>
                 </form>
               {% endif %}
@@ -150,6 +144,7 @@
     }
   });
 </script>
+
 
 <!-- 🎨 Custom CSS -->
 <style>

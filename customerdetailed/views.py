@@ -76,30 +76,19 @@ def customerdetailed_dashboard(request):
         "readonly": is_azure_admin(request.user)
     })
 
-# F - Admin Dashboard View (Azure Admin only, now with form submission)
+# F - Admin Dashboard View (Azure Admin only, read-only)
 @user_passes_test(is_azure_admin)
 def admin_dashboard(request):
     query = request.GET.get("q", "").strip()
-    form = CustomerDetailedForm(request.POST or None)
-
     customerdetaileds = filter_customerdetaileds(query=query, exclude_user=request.user)
     customerdetaileds_page = get_paginated_queryset(request, customerdetaileds)
-
-    # Allow admin to submit form
-    if request.method == "POST" and form.is_valid():
-        customer = form.save(commit=False)
-        customer.created_by = request.user
-        customer.team = getattr(request.user.customerdetailed_profile, "role", None)
-        customer.save()
-        messages.success(request, "✅ Customer detailed record created successfully by admin.")
-        return redirect(f"{reverse('admin_dashboard')}?q={query}")
 
     return render(request, "customerdetailed/customerdetailed_dashboard.html", {
         "customerdetaileds": customerdetaileds_page,
         "query": query,
-        "form": form,
+        "form": CustomerDetailedForm(),  # Admin can view form but not submit
         "mode": "admin",
-        "readonly": False
+        "readonly": True
     })
 
 # G - Edit View (Only owner can edit)
