@@ -60,17 +60,13 @@ def project_dashboard(request):
 
     form = ProjectForm(request.POST or None) if not is_admin else None
 
-    if not is_admin and request.method == "POST":
-        try:
-            if form.is_valid():
-                project = form.save(commit=False)
-                project.created_by = request.user
-                project.save()
-                messages.success(request, "✅ Project created successfully.")
-                return redirect(f"{reverse('project_dashboard')}?q={query}")
-        except Exception as e:
-            print("🔥 Error creating project:", e)
-            messages.error(request, f"Error: {e}")
+    if not is_admin and request.method == "POST" and form.is_valid():
+        project = form.save(commit=False)
+        project.created_by = request.user
+        project.team = getattr(request.user.project_profile, "role", None)  # Adjust if applicable
+        project.save()
+        messages.success(request, "✅ Project created successfully.")
+        return redirect(f"{reverse('project_dashboard')}?q={query}")
 
     return render(request, "project/project_dashboard.html", {
         "projects": projects_page,
