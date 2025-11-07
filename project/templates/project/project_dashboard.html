@@ -16,39 +16,39 @@
     {% endfor %}
   {% endif %}
 
-  <!-- 📝 Project Form Section -->
-  {% if not readonly %}
-  <section class="form-section">
-    <header class="form" onclick="toggleForm()">
-      <h2><i class="fas fa-tasks"></i> PROJECT FORM <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span></h2>
-    </header>
+<!-- 📝 Project Form Section -->
+{% if not readonly %}
+<section class="form-section">
+  <header class="form" onclick="toggleForm()">
+    <h2><i class="fas fa-tasks"></i> PROJECT FORM <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span></h2>
+  </header>
 
-    <div id="formContent" class="form-content" style="display: block;">
-      <form method="post">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
+  <div id="formContent" class="form-content" style="display: block;">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
 
-        <div class="form-grid">
-          <div class="form-cell">{{ form.name_of_project.label_tag }}{{ form.name_of_project }}</div>
-          <div class="form-cell">{{ form.project_address.label_tag }}{{ form.project_address }}</div>
-          <div class="form-cell">{{ form.contact_person_name.label_tag }}{{ form.contact_person_name }}</div>
-          <div class="form-cell">{{ form.contact_person_number.label_tag }}{{ form.contact_person_number }}</div>
-        </div>
+      <div class="form-grid">
+        <div class="form-cell">{{ form.name_of_project.label_tag }}{{ form.name_of_project }}</div>
+        <div class="form-cell">{{ form.project_address.label_tag }}{{ form.project_address }}</div>
+        <div class="form-cell">{{ form.contact_person_name.label_tag }}{{ form.contact_person_name }}</div>
+        <div class="form-cell">{{ form.contact_person_number.label_tag }}{{ form.contact_person_number }}</div>
+      </div>
 
-        <div class="form-actions">
-          <button type="submit" class="btn green">
-            {% if mode == 'edit' %}Update{% else %}Save{% endif %}
-          </button>
-          {% if mode != 'list' %}
-            <a href="{% url 'project_dashboard' %}?q={{ query }}" class="btn gray">Cancel</a>
-          {% endif %}
-        </div>
-      </form>
-    </div>
-  </section>
-  {% endif %}
+      <div class="form-actions">
+        <button type="submit" class="btn green">
+          {% if mode == 'edit' %}Update{% else %}Save{% endif %}
+        </button>
+        {% if mode != 'list' %}
+          <a href="{% url 'project_dashboard' %}?q={{ query }}" class="btn gray">Cancel</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</section>
+{% endif %}
 
-  <!-- 🔍 Search Section -->
+<!-- 🔍 Search Section -->
   <section class="filter-section">
     <h2>🔍 FILTERING</h2>
     <form method="get">
@@ -57,7 +57,7 @@
     </form>
   </section>
 
-  <!-- 📋 Project List Section -->
+<!-- 📋 Project List Section -->
 <section class="table-section">
   <header class="table-header">
     <h2><i class="fas fa-list"></i> PROJECT LIST</h2>
@@ -66,7 +66,7 @@
   <table>
     <thead>
       <tr>
-        <th>#</th>
+        <th>Sl No</th>
         <th>Project Name</th>
         <th>Address</th>
         <th>Contact Person</th>
@@ -93,19 +93,17 @@
                   <i class="fas fa-trash-alt"></i> Delete
                 </button>
               </form>
-            {% else %}
-              <span class="text-muted">No access</span>
             {% endif %}
           </td>
         </tr>
       {% empty %}
-        <tr><td colspan="7" class="no-data">No project records found.</td></tr>
+        <tr><td colspan="6" class="no-data">No project records found.</td></tr>
       {% endfor %}
     </tbody>
   </table>
 </section>
 
-  <!-- 📋 Pagination Section -->
+<!-- 📋 Pagination Section -->
   {% if projects.paginator.num_pages > 1 %}
   <footer class="pagination-footer">
     <nav class="pagination">
@@ -120,6 +118,7 @@
   </footer>
   {% endif %}
 </div>
+
 
 <!-- 🔧 Toggle Script -->
 <script>
