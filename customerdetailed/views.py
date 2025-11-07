@@ -4,7 +4,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.urls import reverse
 from django.db.models import Q
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 
 from .models import CustomerDetailed
@@ -12,17 +12,14 @@ from .forms import CustomerDetailedForm
 
 # B - Azure Admin Check
 def is_azure_admin(user):
-    return user.email == 'admin@dzignscapeprofessionals.onmicrosoft.com'
+    return user.email.lower() == 'admin@dzignscapeprofessionals.onmicrosoft.com'
 
 # C - Filtering Function
-def filter_customerdetaileds(query=None, user=None, exclude_user=None):
+def filter_customerdetaileds(query=None, user=None, admin_view=False):
     queryset = CustomerDetailed.objects.all()
 
-    if user:
+    if not admin_view and user:
         queryset = queryset.filter(created_by=user)
-
-    if exclude_user:
-        queryset = queryset.exclude(created_by=exclude_user)
 
     if query:
         queryset = queryset.filter(
@@ -31,7 +28,7 @@ def filter_customerdetaileds(query=None, user=None, exclude_user=None):
             Q(company__icontains=query)
         )
 
-    return queryset
+    return queryset.order_by('-id')
 
 # D - Reusable Pagination Function
 def get_paginated_queryset(request, queryset, per_page=10):
@@ -45,22 +42,18 @@ def get_paginated_queryset(request, queryset, per_page=10):
     except EmptyPage:
         return paginator.page(paginator.num_pages)
 
-# E - Unified Dashboard View (List View + Form Submission)
+# E - Team Member Dashboard View
 @login_required
 def customerdetailed_dashboard(request):
     query = request.GET.get("q", "").strip()
-    form = CustomerDetailedForm(request.POST or None)
+    is_admin = is_azure_admin(request.user)
 
-    # Role-based data filtering
-    if is_azure_admin(request.user):
-        customerdetaileds = filter_customerdetaileds(query=query, exclude_user=request.user)
-    else:
-        customerdetaileds = filter_customerdetaileds(query=query, user=request.user)
-
+    customerdetaileds = filter_customerdetaileds(query=query, user=request.user, admin_view=is_admin)
     customerdetaileds_page = get_paginated_queryset(request, customerdetaileds)
 
-    # Save logic: only non-admin users can submit
-    if not is_azure_admin(request.user) and request.method == "POST" and form.is_valid():
+    form = CustomerDetailedForm(request.POST or None) if not is_admin else None
+
+    if not is_admin and request.method == "POST" and form.is_valid():
         customer = form.save(commit=False)
         customer.created_by = request.user
         customer.team = getattr(request.user.customerdetailed_profile, "role", None)
@@ -73,30 +66,33 @@ def customerdetailed_dashboard(request):
         "query": query,
         "form": form,
         "mode": "list",
-        "readonly": is_azure_admin(request.user)
+        "readonly": is_admin
     })
 
-# F - Admin Dashboard View (Azure Admin only, read-only)
-@user_passes_test(is_azure_admin)
+# F - Admin Dashboard View (Read-only)
+@login_required
 def admin_dashboard(request):
+    if not is_azure_admin(request.user):
+        raise PermissionDenied
+
     query = request.GET.get("q", "").strip()
-    customerdetaileds = filter_customerdetaileds(query=query, exclude_user=request.user)
+    customerdetaileds = filter_customerdetaileds(query=query, admin_view=True)
     customerdetaileds_page = get_paginated_queryset(request, customerdetaileds)
 
     return render(request, "customerdetailed/customerdetailed_dashboard.html", {
         "customerdetaileds": customerdetaileds_page,
         "query": query,
-        "form": CustomerDetailedForm(),  # Admin can view form but not submit
+        "form": None,
         "mode": "admin",
         "readonly": True
     })
 
-# G - Edit View (Only owner can edit)
+# G - Edit View (Only team member can edit their own)
 @login_required
 def edit_customer(request, pk):
     customer = get_object_or_404(CustomerDetailed, pk=pk)
 
-    if customer.created_by != request.user or is_azure_admin(request.user):
+    if is_azure_admin(request.user) or customer.created_by != request.user:
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
@@ -119,12 +115,12 @@ def edit_customer(request, pk):
         "readonly": False
     })
 
-# H - Delete View (Only owner can delete)
+# H - Delete View (Only team member can delete their own)
 @login_required
 def delete_customer(request, pk):
     customer = get_object_or_404(CustomerDetailed, pk=pk)
 
-    if customer.created_by != request.user or is_azure_admin(request.user):
+    if is_azure_admin(request.user) or customer.created_by != request.user:
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
@@ -139,3 +135,4 @@ def delete_customer(request, pk):
         "customer": customer,
         "query": query
     })
+

@@ -1,11 +1,16 @@
 from django.db import models
+from django.contrib.auth.models import User
+
 class Project(models.Model):
-    id = models.AutoField(primary_key=True)  # Auto-incrementing ID
-    name_of_project = models.CharField(max_length=255)  # Project name
-    project_address = models.CharField(max_length=500)  # Project address as CharField
-    contact_person_name = models.CharField(max_length=255)  # Name of contact person
-    contact_person_number = models.CharField(max_length=20)  # Contact number of contact person
-    
+    id = models.AutoField(primary_key=True)
+    name_of_project = models.CharField(max_length=255)
+    project_address = models.CharField(max_length=500)
+    contact_person_name = models.CharField(max_length=255)
+    contact_person_number = models.CharField(max_length=20)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projects')
+
     def __str__(self):
-        return f"{self.name_of_project}"
+        return self.name_of_project
+
+
 

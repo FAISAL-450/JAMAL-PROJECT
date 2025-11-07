@@ -3,10 +3,9 @@
 {% block title %}Project Dashboard{% endblock %}
 {% block content %}
 
-<!-- 📦 Main Dashboard Container -->
 <div class="dashboard-wrapper">
 
-  <!-- 🔔 Flash Messages Section -->
+  <!-- 🔔 Flash Messages -->
   {% if messages %}
     {% for message in messages %}
       <div class="alert-box">
@@ -16,20 +15,18 @@
     {% endfor %}
   {% endif %}
 
-  <!-- 📝 Grid-Based Project Form Section -->
+  <!-- 📝 Project Form (Team Members Only) -->
+  {% if not readonly %}
   <section class="form-section">
     <header class="form" onclick="toggleForm()">
-  <h2><i class="fas fa-tasks"></i> PROJECT FORM <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span></h2>
-</header>
+      <h2><i class="fas fa-tasks"></i> PROJECT FORM <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span></h2>
+    </header>
 
     <div id="formContent" class="form-content" style="display: block;">
-
-
       <form method="post">
         {% csrf_token %}
         {{ form.non_field_errors }}
 
-        <!-- Grid Layout -->
         <div class="form-grid">
           <div class="form-cell">
             {{ form.name_of_project.label_tag }}
@@ -49,7 +46,6 @@
           </div>
         </div>
 
-        <!-- Form Actions -->
         <div class="form-actions">
           <button type="submit" class="btn green">
             {% if mode == 'edit' %}Update{% else %}Save{% endif %}
@@ -61,75 +57,84 @@
       </form>
     </div>
   </section>
-
- <!-- 🔍 Filter/Search Section -->
-<section class="filter-section">
-  <h2>🔍 FILTERING</h2>
-  <form method="get">
-    <input type="text" name="q" value="{{ query }}" placeholder="Search by project name">
-    <button type="submit" class="btn blue">Filter</button>
-  </form>
-</section>
-
-  <!-- 📋 Project List Section -->
-<section class="table-section">
-  <header class="table-header">
-    <h2><i class="fas fa-list"></i> PROJECT LIST</h2>
-  </header>
-
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Name of Project</th>
-        <th>Detailed Project Address</th>
-        <th>Name of Contact Person</th>
-        <th>Contact Number</th>
-        <th>Actions Button</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for project in projects %}
-        <tr>
-          <td>{{ project.id }}</td>
-          <td>{{ project.name_of_project }}</td>
-          <td>{{ project.project_address }}</td>
-          <td>{{ project.contact_person_name }}</td>
-          <td>{{ project.contact_person_number }}</td>
-          <td>
-            <a href="{% url 'edit_project' project.id %}?q={{ query }}" class="btn yellow action-btn">
-              <i class="fas fa-edit"></i> Edit
-            </a>
-            <form method="post" action="{% url 'project_delete' project.id %}?q={{ query }}" style="display:inline;">
-              {% csrf_token %}
-              <button type="submit" class="btn red action-btn" onclick="return confirm('Delete this project?');">
-                <i class="fas fa-trash-alt"></i> Delete
-              </button>
-            </form>
-          </td>
-        </tr>
-      {% empty %}
-        <tr><td colspan="6" class="no-data">No projects found.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <!-- 📋 Paginator Section -->
-  {% if projects.paginator.num_pages > 1 %}
-    <footer class="pagination-footer">
-      <nav class="pagination">
-        {% if projects.has_previous %}
-          <a href="?q={{ query }}&page={{ projects.previous_page_number }}" class="page-link">Previous</a>
-        {% endif %}
-        <span class="page-info">Page {{ projects.number }} of {{ projects.paginator.num_pages }}</span>
-        {% if projects.has_next %}
-          <a href="?q={{ query }}&page={{ projects.next_page_number }}" class="page-link">Next</a>
-        {% endif %}
-      </nav>
-    </footer>
   {% endif %}
-</section>
 
+  <!-- 🔍 Search Filter -->
+  <section class="filter-section">
+    <h2>🔍 FILTERING</h2>
+    <form method="get">
+      <input type="text" name="q" value="{{ query }}" placeholder="Search by project name">
+      <button type="submit" class="btn blue">Filter</button>
+    </form>
+  </section>
+
+  <!-- 📋 Project List -->
+  <section class="table-section">
+    <header class="table-header">
+      <h2><i class="fas fa-list"></i> PROJECT LIST</h2>
+    </header>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name of Project</th>
+          <th>Detailed Project Address</th>
+          <th>Name of Contact Person</th>
+          <th>Contact Number</th>
+          <th>Created By</th>
+          {% if not readonly %}<th>Actions</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for project in projects %}
+          <tr>
+            <td>{{ project.id }}</td>
+            <td>{{ project.name_of_project }}</td>
+            <td>{{ project.project_address }}</td>
+            <td>{{ project.contact_person_name }}</td>
+            <td>{{ project.contact_person_number }}</td>
+            <td>{{ project.created_by.username }}</td>
+            {% if not readonly %}
+              <td>
+                {% if project.created_by == request.user %}
+                  <a href="{% url 'edit_project' project.id %}?q={{ query }}" class="btn yellow action-btn">
+                    <i class="fas fa-edit"></i> Edit
+                  </a>
+                  <form method="post" action="{% url 'delete_project' project.id %}?q={{ query }}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn red action-btn" onclick="return confirm('Delete this project?');">
+                      <i class="fas fa-trash-alt"></i> Delete
+                    </button>
+                  </form>
+                {% else %}
+                  <span class="text-muted">No access</span>
+                {% endif %}
+              </td>
+            {% endif %}
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="no-data">No projects found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- 📋 Pagination -->
+    {% if projects.paginator.num_pages > 1 %}
+      <footer class="pagination-footer">
+        <nav class="pagination">
+          {% if projects.has_previous %}
+            <a href="?q={{ query }}&page={{ projects.previous_page_number }}" class="page-link">Previous</a>
+          {% endif %}
+          <span class="page-info">Page {{ projects.number }} of {{ projects.paginator.num_pages }}</span>
+          {% if projects.has_next %}
+            <a href="?q={{ query }}&page={{ projects.next_page_number }}" class="page-link">Next</a>
+          {% endif %}
+        </nav>
+      </footer>
+    {% endif %}
+  </section>
+</div>
 
 <!-- 🔧 Toggle Script -->
 <script>
@@ -148,7 +153,6 @@
     }
   }
 
-  // Auto-unhide form if in edit mode
   document.addEventListener('DOMContentLoaded', function () {
     const mode = "{{ mode }}";
     if (mode === "edit") {
