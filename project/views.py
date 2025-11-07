@@ -16,12 +16,14 @@ AZURE_ADMIN_EMAIL = 'admin@dzignscapeprofessionals.onmicrosoft.com'
 def is_azure_admin(user):
     return getattr(user, 'email', '').lower() == AZURE_ADMIN_EMAIL.lower()
 
-# C - Filtering Function
+# C - Filtering Function (includes team member access)
 def filter_projects(query=None, user=None, exclude_user=None):
     queryset = Project.objects.all()
 
     if user:
-        queryset = queryset.filter(created_by=user)
+        queryset = queryset.filter(
+            Q(created_by=user) | Q(team_members=user)
+        ).distinct()
 
     if exclude_user:
         queryset = queryset.exclude(created_by=exclude_user)
@@ -53,17 +55,14 @@ def project_dashboard(request):
     query = request.GET.get("q", "").strip()
     form = ProjectForm(request.POST or None)
 
-    if is_azure_admin(request.user):
-        projects = filter_projects(query=query)
-    else:
-        projects = filter_projects(query=query, user=request.user)
-
+    projects = filter_projects(query=query, user=request.user)
     projects_page = get_paginated_queryset(request, projects)
 
     if not is_azure_admin(request.user) and request.method == "POST" and form.is_valid():
         project = form.save(commit=False)
         project.created_by = request.user
         project.save()
+        form.save_m2m()  # Save team_members if included
         messages.success(request, "✅ Project created successfully.")
         return redirect(f"{reverse('project_dashboard')}?q={query}")
 
@@ -90,12 +89,12 @@ def admin_project_dashboard(request):
         "readonly": True
     })
 
-# G - Edit View (Only owner can edit)
+# G - Edit View (Owner or Team Member can edit)
 @login_required
 def edit_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
 
-    if project.created_by != request.user:
+    if request.user != project.created_by and request.user not in project.team_members.all():
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
@@ -118,12 +117,12 @@ def edit_project(request, pk):
         "readonly": False
     })
 
-# H - Delete View (Only owner can delete)
+# H - Delete View (Owner or Team Member can delete)
 @login_required
 def delete_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
 
-    if project.created_by != request.user:
+    if request.user != project.created_by and request.user not in project.team_members.all():
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
