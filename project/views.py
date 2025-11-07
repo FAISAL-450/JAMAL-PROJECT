@@ -60,17 +60,21 @@ def project_dashboard(request):
 
     form = ProjectForm(request.POST or None) if not is_admin else None
 
-    if not is_admin and request.method == "POST" and form.is_valid():
-        project = form.save(commit=False)
-        project.created_by = request.user
-        project.save()
+    if not is_admin and request.method == "POST":
+        try:
+            if form.is_valid():
+                project = form.save(commit=False)
+                project.created_by = request.user
+                project.save()
 
-        # ✅ Save ManyToMany relationships if team_members is included in the form
-        if 'team_members' in form.fields:
-            form.save_m2m()
+                if 'team_members' in form.fields:
+                    form.save_m2m()
 
-        messages.success(request, "✅ Project created successfully.")
-        return redirect(f"{reverse('project_dashboard')}?q={query}")
+                messages.success(request, "✅ Project created successfully.")
+                return redirect(f"{reverse('project_dashboard')}?q={query}")
+        except Exception as e:
+            print("🔥 Error creating project:", e)
+            messages.error(request, f"Error: {e}")
 
     return render(request, "project/project_dashboard.html", {
         "projects": projects_page,
