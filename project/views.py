@@ -63,10 +63,7 @@ def project_dashboard(request):
     if not is_admin and request.method == "POST" and form.is_valid():
         project = form.save(commit=False)
         project.created_by = request.user
-        try:
-            project.team = getattr(getattr(request.user, "project_profile", None), "role", None)
-        except AttributeError:
-            project.team = None
+        project.team = getattr(request.user.project_profile, "role", None)
         project.save()
         messages.success(request, "✅ Project created successfully.")
         return redirect(f"{reverse('project_dashboard')}?q={query}")
