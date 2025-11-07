@@ -1,7 +1,7 @@
 # A - Import Required Modules
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.urls import reverse
+from django.urls import reverse_lazy
 from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -11,10 +11,16 @@ from .models import Project
 from .forms import ProjectForm
 
 # B - Azure Admin Check
-def is_azure_admin(user):
-    return user.email.lower() == 'admin@dzignscapeprofessionals.onmicrosoft.com'
+AZURE_ADMIN_EMAIL = 'admin@dzignscapeprofessionals.onmicrosoft.com'
 
-# C - Filtering Function
+def is_azure_admin(user):
+    return getattr(user, 'email', '').lower() == AZURE_ADMIN_EMAIL.lower()
+
+# C - Query Helper
+def get_query_param(request, key="q"):
+    return request.GET.get(key, "").strip()
+
+# D - Filtering Function
 def filter_projects(query=None, user=None, admin_view=False):
     queryset = Project.objects.all()
 
@@ -30,7 +36,7 @@ def filter_projects(query=None, user=None, admin_view=False):
 
     return queryset.order_by('-id')
 
-# D - Reusable Pagination Function
+# E - Reusable Pagination Function
 def get_paginated_queryset(request, queryset, per_page=10):
     paginator = Paginator(queryset, per_page)
     page_number = request.GET.get("page")
@@ -42,10 +48,10 @@ def get_paginated_queryset(request, queryset, per_page=10):
     except EmptyPage:
         return paginator.page(paginator.num_pages)
 
-# E - Team Member Dashboard View
+# F - Team Member Dashboard View
 @login_required
 def project_dashboard(request):
-    query = request.GET.get("q", "").strip()
+    query = get_query_param(request)
     is_admin = is_azure_admin(request.user)
 
     projects = filter_projects(query=query, user=request.user, admin_view=is_admin)
@@ -59,7 +65,7 @@ def project_dashboard(request):
         project.team = getattr(request.user.project_profile, "role", None)
         project.save()
         messages.success(request, "✅ Project created successfully.")
-        return redirect(f"{reverse('project_dashboard')}?q={query}")
+        return redirect(f"{reverse_lazy('project_dashboard')}?q={query}")
 
     return render(request, "project/project_dashboard.html", {
         "projects": projects_page,
@@ -69,13 +75,13 @@ def project_dashboard(request):
         "readonly": is_admin
     })
 
-# F - Admin Dashboard View (Read-only)
+# G - Admin Dashboard View (Read-only)
 @login_required
 def admin_dashboard(request):
     if not is_azure_admin(request.user):
         raise PermissionDenied
 
-    query = request.GET.get("q", "").strip()
+    query = get_query_param(request)
     projects = filter_projects(query=query, admin_view=True)
     projects_page = get_paginated_queryset(request, projects)
 
@@ -87,7 +93,7 @@ def admin_dashboard(request):
         "readonly": True
     })
 
-# G - Edit View (Only team member can edit their own)
+# H - Edit View (Only team member can edit their own)
 @login_required
 def edit_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
@@ -95,13 +101,13 @@ def edit_project(request, pk):
     if is_azure_admin(request.user) or project.created_by != request.user:
         raise PermissionDenied
 
-    query = request.GET.get("q", "").strip()
+    query = get_query_param(request)
     form = ProjectForm(request.POST or None, instance=project)
 
     if form.is_valid():
         form.save()
         messages.success(request, "✏️ Project updated successfully.")
-        return redirect(f"{reverse('project_dashboard')}?q={query}")
+        return redirect(f"{reverse_lazy('project_dashboard')}?q={query}")
 
     projects = filter_projects(query=query, user=request.user)
     projects_page = get_paginated_queryset(request, projects)
@@ -115,7 +121,7 @@ def edit_project(request, pk):
         "readonly": False
     })
 
-# H - Delete View (Only team member can delete their own)
+# I - Delete View (Only team member can delete their own)
 @login_required
 def delete_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
@@ -123,19 +129,18 @@ def delete_project(request, pk):
     if is_azure_admin(request.user) or project.created_by != request.user:
         raise PermissionDenied
 
-    query = request.GET.get("q", "").strip()
+    query = get_query_param(request)
 
     if request.method == 'POST':
         name = project.name_of_project
         project.delete()
         messages.success(request, f"🗑️ Project '{name}' deleted successfully.")
-        return redirect(f"{reverse('project_dashboard')}?q={query}")
+        return redirect(f"{reverse_lazy('project_dashboard')}?q={query}")
 
     return render(request, "project/confirm_delete.html", {
         "project": project,
         "query": query
     })
-
 
 
 
