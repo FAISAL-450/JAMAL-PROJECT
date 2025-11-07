@@ -33,6 +33,10 @@
         <div class="form-cell">{{ form.project_address.label_tag }}{{ form.project_address }}</div>
         <div class="form-cell">{{ form.contact_person_name.label_tag }}{{ form.contact_person_name }}</div>
         <div class="form-cell">{{ form.contact_person_number.label_tag }}{{ form.contact_person_number }}</div>
+
+        {% if form.team_members %}
+        <div class="form-cell">{{ form.team_members.label_tag }}{{ form.team_members }}</div>
+        {% endif %}
       </div>
 
       <div class="form-actions">
