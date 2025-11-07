@@ -11,8 +11,10 @@ from .models import Project
 from .forms import ProjectForm
 
 # B - Azure Admin Check
+AZURE_ADMIN_EMAIL = 'admin@dzignscapeprofessionals.onmicrosoft.com'
+
 def is_azure_admin(user):
-    return user.email.lower() == 'admin@dzignscapeprofessionals.onmicrosoft.com'
+    return getattr(user, 'email', '').lower() == AZURE_ADMIN_EMAIL.lower()
 
 # C - Filtering Function
 def filter_projects(query=None, user=None, exclude_user=None):
@@ -65,7 +67,7 @@ def project_dashboard(request):
         messages.success(request, "✅ Project created successfully.")
         return redirect(f"{reverse('project_dashboard')}?q={query}")
 
-    return render(request, "project_dashboard.html", {
+    return render(request, "project/project_dashboard.html", {
         "projects": projects_page,
         "query": query,
         "form": form,
@@ -80,7 +82,7 @@ def admin_project_dashboard(request):
     projects = filter_projects(query=query)
     projects_page = get_paginated_queryset(request, projects)
 
-    return render(request, "project_dashboard.html", {
+    return render(request, "project/project_dashboard.html", {
         "projects": projects_page,
         "query": query,
         "form": ProjectForm(),
@@ -107,7 +109,7 @@ def edit_project(request, pk):
     projects = filter_projects(query=query, user=request.user)
     projects_page = get_paginated_queryset(request, projects)
 
-    return render(request, "project_dashboard.html", {
+    return render(request, "project/project_dashboard.html", {
         "form": form,
         "mode": "edit",
         "project": project,
@@ -132,8 +134,9 @@ def delete_project(request, pk):
         messages.success(request, f"🗑️ Project '{name}' deleted successfully.")
         return redirect(f"{reverse('project_dashboard')}?q={query}")
 
-    return render(request, "confirm_delete.html", {
+    return render(request, "project/confirm_delete.html", {
         "project": project,
         "query": query
     })
+
 
