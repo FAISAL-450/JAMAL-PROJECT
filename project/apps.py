@@ -7,3 +7,5 @@ class ProjectConfig(AppConfig):
     def ready(self):
         import project.signals
 
+
+

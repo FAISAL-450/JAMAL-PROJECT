@@ -4,29 +4,22 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.urls import reverse
 from django.db.models import Q
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 
 from .models import Project
 from .forms import ProjectForm
 
 # B - Azure Admin Check
-AZURE_ADMIN_EMAIL = 'admin@dzignscapeprofessionals.onmicrosoft.com'
-
 def is_azure_admin(user):
-    return getattr(user, 'email', '').lower() == AZURE_ADMIN_EMAIL.lower()
+    return user.email.lower() == 'admin@dzignscapeprofessionals.onmicrosoft.com'
 
-# C - Filtering Function-(Admin & Team)
-def filter_projects(query=None, user=None, exclude_user=None):
+# C - Filtering Function
+def filter_projects(query=None, user=None, admin_view=False):
     queryset = Project.objects.all()
 
-    if user:
-        queryset = queryset.filter(
-            Q(created_by=user) | Q(team_members=user)
-        ).distinct()
-
-    if exclude_user:
-        queryset = queryset.exclude(created_by=exclude_user)
+    if not admin_view and user:
+        queryset = queryset.filter(created_by=user)
 
     if query:
         queryset = queryset.filter(
@@ -49,13 +42,13 @@ def get_paginated_queryset(request, queryset, per_page=10):
     except EmptyPage:
         return paginator.page(paginator.num_pages)
 
-# E – Team Dashboard View-(Azure Team user)
+# E - Team Member Dashboard View
 @login_required
 def project_dashboard(request):
     query = request.GET.get("q", "").strip()
     is_admin = is_azure_admin(request.user)
 
-    projects = filter_projects(query=query, user=request.user)
+    projects = filter_projects(query=query, user=request.user, admin_view=is_admin)
     projects_page = get_paginated_queryset(request, projects)
 
     form = ProjectForm(request.POST or None) if not is_admin else None
@@ -76,14 +69,14 @@ def project_dashboard(request):
         "readonly": is_admin
     })
 
-# F - Admin Dashboard View-(Azure Admin-read-only)
+# F - Admin Dashboard View (Read-only)
 @login_required
 def admin_dashboard(request):
     if not is_azure_admin(request.user):
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
-    projects = filter_projects(query=query)
+    projects = filter_projects(query=query, admin_view=True)
     projects_page = get_paginated_queryset(request, projects)
 
     return render(request, "project/project_dashboard.html", {
@@ -94,14 +87,12 @@ def admin_dashboard(request):
         "readonly": True
     })
 
-# G - Edit View (Team will edit)
+# G - Edit View (Only team member can edit their own)
 @login_required
 def edit_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
 
-    if is_azure_admin(request.user) or (
-        request.user != project.created_by and request.user not in project.team_members.all()
-    ):
+    if is_azure_admin(request.user) or project.created_by != request.user:
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
@@ -124,14 +115,12 @@ def edit_project(request, pk):
         "readonly": False
     })
 
-# H - Delete View (Team will delete)
+# H - Delete View (Only team member can delete their own)
 @login_required
 def delete_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
 
-    if is_azure_admin(request.user) or (
-        request.user != project.created_by and request.user not in project.team_members.all()
-    ):
+    if is_azure_admin(request.user) or project.created_by != request.user:
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
@@ -146,5 +135,7 @@ def delete_project(request, pk):
         "project": project,
         "query": query
     })
+
+
 
 
