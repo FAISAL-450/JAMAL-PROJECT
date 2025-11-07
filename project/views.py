@@ -64,7 +64,7 @@ def project_dashboard(request):
         project = form.save(commit=False)
         project.created_by = request.user
         try:
-            project.team = getattr(request.user.project_profile, "role", None)
+            project.team = getattr(getattr(request.user, "project_profile", None), "role", None)
         except AttributeError:
             project.team = None
         project.save()
