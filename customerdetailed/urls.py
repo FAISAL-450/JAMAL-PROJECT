@@ -13,4 +13,6 @@ urlpatterns = [
 
     # 🗑️ Delete customer entry (only owner, not Azure admin)
     path('dashboard/delete/<int:pk>/', views.delete_customer, name='delete_customer'),
+
+     
 ]

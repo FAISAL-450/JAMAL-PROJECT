@@ -34,11 +34,6 @@
         <div class="form-cell">{{ form.contact_person_name.label_tag }}{{ form.contact_person_name }}</div>
         <div class="form-cell">{{ form.contact_person_number.label_tag }}{{ form.contact_person_number }}</div>
 
-        {% if form.team_members %}
-        <div class="form-cell">{{ form.team_members.label_tag }}{{ form.team_members }}</div>
-        {% endif %}
-      </div>
-
       <div class="form-actions">
         <button type="submit" class="btn green">
           {% if mode == 'edit' %}Update{% else %}Save{% endif %}

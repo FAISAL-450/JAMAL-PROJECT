@@ -66,10 +66,6 @@ def project_dashboard(request):
                 project = form.save(commit=False)
                 project.created_by = request.user
                 project.save()
-
-                if 'team_members' in form.fields:
-                    form.save_m2m()
-
                 messages.success(request, "✅ Project created successfully.")
                 return redirect(f"{reverse('project_dashboard')}?q={query}")
         except Exception as e:

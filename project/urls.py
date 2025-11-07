@@ -13,6 +13,7 @@ urlpatterns = [
 
     # 🗑️ Delete Project View-(owner or team member)
     path('dashboard/delete/<int:pk>/', views.delete_project, name='delete_project'),
+
 ]
 
 

@@ -9,7 +9,7 @@ class Project(models.Model):
     contact_person_number = models.CharField(max_length=20)
 
     # 🔸 Extra Fields-(used in backend logic)
-    team_members = models.ManyToManyField(User, related_name='team_projects', blank=True)
+    team = models.CharField(max_length=100)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projects')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
