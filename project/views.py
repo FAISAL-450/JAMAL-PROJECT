@@ -66,7 +66,7 @@ def project_dashboard(request):
     if not is_azure_admin(request.user) and request.method == "POST" and form.is_valid():
         project = form.save(commit=False)
         project.created_by = request.user
-        project.team = request.user.team  # ✅ Assign team name from user
+        project.team = request.user.profile.team
         project.save()
         messages.success(request, "✅ Project created successfully.")
         return redirect(f"{reverse('project_dashboard')}?q={query}")
