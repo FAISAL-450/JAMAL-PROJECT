@@ -47,7 +47,7 @@ def get_paginated_queryset(request, queryset, per_page=10):
     except EmptyPage:
         return paginator.page(paginator.num_pages)
 
-# E - Unified Dashboard View (List View + Form Submission)
+# E - Team Dashboard View (List View + Form Submission)
 @login_required
 def project_dashboard(request):
     query = request.GET.get("q", "").strip()
@@ -63,6 +63,7 @@ def project_dashboard(request):
     if not is_azure_admin(request.user) and request.method == "POST" and form.is_valid():
         project = form.save(commit=False)
         project.created_by = request.user
+        project.team = request.user.team  # ✅ Assign team name from user
         project.save()
         messages.success(request, "✅ Project created successfully.")
         return redirect(f"{reverse('project_dashboard')}?q={query}")
@@ -74,6 +75,7 @@ def project_dashboard(request):
         "mode": "list",
         "readonly": is_azure_admin(request.user)
     })
+
 
 # F - Admin Dashboard View (Azure Admin only, read-only)
 @user_passes_test(is_azure_admin)

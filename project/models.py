@@ -7,6 +7,7 @@ class Project(models.Model):
     contact_person_name = models.CharField(max_length=255)
     contact_person_number = models.CharField(max_length=20)
 
+    team = models.CharField(max_length=100)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projects')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
