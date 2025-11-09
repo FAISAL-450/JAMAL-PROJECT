@@ -60,13 +60,25 @@ def project_dashboard(request):
 
     projects_page = get_paginated_queryset(request, projects)
 
-    if not is_azure_admin(request.user) and request.method == "POST" and form.is_valid():
+    if request.method == "POST" and not is_azure_admin(request.user) and form.is_valid():
         project = form.save(commit=False)
-        project.created_by = request.user
-        project.team = settings.DEPARTMENT_EMAIL_MAP.get(request.user.email, "")
-        project.save()
-        messages.success(request, "✅ Project created successfully.")
-        return redirect(f"{reverse('project_dashboard')}?q={query}")
+
+    # Assign the logged-in user as the creator
+    project.created_by = request.user
+
+    # Get the team from settings or use a fallback
+    project.team = settings.DEPARTMENT_EMAIL_MAP.get(
+        request.user.email.lower(), "Unassigned"
+    )
+
+    # Save the project
+    project.save()
+
+    # Notify the user
+    messages.success(request, "✅ Project created successfully.")
+
+    # Redirect back to the dashboard with query preserved
+    return redirect(f"{reverse('project_dashboard')}?q={query}")
 
     return render(request, "project/project_dashboard.html", {
         "projects": projects_page,
