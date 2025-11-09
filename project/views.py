@@ -17,11 +17,14 @@ def is_azure_admin(user):
     return getattr(user, 'email', '').lower() == AZURE_ADMIN_EMAIL.lower()
 
 # C - Filtering Function
-def filter_projects(query=None, user=None, exclude_user=None):
+def filter_projects(query=None, user=None, exclude_user=None, team=None):
     queryset = Project.objects.all()
 
     if user:
         queryset = queryset.filter(created_by=user)
+
+    if team:
+        queryset = queryset.filter(team=team)
 
     if exclude_user:
         queryset = queryset.exclude(created_by=exclude_user)
