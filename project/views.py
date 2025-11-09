@@ -17,14 +17,11 @@ def is_azure_admin(user):
     return getattr(user, 'email', '').lower() == AZURE_ADMIN_EMAIL.lower()
 
 # C - Filtering Function
-def filter_projects(query=None, user=None, exclude_user=None, team=None):
+def filter_projects(query=None, user=None, exclude_user=None):
     queryset = Project.objects.all()
 
     if user:
         queryset = queryset.filter(created_by=user)
-
-    if team:
-        queryset = queryset.filter(team=team)
 
     if exclude_user:
         queryset = queryset.exclude(created_by=exclude_user)
@@ -53,31 +50,29 @@ def get_paginated_queryset(request, queryset, per_page=10):
 # E - Team Dashboard View (List View + Form Submission)
 @login_required
 def project_dashboard(request):
-    form = ProjectForm(request.POST or None)
     query = request.GET.get("q", "").strip()
+    form = ProjectForm(request.POST or None)
 
     if is_azure_admin(request.user):
-        team = settings.DEPARTMENT_EMAIL_MAP.get(request.user.email, "")
-        projects = Project.objects.filter(team=team)
-        readonly = True
+        projects = filter_projects(query=query)
     else:
-        team = settings.DEPARTMENT_EMAIL_MAP.get(request.user.email, "")
-        projects = Project.objects.filter(created_by=request.user)
-        readonly = False
+        projects = filter_projects(query=query, user=request.user)
 
-    if request.method == "POST" and not readonly and form.is_valid():
+    projects_page = get_paginated_queryset(request, projects)
+
+    if not is_azure_admin(request.user) and request.method == "POST" and form.is_valid():
         project = form.save(commit=False)
         project.created_by = request.user
-        project.team = team
         project.save()
         messages.success(request, "✅ Project created successfully.")
         return redirect(f"{reverse('project_dashboard')}?q={query}")
 
     return render(request, "project/project_dashboard.html", {
-        "projects": projects,
-        "form": form,
-        "readonly": readonly,
+        "projects": projects_page,
         "query": query,
+        "form": form,
+        "mode": "list",
+        "readonly": is_azure_admin(request.user)
     })
 
 # F - Admin Dashboard View (Azure Admin only, read-only)
@@ -143,6 +138,7 @@ def delete_project(request, pk):
         "project": project,
         "query": query
     })
+
 
 
 
