@@ -1,12 +1,23 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from django.contrib.auth.models import User
-from .models import Profile
+from .models import Project
 
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
+# A - Handle Project Creation
+@receiver(post_save, sender=Project)
+def handle_project_create(sender, instance, created, **kwargs):
     if created:
-        Profile.objects.create(user=instance, team="Default Team")  # You can customize the default team
+        print(f"📦 [CREATE] New project created: '{instance.name_of_project}' by {instance.created_by.username}")
+
+# B - Handle Project Update
+@receiver(post_save, sender=Project)
+def handle_project_update(sender, instance, created, **kwargs):
+    if not created:
+        print(f"✏️ [UPDATE] Project updated: '{instance.name_of_project}' by {instance.created_by.username}")
+
+# C - Handle Project Deletion
+@receiver(post_delete, sender=Project)
+def handle_project_delete(sender, instance, **kwargs):
+    print(f"🗑️ [DELETE] Project deleted: '{instance.name_of_project}' by {instance.created_by.username}")
 
 
 

@@ -53,32 +53,32 @@ def get_paginated_queryset(request, queryset, per_page=10):
 # E - Team Dashboard View (List View + Form Submission)
 @login_required
 def project_dashboard(request):
-    query = request.GET.get("q", "").strip()
     form = ProjectForm(request.POST or None)
+    query = request.GET.get("q", "").strip()
 
     if is_azure_admin(request.user):
-        projects = filter_projects(query=query)
+        team = settings.DEPARTMENT_EMAIL_MAP.get(request.user.email, "")
+        projects = Project.objects.filter(team=team)
+        readonly = True
     else:
-        projects = filter_projects(query=query, user=request.user)
+        team = settings.DEPARTMENT_EMAIL_MAP.get(request.user.email, "")
+        projects = Project.objects.filter(created_by=request.user)
+        readonly = False
 
-    projects_page = get_paginated_queryset(request, projects)
-
-    if not is_azure_admin(request.user) and request.method == "POST" and form.is_valid():
+    if request.method == "POST" and not readonly and form.is_valid():
         project = form.save(commit=False)
         project.created_by = request.user
-        project.team = request.user.project_profile.team
+        project.team = team
         project.save()
         messages.success(request, "✅ Project created successfully.")
         return redirect(f"{reverse('project_dashboard')}?q={query}")
 
     return render(request, "project/project_dashboard.html", {
-        "projects": projects_page,
-        "query": query,
+        "projects": projects,
         "form": form,
-        "mode": "list",
-        "readonly": is_azure_admin(request.user)
+        "readonly": readonly,
+        "query": query,
     })
-
 
 # F - Admin Dashboard View (Azure Admin only, read-only)
 @user_passes_test(is_azure_admin)

@@ -1,15 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Profile model to store team information for each user
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='project_profile')
-    team = models.CharField(max_length=100)
-
-    def __str__(self):
-        return f"{self.user.username} - {self.team}"
-
-# Project model linked to user and team
 class Project(models.Model):
     name_of_project = models.CharField(max_length=255)
     project_address = models.CharField(max_length=500)
@@ -23,6 +14,7 @@ class Project(models.Model):
 
     def __str__(self):
         return self.name_of_project
+
 
 
 
