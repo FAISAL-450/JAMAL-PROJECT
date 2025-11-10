@@ -62,9 +62,7 @@ INSTALLED_APPS = [
     'project',
     'account',
     'accounts',
-    'salesmarketing',
-    'customerdetailed',
-    'lead',
+    
 
 ]
 
@@ -85,10 +83,6 @@ DEPARTMENT_EMAIL_MAP = {
     'jasim@dzignscapeprofessionals.onmicrosoft.com': 'construction',
     'lemon@dzignscapeprofessionals.onmicrosoft.com': 'construction',
     'raton@dzignscapeprofessionals.onmicrosoft.com': 'finance',
-    
-    'based@dzignscapeprofessionals.onmicrosoft.com': 'salesmarketing',
-    'dulal@dzignscapeprofessionals.onmicrosoft.com': 'salesmarketing',
-
     'admin@dzignscapeprofessionals.onmicrosoft.com': 'admin',  # or use 'construction,finance' if multi-access
 }
 

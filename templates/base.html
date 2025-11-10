@@ -135,21 +135,6 @@
           </li>
         {% endif %}
 
-        {% if email == 'based@dzignscapeprofessionals.onmicrosoft.com' or email == 'dulal@dzignscapeprofessionals.onmicrosoft.com' %}
-          <!-- 📈 Based & Dulal: Sales & Marketing -->
-          <li class="dropdown">
-            <a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
-              <span><i class="fas fa-chart-line"></i> Sales & Marketing</span>
-              <i class="fa fa-chevron-down toggle-icon"></i>
-            </a>
-            <ul class="dropdown-menu">
-              <li><a href="{% url 'customerdetailed_dashboard' %}?department=salesmarketing">Customer Detailed</a></li>
-              <li><a href="{% url 'lead_dashboard' %}?department=salesmarketing">Lead Detailed</a></li>
-
-            </ul>
-          </li>
-        {% endif %}
-
         {% if email == 'raton@dzignscapeprofessionals.onmicrosoft.com' %}
           <!-- 💰 Raton: Finance -->
           <li class="dropdown">
@@ -181,19 +166,6 @@
             </a>
             <ul class="dropdown-menu">
               <li><a href="{% url 'project_dashboard' %}?department=construction">Project Detailed</a></li>
-            </ul>
-          </li>
-
-          <!-- Sales & Marketing -->
-          <li class="dropdown">
-            <a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
-              <span><i class="fas fa-chart-line"></i> Sales & Marketing</span>
-              <i class="fa fa-chevron-down toggle-icon"></i>
-            </a>
-            <ul class="dropdown-menu">
-              <li><a href="{% url 'customerdetailed_dashboard' %}?department=salesmarketing">Customer Detailed</a></li>
-              <li><a href="{% url 'lead_dashboard' %}?department=salesmarketing">Lead Detailed</a></li>
-
             </ul>
           </li>
 
