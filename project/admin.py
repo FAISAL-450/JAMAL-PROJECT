@@ -1,40 +1,39 @@
+# A - Import Required Modules
 from django.contrib import admin
-from .models import Project
+from .models import ProjectProfile, Project
 
+# B - Azure Admin Email
 AZURE_ADMIN_EMAIL = 'admin@dzignscapeprofessionals.onmicrosoft.com'
 
-class ProjectAdmin(admin.ModelAdmin):
-    list_display = (
-        'name_of_project',
-        'project_address',
-        'contact_person_name',
-        'contact_person_number',
-        'created_by',
-    )
-    search_fields = (
-        'name_of_project',
-        'project_address',
-        'contact_person_name',
-    )
-    list_filter = ('created_by',)
+# C - Mixin: Restrict Admin Access to Azure Admin
+class AzureAdminOnlyMixin:
+    def has_module_permission(self, request):
+        return request.user.email == AZURE_ADMIN_EMAIL
 
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        if request.user.email.lower() == AZURE_ADMIN_EMAIL:
-            return qs  # Admin sees all projects
-        return qs.filter(created_by=request.user)  # Team members see only their own
-
-    def has_add_permission(self, request):
-        return False  # Disable add in admin
+    def has_view_permission(self, request, obj=None):
+        return request.user.email == AZURE_ADMIN_EMAIL
 
     def has_change_permission(self, request, obj=None):
-        return False  # Disable edit in admin
+        return request.user.email == AZURE_ADMIN_EMAIL
 
     def has_delete_permission(self, request, obj=None):
-        return False  # Disable delete in admin
+        return request.user.email == AZURE_ADMIN_EMAIL
 
-admin.site.register(Project, ProjectAdmin)
+# D - ProjectProfile Admin
+@admin.register(ProjectProfile)
+class ProjectProfileAdmin(AzureAdminOnlyMixin, admin.ModelAdmin):
+    list_display = ['user', 'role']
+    list_filter = ['role']
+    search_fields = ['user__username']
+    ordering = ['user__username']
 
+# E - Project Admin
+@admin.register(Project)
+class ProjectAdmin(AzureAdminOnlyMixin, admin.ModelAdmin):
+    list_display = ['name_of_project', 'project_address', 'created_by', 'team', 'created_at']
+    list_filter = ['team', 'created_by']
+    search_fields = ['name_of_project', 'project_address', 'created_by__username']
+    ordering = ['-created_at']
 
 
 

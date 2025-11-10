@@ -11,10 +11,8 @@ from .models import Project
 from .forms import ProjectForm
 
 # B - Azure Admin Check
-AZURE_ADMIN_EMAIL = 'admin@dzignscapeprofessionals.onmicrosoft.com'
-
 def is_azure_admin(user):
-    return getattr(user, 'email', '').lower() == AZURE_ADMIN_EMAIL.lower()
+    return user.email == 'admin@dzignscapeprofessionals.onmicrosoft.com'
 
 # C - Filtering Function
 def filter_projects(query=None, user=None, exclude_user=None):
@@ -30,10 +28,11 @@ def filter_projects(query=None, user=None, exclude_user=None):
         queryset = queryset.filter(
             Q(name_of_project__icontains=query) |
             Q(project_address__icontains=query) |
-            Q(contact_person_name__icontains=query)
+            Q(contact_person_name__icontains=query) |
+            Q(contact_person_number__icontains=query)
         )
 
-    return queryset.order_by('-id')
+    return queryset
 
 # D - Reusable Pagination Function
 def get_paginated_queryset(request, queryset, per_page=10):
@@ -47,63 +46,59 @@ def get_paginated_queryset(request, queryset, per_page=10):
     except EmptyPage:
         return paginator.page(paginator.num_pages)
 
-# E - Team Dashboard View (List View + Form Submission)
+# E - Unified Dashboard View (List View + Form Submission)
 @login_required
 def project_dashboard(request):
     query = request.GET.get("q", "").strip()
     form = ProjectForm(request.POST or None)
 
     if is_azure_admin(request.user):
-        projects = filter_projects(query=query)
+        projects = filter_projects(query=query, exclude_user=request.user)
     else:
         projects = filter_projects(query=query, user=request.user)
 
     projects_page = get_paginated_queryset(request, projects)
 
-    if request.method == "POST" and not is_azure_admin(request.user) and form.is_valid():
+    if not is_azure_admin(request.user) and request.method == "POST" and form.is_valid():
         project = form.save(commit=False)
+        project.created_by = request.user
+        project.team = getattr(
+            getattr(request.user, "project_profile", None),
+            "role",
+            "manager"
+        )
+        project.save()
+        messages.success(request, "✅ Project created successfully.")
+        return redirect(f"{reverse('project_dashboard')}?q={query}")
 
-    # Assign the logged-in user as the creator
-    project.created_by = request.user
-
-    # Get the team from settings or use a fallback
-    project.team = settings.DEPARTMENT_EMAIL_MAP.get(
-        request.user.email.lower(), "Unassigned"
-    )
-
-    # Save the project
-    project.save()
-
-    # Notify the user
-    messages.success(request, "✅ Project created successfully.")
-
-    # Redirect back to the dashboard with query preserved
-    return redirect(f"{reverse('project_dashboard')}?q={query}")
-
-    return render(request, "project/project_dashboard.html", {
+    context = {
         "projects": projects_page,
         "query": query,
         "form": form,
         "mode": "list",
         "readonly": is_azure_admin(request.user)
-    })
+    }
+    return render(request, "project/project_dashboard.html", context)
 
 # F - Admin Dashboard View (Azure Admin only, read-only)
 @user_passes_test(is_azure_admin)
-def admin_project_dashboard(request):
+@login_required
+def admin_dashboard(request):
     query = request.GET.get("q", "").strip()
-    projects = filter_projects(query=query)
+    projects = filter_projects(query=query, exclude_user=request.user)
     projects_page = get_paginated_queryset(request, projects)
 
-    return render(request, "project/project_dashboard.html", {
+    context = {
         "projects": projects_page,
         "query": query,
         "form": ProjectForm(),
         "mode": "admin",
         "readonly": True
-    })
+    }
+    return render(request, "project/project_dashboard.html", context)
 
 # G - Edit View (Only owner can edit)
+@user_passes_test(lambda u: not is_azure_admin(u))
 @login_required
 def edit_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
@@ -122,16 +117,18 @@ def edit_project(request, pk):
     projects = filter_projects(query=query, user=request.user)
     projects_page = get_paginated_queryset(request, projects)
 
-    return render(request, "project/project_dashboard.html", {
+    context = {
         "form": form,
         "mode": "edit",
         "project": project,
         "query": query,
         "projects": projects_page,
         "readonly": False
-    })
+    }
+    return render(request, "project/project_dashboard.html", context)
 
 # H - Delete View (Only owner can delete)
+@user_passes_test(lambda u: not is_azure_admin(u))
 @login_required
 def delete_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
@@ -151,8 +148,6 @@ def delete_project(request, pk):
         "project": project,
         "query": query
     })
-
-
 
 
 
