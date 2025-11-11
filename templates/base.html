@@ -121,7 +121,19 @@
           </a>
         </li>
 
-        
+        {% if email == 'based@dzignscapeprofessionals.onmicrosoft.com' or email == 'dulal@dzignscapeprofessionals.onmicrosoft.com' %}
+          <!-- 📣 Sales & Marketing Access -->
+          <li class="dropdown">
+            <a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
+              <span><i class="fas fa-bullhorn"></i> Sales & Marketing</span>
+              <i class="fa fa-chevron-down toggle-icon"></i>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="{% url 'customerdetailed_dashboard' %}?department=salesmarketing">Customer Detailed</a></li>
+            </ul>
+          </li>
+        {% endif %}
+
         {% if email == 'jasim@dzignscapeprofessionals.onmicrosoft.com' or email == 'lemon@dzignscapeprofessionals.onmicrosoft.com' %}
           <!-- 👷 Jasim & Lemon: Construction -->
           <li class="dropdown">
@@ -158,7 +170,19 @@
 
         {% if email == 'admin@dzignscapeprofessionals.onmicrosoft.com' %}
           <!-- 🛡️ Admin: Full Access -->
-          <!-- Construction -->
+
+          <!-- 📣 Sales & Marketing -->
+          <li class="dropdown">
+            <a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
+              <span><i class="fas fa-bullhorn"></i> Sales & Marketing</span>
+              <i class="fa fa-chevron-down toggle-icon"></i>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="{% url 'customerdetailed_dashboard' %}?department=salesmarketing">Customer Detailed</a></li>
+            </ul>
+          </li>
+
+          <!-- 👷 Construction -->
           <li class="dropdown">
             <a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
               <span><i class="fas fa-hard-hat"></i> Construction</span>
@@ -169,7 +193,7 @@
             </ul>
           </li>
 
-          <!-- Finance -->
+          <!-- 💰 Finance -->
           <li class="dropdown">
             <a class="dropdown-toggle" href="#" role="button" aria-expanded="false">
               <span><i class="fas fa-coins"></i> Finance</span>
