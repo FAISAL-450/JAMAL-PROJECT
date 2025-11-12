@@ -27,5 +27,6 @@ path('accounts/', include('accounts.urls')),
 
 path('salesmarketing/', include('salesmarketing.urls')),   
 path('customerdetailed/', include('customerdetailed.urls')),  
+path('lead/', include('lead.urls')),  
  
 ]
