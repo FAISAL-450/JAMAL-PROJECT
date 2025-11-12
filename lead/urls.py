@@ -15,6 +15,6 @@ urlpatterns = [
     path('dashboard/delete/<int:pk>/', views.delete_lead, name='delete_lead'),
 
     # 🔄 Auto-fill API endpoint
-    path('api/customer/<int:pk>/', views.get_customer_details, name='get_customer_details'),
-    
+    path('dashboard/get-customer-details/<int:customerId>/', views.get_customer_details, name='get_customer_details'),
+
 ]
