@@ -60,7 +60,7 @@ class LeadForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['customer_name'].empty_label = "--------- Select Customer Name ---------"
 
-        # Filter customer options based on Azure Team User email
+        # Filter customer options based on Azure Team User email-(Need for-Drop-down-show-based on-specific-user account)
         allowed_emails = [
             'based@dzignscapeprofessionals.onmicrosoft.com',
             'dulal@dzignscapeprofessionals.onmicrosoft.com',
@@ -72,3 +72,4 @@ class LeadForm(forms.ModelForm):
             self.fields['customer_name'].queryset = queryset
         else:
             self.fields['customer_name'].queryset = CustomerDetailed.objects.none()
+

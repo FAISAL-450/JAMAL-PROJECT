@@ -98,7 +98,7 @@
               <a href="{% url 'edit_lead' lead.pk %}?q={{ query }}" class="btn yellow action-btn">
                 <i class="fas fa-edit"></i> Edit
               </a>
-              <form method="post" action="{% url 'lead_delete' lead.pk %}?q={{ query }}" style="display:inline;">
+              <form method="post" action="{% url 'delete_lead' lead.pk %}?q={{ query }}" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" class="btn red action-btn" onclick="return confirm('Delete this lead?');">
                   <i class="fas fa-trash-alt"></i> Delete
@@ -148,6 +148,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
+    // 🔁 Auto-expand form if in edit mode
     const mode = "{{ mode }}";
     if (mode === "edit") {
       const form = document.getElementById('formContent');
@@ -157,7 +158,7 @@
       icon.classList.add('fa-chevron-up');
     }
 
-    // 🧠 Auto-fill customer details
+    // 🧠 Auto-fill customer details on selection
     const customerSelect = document.getElementById('id_customer_name');
     const emailField = document.getElementById('id_customer_email');
     const phoneField = document.getElementById('id_customer_phone');
@@ -169,11 +170,14 @@
         if (!customerId) return;
 
         fetch(`/lead/dashboard/get-customer-details/${customerId}/`)
-          .then(res => res.json())
+          .then(res => {
+            if (!res.ok) throw new Error(`Fetch failed with status ${res.status}`);
+            return res.json();
+          })
           .then(data => {
-            emailField.value = data.email || '';
-            phoneField.value = data.phone || '';
-            companyField.value = data.company || '';
+            if (emailField) emailField.value = data.email || '';
+            if (phoneField) phoneField.value = data.phone || '';
+            if (companyField) companyField.value = data.company || '';
           })
           .catch(err => console.error("Auto-fill fetch error:", err));
       });

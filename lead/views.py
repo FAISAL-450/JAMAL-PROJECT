@@ -10,6 +10,7 @@ from django.http import JsonResponse
 
 from .models import Lead
 from .forms import LeadForm
+from customerdetailed.models import CustomerDetailed
 
 # B - Azure Admin Check
 def is_azure_admin(user):
@@ -154,13 +155,12 @@ def delete_lead(request, pk):
         "query": query
     })
 
-# I - Auto-Fill API View (used by JavaScript)
-@login_required
+# I - Auto-Fill API View (used by JavaScript)-(Based on-Drop-down- customer_name-Auto-Fill-email, phone, company)
 def get_customer_details(request, pk):
-    lead = get_object_or_404(Lead, pk=pk, created_by=request.user)
+    customer = get_object_or_404(CustomerDetailed, pk=pk)
     return JsonResponse({
-        'email': lead.customer_email or '',
-        'phone': lead.customer_phone or '',
-        'company': lead.customer_company or '',
+        'email': customer.email or '',
+        'phone': customer.phone or '',
+        'company': customer.company or '',
     })
 
