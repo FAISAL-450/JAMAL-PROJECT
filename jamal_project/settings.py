@@ -91,7 +91,7 @@ DEPARTMENT_EMAIL_MAP = {
     'based@dzignscapeprofessionals.onmicrosoft.com': 'salesmarketing',
     'dulal@dzignscapeprofessionals.onmicrosoft.com': 'salesmarketing',
 
-    'admin@dzignscapeprofessionals.onmicrosoft.com': 'admin',  # or use 'construction,finance' if multi-access
+    'admin@dzignscapeprofessionals.onmicrosoft.com': 'admin',  # or use 'construction,finance,salesmarketing' if multi-access
 }
 
 # 🔐 Azure AD Login Redirect

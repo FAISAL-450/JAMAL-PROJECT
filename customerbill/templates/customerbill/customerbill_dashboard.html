@@ -59,62 +59,55 @@
     </form>
   </section>
 
-<!-- 📋 Customerbill List Section -->
-<section class="table-section">
-  <header class="table-header">
-    <h2><i class="fas fa-address-book"></i> CUSTOMER BILL LIST</h2>
-  </header>
+  <!-- 📋 Customerbill List Section -->
+  <section class="table-section">
+    <header class="table-header">
+      <h2><i class="fas fa-address-book"></i> CUSTOMER BILL LIST</h2>
+    </header>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Sl No</th>
-        <th>Name of Project</th>
-        <th>Name of Customer</th>
-        <th>Description of Bill</th>
-        <th>Bill Date</th>
-        <th>Bill Number</th>
-        <th>Bill Amount</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for customerbill in customerbills %}
+    <table>
+      <thead>
         <tr>
-          <td>{{ forloop.counter }}</td>
-          <td>{{ customerbill.project_name }}</td>
-          <td>{{ customerbill.customer_name }}</td>
-          <td>{{ customerbill.description_bill }}</td>
-          <td>{{ customerbill.bill_date }}</td>
-          <td>{{ customerbill.bill_no }}</td>
-          <td>{{ customerbill.bill_amount }}</td>
-          <td>
-            {% if not readonly and customerbill.created_by == request.user %}
-              <a href="{% url 'edit_customerbill' customerbill.pk %}?q={{ query }}" class="btn yellow action-btn">
-                <i class="fas fa-edit"></i> Edit
-              </a>
-              <form method="post" action="{% url 'delete_customerbill' customerbill.pk %}?q={{ query }}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn red action-btn" onclick="return confirm('Delete this customer bill?');">
-                  <i class="fas fa-trash-alt"></i> Delete
-                </button>
-              </form>
-            {% endif %}
-          </td>
+          <th>Sl No</th>
+          <th>Name of Project</th>
+          <th>Name of Customer</th>
+          <th>Description of Bill</th>
+          <th>Bill Date</th>
+          <th>Bill Number</th>
+          <th>Bill Amount</th>
+          <th>Actions</th>
         </tr>
-      {% empty %}
-        <tr><td colspan="8" class="no-data">No customerbill records found.</td></tr>
-      {% endfor %}
-
-      <!-- ✅ Total Bill Amount Row -->
-      <tr class="total-row">
-        <td colspan="6" class="text-end" style="text-align: right;"><strong>Total Bill Amount:</strong></td>
-        <td><strong>{{ total_bill_amount|floatformat:2 }}</strong></td>
-        <td></td>
-      </tr>
-    </tbody>
-  </table>
-</section>
+      </thead>
+      <tbody>
+        {% for customerbill in customerbills %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ customerbill.project_name }}</td>
+            <td>{{ customerbill.customer_name }}</td>
+            <td>{{ customerbill.description_bill }}</td>
+            <td>{{ customerbill.bill_date }}</td>
+            <td>{{ customerbill.bill_no }}</td>
+            <td>{{ customerbill.bill_amount }}</td>
+            <td>
+              {% if not readonly and customerbill.created_by == request.user %}
+                <a href="{% url 'edit_customerbill' customerbill.pk %}?q={{ query }}" class="btn yellow action-btn">
+                  <i class="fas fa-edit"></i> Edit
+                </a>
+                <form method="post" action="{% url 'delete_customerbill' customerbill.pk %}?q={{ query }}" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn red action-btn" onclick="return confirm('Delete this customer bill?');">
+                    <i class="fas fa-trash-alt"></i> Delete
+                  </button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="8" class="no-data">No customerbill records found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
 
   <!-- 📋 Pagination Section -->
   {% if customerbills.paginator.num_pages > 1 %}
@@ -576,4 +569,3 @@ td {
 </style>
 
 {% endblock %}
-

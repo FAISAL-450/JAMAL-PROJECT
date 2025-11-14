@@ -61,9 +61,6 @@ def customerbill_dashboard(request):
 
     customerbills_page = get_paginated_queryset(request, customerbills)
 
-    # ✅ Calculate total bill amount
-    total_bill_amount = customerbills.aggregate(Sum('bill_amount'))['bill_amount__sum'] or 0
-
     # ✅ Corrected form initialization
     form = CustomerbillForm(request.POST or None, user=request.user)
 
@@ -85,8 +82,7 @@ def customerbill_dashboard(request):
         "query": query,
         "form": form,
         "mode": "list",
-        "readonly": is_azure_admin(request.user),
-        "total_bill_amount": total_bill_amount  # ✅ Pass to template
+        "readonly": is_azure_admin(request.user)
     }
     return render(request, "customerbill/customerbill_dashboard.html", context)
 
@@ -158,4 +154,5 @@ def delete_customerbill(request, pk):
         "customerbill": customerbill,
         "query": query
     })
+
 
