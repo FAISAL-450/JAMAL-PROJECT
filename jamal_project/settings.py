@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'salesmarketing',
     'customerdetailed',
     'lead',
+    'contractor',
 
 ]
 

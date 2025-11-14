@@ -27,3 +27,17 @@ def construction_pd_list(request):
         'query': query
     })
 
+# 🏗️ Construction Contractor List View
+def construction_cd_list(request):
+    query = request.GET.get('q', '').strip()
+    contractors = Contractor.objects.filter(department='construction')
+
+    if query:
+        contractors = contractors.filter(contractor_company__icontains=query)
+
+    contractors_page = get_paginated_queryset(request, contractors, per_page=10)
+
+    return render(request, 'construction/construction_cd_list.html', {
+        'contractors': contractors_page,
+        'query': query
+    })
