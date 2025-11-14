@@ -30,5 +30,9 @@ path('customerdetailed/', include('customerdetailed.urls')),
 path('lead/', include('lead.urls')), 
 path('contractor/', include('contractor.urls')),
 
+path('customerbill/', include('customerbill.urls')),
+
+
+
 
 ]

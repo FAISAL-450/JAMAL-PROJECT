@@ -27,3 +27,18 @@ def salesmarketing_doc_list(request):
         'query': query
     })
 
+# 🏗️ Sales & Marketing Customer Bill Detailed List View
+def salesmarketing_cb_list(request):
+    query = request.GET.get('q', '').strip()
+
+    customerbills = Customerbill.objects.filter(department='salesmarketing')
+    
+    if query:
+        customerbills = customerbills.filter(customer_name__icontains=query)
+
+    customerbills_page = get_paginated_queryset(request, customerbills, per_page=10)
+
+    return render(request, 'salesmarketing/salesmarketing_cb_list.html', {
+        'customerbills': customerbills_page,
+        'query': query
+    })
