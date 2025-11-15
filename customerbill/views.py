@@ -16,7 +16,12 @@ from project.models import Project
 
 # B - Azure Admin Check
 def is_azure_admin(user):
-    return user.email == 'admin@dzignscapeprofessionals.onmicrosoft.com'
+    return user.email in [
+        'admin@dzignscapeprofessionals.onmicrosoft.com',
+        'based@dzignscapeprofessionals.onmicrosoft.com',
+        'dulal@dzignscapeprofessionals.onmicrosoft.com',
+    ]
+
 
 # C - Filtering Function
 def filter_customerbills(query=None, user=None, exclude_user=None):
