@@ -49,25 +49,33 @@ class CustomerbillForm(forms.ModelForm):
             }),
         }
 
+    # Process-Drop-down-(Based on-project_name & customer_name)
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
+        # Set empty labels
         self.fields['project_name'].empty_label = "--------- Select Project Name ---------"
         self.fields['customer_name'].empty_label = "--------- Select Customer Name ---------"
 
-        # Define allowed emails for dropdown access
+        # Define allowed emails
         allowed_emails = [
             'based@dzignscapeprofessionals.onmicrosoft.com',
             'dulal@dzignscapeprofessionals.onmicrosoft.com',
         ]
         normalized_emails = [email.lower().strip() for email in allowed_emails]
 
+        # Set project_name queryset
         if user and user.email.lower().strip() in normalized_emails:
             self.fields['project_name'].queryset = Project.objects.filter(created_by=user)
-            self.fields['customer_name'].queryset = CustomerDetailed.objects.filter(created_by=user)
         else:
             self.fields['project_name'].queryset = Project.objects.none()
+
+        # Set customer_name queryset
+        if user and user.email.lower().strip() in normalized_emails:
+            self.fields['customer_name'].queryset = CustomerDetailed.objects.filter(created_by=user)
+        else:
             self.fields['customer_name'].queryset = CustomerDetailed.objects.none()
+
 
 
