@@ -55,21 +55,25 @@ class LeadForm(forms.ModelForm):
             }),
         }
 
+    # Process-Drop-down-(Based on-customer_name)
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+
+        # Set empty label for customer_name
         self.fields['customer_name'].empty_label = "--------- Select Customer Name ---------"
 
-        # Filter customer options based on Azure Team User email-(Need for-Drop-down-show-based on-specific-user account)
+        # Define allowed emails for sales/marketing access
         allowed_emails = [
             'based@dzignscapeprofessionals.onmicrosoft.com',
             'dulal@dzignscapeprofessionals.onmicrosoft.com',
         ]
         normalized_emails = [email.lower().strip() for email in allowed_emails]
 
+        # Set customer_name queryset based on user
         if user and user.email.lower().strip() in normalized_emails:
-            queryset = CustomerDetailed.objects.filter(created_by=user)
-            self.fields['customer_name'].queryset = queryset
+            self.fields['customer_name'].queryset = CustomerDetailed.objects.filter(created_by=user)
         else:
             self.fields['customer_name'].queryset = CustomerDetailed.objects.none()
+
 
