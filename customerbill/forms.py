@@ -28,33 +28,27 @@ class CustomerbillForm(forms.ModelForm):
             'project_name': forms.Select(attrs={
                 'class': 'form-control',
             }),
-
             'customer_name': forms.Select(attrs={
                 'class': 'form-control',
             }),
-
             'description_bill': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter bill description'
             }),
-
             'bill_date': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date'
             }),
-
             'bill_no': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter bill no'
             }),
-
             'bill_amount': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter bill amount'
             }),
         }
 
-    # Set-Drop-down-Placeholder
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
@@ -62,28 +56,18 @@ class CustomerbillForm(forms.ModelForm):
         self.fields['project_name'].empty_label = "--------- Select Project Name ---------"
         self.fields['customer_name'].empty_label = "--------- Select Customer Name ---------"
 
-        # ✅ Use predefined access control lists
-        project_app_access_emails = [
+        # Define allowed emails for dropdown access
+        allowed_emails = [
             'based@dzignscapeprofessionals.onmicrosoft.com',
             'dulal@dzignscapeprofessionals.onmicrosoft.com',
         ]
+        normalized_emails = [email.lower().strip() for email in allowed_emails]
 
-        customerdetailed_app_access_emails = [
-            'based@dzignscapeprofessionals.onmicrosoft.com',
-            'dulal@dzignscapeprofessionals.onmicrosoft.com',
-        ]
-
-        user_email = user.email.lower().strip() if user else ''
-
-        # Project dropdown access
-        if user_email in [email.lower().strip() for email in project_app_access_emails]:
+        if user and user.email.lower().strip() in normalized_emails:
             self.fields['project_name'].queryset = Project.objects.filter(created_by=user)
-        else:
-            self.fields['project_name'].queryset = Project.objects.none()
-
-        # Customer dropdown access
-        if user_email in [email.lower().strip() for email in customerdetailed_app_access_emails]:
             self.fields['customer_name'].queryset = CustomerDetailed.objects.filter(created_by=user)
         else:
+            self.fields['project_name'].queryset = Project.objects.none()
             self.fields['customer_name'].queryset = CustomerDetailed.objects.none()
+
 
