@@ -12,7 +12,7 @@ from .models import Customerbill
 from .forms import CustomerbillForm
 
 from customerdetailed.models import CustomerDetailed
-from project.models import Project  # Assuming Project is defined in project.models
+from project.models import Project
 
 # B - Azure Admin Check
 def is_azure_admin(user):

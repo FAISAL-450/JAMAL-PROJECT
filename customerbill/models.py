@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from customerdetailed.models import CustomerDetailed
-from project.models import Project  # Assuming Project is defined in project.models
 
 # Role list
 ROLE_CHOICES = [
@@ -32,13 +31,13 @@ class CustomerbillProfile(models.Model):
 
 class Customerbill(models.Model):
     project_name = models.ForeignKey(
-        Project,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='Customerbill_project_name',
-        verbose_name="Project Name"
-    )
+    'project.Project',
+    on_delete=models.SET_NULL,
+    null=True,
+    blank=True,
+    related_name='Customerbill_project_name',
+    verbose_name="Project Name"
+)
     customer_name = models.ForeignKey(
         CustomerDetailed,
         on_delete=models.SET_NULL,

@@ -1,7 +1,7 @@
 from django import forms
 from .models import Customerbill
 from customerdetailed.models import CustomerDetailed
-from project.models import Project  # Assuming Project is defined in project.models
+from project.models import Project
 
 class CustomerbillForm(forms.ModelForm):
     class Meta:
