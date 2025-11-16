@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.models import User
 from .models import Customerbill
 from customerdetailed.models import CustomerDetailed
 from project.models import Project
@@ -14,7 +15,6 @@ class CustomerbillForm(forms.ModelForm):
             'bill_no',
             'bill_amount',
         ]
-        
         labels = {
             'project_name': 'Project Name',
             'customer_name': 'Customer Name',
@@ -23,18 +23,14 @@ class CustomerbillForm(forms.ModelForm):
             'bill_no': 'Bill No',
             'bill_amount': 'Bill Amount',
         }
-
         widgets = {
-            'project_name': forms.Select(attrs={
-                'class': 'form-control',
-            }),
-            'customer_name': forms.Select(attrs={
-                'class': 'form-control',
-            }),
+            'project_name': forms.Select(attrs={'class': 'form-control'}),
+            'customer_name': forms.Select(attrs={'class': 'form-control'}),
             'description_bill': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter bill description'
             }),
+            
             'bill_date': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date'
@@ -43,39 +39,34 @@ class CustomerbillForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Enter bill no'
             }),
+            
             'bill_amount': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter bill amount'
             }),
         }
 
-    # Process-Drop-down-(Based on-project_name & customer_name)
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
-        # Set empty labels
         self.fields['project_name'].empty_label = "--------- Select Project Name ---------"
         self.fields['customer_name'].empty_label = "--------- Select Customer Name ---------"
 
-        # Define allowed emails
-        allowed_emails = [
-            'based@dzignscapeprofessionals.onmicrosoft.com',
-            'dulal@dzignscapeprofessionals.onmicrosoft.com',
-        ]
-        normalized_emails = [email.lower().strip() for email in allowed_emails]
-
-        # Set project_name queryset
-        if user and user.email.lower().strip() in normalized_emails:
-            self.fields['project_name'].queryset = Project.objects.filter(created_by=user)
-        else:
+        # 🔐 Show only projects created by-Jasim
+        jasim_email = 'jasim@dzignscapeprofessionals.onmicrosoft.com'
+        try:
+            jasim_user = User.objects.get(email__iexact=jasim_email)
+            self.fields['project_name'].queryset = Project.objects.filter(created_by=jasim_user)
+        except User.DoesNotExist:
             self.fields['project_name'].queryset = Project.objects.none()
 
-        # Set customer_name queryset
-        if user and user.email.lower().strip() in normalized_emails:
+        # 🎯 Filter customer names created by the current user (based@dzignscapeprofessionals.onmicrosoft.com)
+        if user:
             self.fields['customer_name'].queryset = CustomerDetailed.objects.filter(created_by=user)
         else:
             self.fields['customer_name'].queryset = CustomerDetailed.objects.none()
+
 
 
 

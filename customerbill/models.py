@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from customerdetailed.models import CustomerDetailed
+from project.models import Project  # Assuming Project is defined in project.models
 
 # Role list
 ROLE_CHOICES = [
@@ -31,13 +32,13 @@ class CustomerbillProfile(models.Model):
 
 class Customerbill(models.Model):
     project_name = models.ForeignKey(
-    'project.Project',
-    on_delete=models.SET_NULL,
-    null=True,
-    blank=True,
-    related_name='Customerbill_project_name',
-    verbose_name="Project Name"
-)
+        Project,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='Customerbill_project_name',
+        verbose_name="Project Name"
+    )
     customer_name = models.ForeignKey(
         CustomerDetailed,
         on_delete=models.SET_NULL,
@@ -47,7 +48,12 @@ class Customerbill(models.Model):
         verbose_name="Customer Name"
     )
     description_bill = models.CharField(max_length=100, blank=True)
-    bill_date = models.DateField(editable=True)
+    bill_date = models.DateTimeField(
+    verbose_name="Bill Date",
+    help_text="Date of the bill",
+    blank=True,
+    null=True
+)
     bill_no = models.CharField(max_length=20, blank=True)
     bill_amount = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
 
@@ -71,4 +77,5 @@ class Customerbill(models.Model):
         ordering = ['-created_at']
         verbose_name = "Customerbill Detail"
         verbose_name_plural = "Customerbill Details"
+
 
