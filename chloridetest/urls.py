@@ -1,7 +1,11 @@
 from django.urls import path
 from . import views
 
+app_name = 'chloridetest'
+
 urlpatterns = [
-    path('', views.ctr_dashboard, name='ctr_dashboard'),
+    path('', views.chloridetest_dashboard, name='chloridetest_dashboard'),
 ]
+
+
 

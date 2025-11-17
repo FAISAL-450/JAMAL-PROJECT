@@ -56,3 +56,5 @@ def construction_ctr_list(request):
         'ctrs': ctrs_page,
         'query': query
     })
+
+

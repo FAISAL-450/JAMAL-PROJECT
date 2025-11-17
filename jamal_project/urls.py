@@ -31,8 +31,7 @@ path('lead/', include('lead.urls')),
 path('contractor/', include('contractor.urls')),
 
 path('customerbill/', include('customerbill.urls')),
-
-path('chloridetest/', include('chloridetest.urls')),
+path('chloridetest/', include('chloridetest.urls'))
 
 
 ]
