@@ -4,5 +4,7 @@ app_name = 'construction'  # Namespace for reverse URL resolution
 urlpatterns = [
     path('project-detailed/', views.construction_pd_list, name='construction_pd_list'),
     path('contractor-detailed/', views.construction_cd_list, name='construction_cd_list'),
+    path('ctr-detailed/', views.construction_ctr_list, name='construction_ctr_list'),
+
     
 ]

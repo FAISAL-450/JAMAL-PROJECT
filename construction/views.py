@@ -41,3 +41,18 @@ def construction_cd_list(request):
         'contractors': contractors_page,
         'query': query
     })
+
+# 🏗️ Construction CTR List View
+def construction_ctr_list(request):
+    query = request.GET.get('q', '').strip()
+    ctrs = Ctr.objects.filter(department='construction')
+
+    if query:
+        ctrs = ctrs.filter(time_interval_min__icontains=query)
+
+    ctrs_page = get_paginated_queryset(request, ctrs, per_page=10)
+
+    return render(request, 'construction/construction_ctr_list.html', {
+        'ctrs': ctrs_page,
+        'query': query
+    })
