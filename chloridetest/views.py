@@ -7,7 +7,7 @@ def chloridetest_dashboard(request):
         form = ChlorideTestReadingForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('chloridetest:chloridetest_dashboard')  # namespaced redirect
+            return redirect('chloridetest:chloridetest_dashboard')
     else:
         form = ChlorideTestReadingForm()
 
@@ -17,6 +17,8 @@ def chloridetest_dashboard(request):
         'form': form,
         'readings': readings,
     })
+
+
 
 
 
