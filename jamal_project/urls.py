@@ -32,7 +32,7 @@ path('contractor/', include('contractor.urls')),
 
 path('customerbill/', include('customerbill.urls')),
 
-
+path('chloridetest/', include('chloridetest.urls')),
 
 
 ]

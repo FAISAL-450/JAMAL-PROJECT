@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Project Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h2 { margin-top: 0; }
+        .heading-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        .heading-inputs {
+            display: flex;
+            flex-direction: column;
+            width: 250px;
+        }
+        .heading-inputs input {
+            margin-bottom: 10px;
+            padding: 8px;
+            width: 100%;
+        }
+        .form-section, .table-section {
+            margin-top: 20px;
+        }
+        form {
+            max-width: 600px;
+        }
+        .submit-btn {
+            margin-top: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+
+    <h2>Project Details</h2>
+    <div class="heading-container">
+        <div class="heading-inputs">
+            <input type="text" placeholder="Project Name">
+            <input type="text" placeholder="Location">
+            <input type="text" placeholder="Client">
+            <input type="text" placeholder="Building">
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h2>Chloride Test Reading Form</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="submit-btn">Submit</button>
+        </form>
+    </div>
+
+    <div class="table-section">
+        <h2>Submitted Readings</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Time (min)</th>
+                    <th>Current (mA)</th>
+                    <th>Voltage (V)</th>
+                    <th>Charge (C)</th>
+                    <th>Diameter (in)</th>
+                    <th>Permeability</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reading in readings %}
+                <tr>
+                    <td>{{ reading.time_interval_min }}</td>
+                    <td>{{ reading.current_ma }}</td>
+                    <td>{{ reading.voltage_v }}</td>
+                    <td>{{ reading.charge_passed_coulombs }}</td>
+                    <td>{{ reading.specimen_diameter_in }}</td>
+                    <td>{{ reading.chloride_ion_permeability }}</td>
+                    <td>{{ reading.remarks }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7">No readings submitted yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
