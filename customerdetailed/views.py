@@ -12,7 +12,7 @@ from .forms import CustomerDetailedForm
 
 # B - Azure Admin Check
 def is_azure_admin(user):
-    return user.email == 'admin@dzignscapeprofessionals.onmicrosoft.com'
+    return user and user.email.lower() == 'admin@dzignscapeprofessionals.onmicrosoft.com'
 
 # C - Filtering Function
 def filter_customerdetaileds(query=None, user=None, exclude_user=None):
@@ -45,22 +45,19 @@ def get_paginated_queryset(request, queryset, per_page=10):
     except EmptyPage:
         return paginator.page(paginator.num_pages)
 
-# E - Unified Dashboard View (List View + Form Submission)
+# E - Unified Dashboard View
 @login_required
 def customerdetailed_dashboard(request):
     query = request.GET.get("q", "").strip()
     form = CustomerDetailedForm(request.POST or None)
     is_admin = is_azure_admin(request.user)
 
-    # Admin sees all, team sees own
-    if is_admin:
-        customerdetaileds = filter_customerdetaileds(query=query)
-    else:
-        customerdetaileds = filter_customerdetaileds(query=query, user=request.user)
-
+    customerdetaileds = filter_customerdetaileds(
+        query=query,
+        user=None if is_admin else request.user
+    )
     customerdetaileds_page = get_paginated_queryset(request, customerdetaileds)
 
-    # Save logic: allow all users
     if request.method == "POST" and form.is_valid():
         customer = form.save(commit=False)
         customer.created_by = request.user
@@ -79,11 +76,11 @@ def customerdetailed_dashboard(request):
         "form": form,
         "mode": "list",
         "readonly": False,
-        "is_admin": is_admin,  # ✅ Pass to template
+        "is_admin": is_admin,
     }
     return render(request, "customerdetailed/customerdetailed_dashboard.html", context)
 
-# F - Edit View (Owner or Admin can edit)
+# F - Edit View
 @login_required
 def edit_customer(request, pk):
     customer = get_object_or_404(CustomerDetailed, pk=pk)
@@ -100,12 +97,10 @@ def edit_customer(request, pk):
         messages.success(request, "✏️ Customer detailed record updated successfully.")
         return redirect(f"{reverse('customerdetailed_dashboard')}?q={query}")
 
-    # Admin sees all, team sees own
-    if is_admin:
-        customerdetaileds = filter_customerdetaileds(query=query)
-    else:
-        customerdetaileds = filter_customerdetaileds(query=query, user=request.user)
-
+    customerdetaileds = filter_customerdetaileds(
+        query=query,
+        user=None if is_admin else request.user
+    )
     customerdetaileds_page = get_paginated_queryset(request, customerdetaileds)
 
     context = {
@@ -115,11 +110,11 @@ def edit_customer(request, pk):
         "query": query,
         "customerdetaileds": customerdetaileds_page,
         "readonly": False,
-        "is_admin": is_admin,  # ✅ Pass to template
+        "is_admin": is_admin,
     }
     return render(request, "customerdetailed/customerdetailed_dashboard.html", context)
 
-# G - Delete View (Owner or Admin can delete)
+# G - Delete View
 @login_required
 def delete_customer(request, pk):
     customer = get_object_or_404(CustomerDetailed, pk=pk)
@@ -139,7 +134,9 @@ def delete_customer(request, pk):
     return render(request, "customerdetailed/confirm_delete.html", {
         "customer": customer,
         "query": query,
-        "is_admin": is_admin,  # ✅ Optional if needed in confirm_delete.html
+        "is_admin": is_admin,
     })
+
+
 
 
