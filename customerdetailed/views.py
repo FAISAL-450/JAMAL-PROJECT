@@ -50,9 +50,10 @@ def get_paginated_queryset(request, queryset, per_page=10):
 def customerdetailed_dashboard(request):
     query = request.GET.get("q", "").strip()
     form = CustomerDetailedForm(request.POST or None)
+    is_admin = is_azure_admin(request.user)
 
     # Admin sees all, team sees own
-    if is_azure_admin(request.user):
+    if is_admin:
         customerdetaileds = filter_customerdetaileds(query=query)
     else:
         customerdetaileds = filter_customerdetaileds(query=query, user=request.user)
@@ -77,7 +78,8 @@ def customerdetailed_dashboard(request):
         "query": query,
         "form": form,
         "mode": "list",
-        "readonly": False
+        "readonly": False,
+        "is_admin": is_admin,  # ✅ Pass to template
     }
     return render(request, "customerdetailed/customerdetailed_dashboard.html", context)
 
@@ -85,8 +87,9 @@ def customerdetailed_dashboard(request):
 @login_required
 def edit_customer(request, pk):
     customer = get_object_or_404(CustomerDetailed, pk=pk)
+    is_admin = is_azure_admin(request.user)
 
-    if customer.created_by != request.user and not is_azure_admin(request.user):
+    if customer.created_by != request.user and not is_admin:
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
@@ -98,7 +101,7 @@ def edit_customer(request, pk):
         return redirect(f"{reverse('customerdetailed_dashboard')}?q={query}")
 
     # Admin sees all, team sees own
-    if is_azure_admin(request.user):
+    if is_admin:
         customerdetaileds = filter_customerdetaileds(query=query)
     else:
         customerdetaileds = filter_customerdetaileds(query=query, user=request.user)
@@ -111,7 +114,8 @@ def edit_customer(request, pk):
         "customer": customer,
         "query": query,
         "customerdetaileds": customerdetaileds_page,
-        "readonly": False
+        "readonly": False,
+        "is_admin": is_admin,  # ✅ Pass to template
     }
     return render(request, "customerdetailed/customerdetailed_dashboard.html", context)
 
@@ -119,8 +123,9 @@ def edit_customer(request, pk):
 @login_required
 def delete_customer(request, pk):
     customer = get_object_or_404(CustomerDetailed, pk=pk)
+    is_admin = is_azure_admin(request.user)
 
-    if customer.created_by != request.user and not is_azure_admin(request.user):
+    if customer.created_by != request.user and not is_admin:
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
@@ -133,5 +138,8 @@ def delete_customer(request, pk):
 
     return render(request, "customerdetailed/confirm_delete.html", {
         "customer": customer,
-        "query": query
+        "query": query,
+        "is_admin": is_admin,  # ✅ Optional if needed in confirm_delete.html
     })
+
+
