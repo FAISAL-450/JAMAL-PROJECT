@@ -86,7 +86,7 @@
             <td>{{ customer.phone }}</td>
             <td>{{ customer.company }}</td>
             <td>
-              {% if not readonly and customer.created_by == request.user %}
+              {% if not readonly and (customer.created_by == request.user or is_admin) %}
                 <a href="{% url 'edit_customer' customer.pk %}?q={{ query }}" class="btn yellow action-btn">
                   <i class="fas fa-edit"></i> Edit
                 </a>
