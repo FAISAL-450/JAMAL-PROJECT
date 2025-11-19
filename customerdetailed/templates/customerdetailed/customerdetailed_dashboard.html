@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Customer Detailed Dishoard{% endblock %}
+{% block title %}Customer Detailed Dashboard{% endblock %}
 {% block content %}
 
-<!-- 📦 Main Dishoard Container -->
+<!-- 📦 Main Dashboard Container -->
 <div class="dashboard-wrapper">
 
   <!-- 🔔 Flash Messages -->
@@ -58,35 +58,50 @@
     </form>
   </section>
 
-  <!-- 📋 Customer List Section -->
-  <section class="table-section">
-    <header class="table-header">
-      <h2><i class="fas fa-address-book"></i> CUSTOMER LIST</h2>
-    </header>
+<!-- 📋 Customer List Section -->
+<section class="table-section">
+  <header class="table-header">
+    <h2><i class="fas fa-address-book"></i> CUSTOMER LIST</h2>
+  </header>
 
-    <table>
-      <thead>
+  <table>
+    <thead>
+      <tr>
+        <th>Sl No</th>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Company</th>
+        <th>Created By</th>
+        <th>Created At</th>
+        <th>Updated By</th>
+        <th>Updated At</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for customer in customerdetaileds %}
         <tr>
-          <th>Sl No</th>
-          <th>Name</th>
-          <th>Address</th>
-          <th>Email</th>
-          <th>Phone</th>
-          <th>Company</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for customer in customerdetaileds %}
-          <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ customer.name }}</td>
-            <td>{{ customer.address }}</td>
-            <td>{{ customer.email }}</td>
-            <td>{{ customer.phone }}</td>
-            <td>{{ customer.company }}</td>
-            <td>
-              {% if not readonly and (customer.created_by == request.user or is_admin) %}
+          <td>{{ forloop.counter }}</td>
+          <td>{{ customer.name }}</td>
+          <td>{{ customer.address }}</td>
+          <td>{{ customer.email }}</td>
+          <td>{{ customer.phone }}</td>
+          <td>{{ customer.company }}</td>
+          <td>{{ customer.created_by.get_full_name|default:customer.created_by.username }}</td>
+          <td><small>{{ customer.created_at|date:"Y-m-d H:i" }}</small></td>
+          <td>{{ customer.updated_by.get_full_name|default:"—" }}</td>
+          <td><small>{{ customer.updated_at|date:"Y-m-d H:i" }}</small></td>
+          <td>
+            {% if is_admin and customer.edit_request_pending %}
+              <a href="{% url 'approve_team_permission' customer.pk %}" class="btn blue action-btn">
+                <i class="fas fa-check-circle"></i> Approve Request
+              </a>
+            {% endif %}
+
+            {% if customer.created_by == current_user %}
+              {% if customer.allow_team_edit %}
                 <a href="{% url 'edit_customer' customer.pk %}?q={{ query }}" class="btn yellow action-btn">
                   <i class="fas fa-edit"></i> Edit
                 </a>
@@ -96,17 +111,24 @@
                     <i class="fas fa-trash-alt"></i> Delete
                   </button>
                 </form>
+              {% elif customer.edit_request_pending %}
+                <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Request Pending</span>
+              {% else %}
+                <a href="{% url 'request_team_permission' customer.pk %}" class="btn btn-outline-primary action-btn">
+                  <i class="fas fa-paper-plane"></i> Request Edit/Delete
+                </a>
               {% endif %}
-            </td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="7" class="no-data">No customer records found.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </section>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="11" class="no-data">No customer records found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
 
-  <!-- 📋 Pagination Section -->
+<!-- 📋 Pagination Section -->
   {% if customerdetaileds.paginator.num_pages > 1 %}
   <footer class="pagination-footer">
     <nav class="pagination">
