@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+
+    <!-- Create Proposal Section -->
+    <h2>Create New Proposal</h2>
+    <form method="post" action="{% url 'create_proposal' %}">
+        {% csrf_token %}
+        {{ proposal_form.as_p }}
+        <button type="submit" class="btn btn-primary">Create Proposal</button>
+    </form>
+
+    {% if proposal %}
+    <hr>
+
+    <!-- Upload Documents Section -->
+    <h2>Upload Documents for: {{ proposal.title }}</h2>
+    <form method="post" enctype="multipart/form-data" action="{% url 'upload_documents' proposal.id %}">
+        {% csrf_token %}
+        {{ document_form.as_p }}
+        <button type="submit" class="btn btn-success">Upload Documents</button>
+    </form>
+
+    <hr>
+
+    <!-- View Proposal Section -->
+    <h2>{{ proposal.title }}</h2>
+    <p><strong>Description:</strong> {{ proposal.description }}</p>
+    <p><strong>Industry:</strong> {{ proposal.industry }}</p>
+    <p><strong>Client Email:</strong> {{ proposal.client_email }}</p>
+
+    <h4>Uploaded Documents</h4>
+    <ul>
+        {% for doc in proposal.documents.all %}
+            <li><a href="{{ doc.file.url }}" target="_blank">{{ doc.file.name }}</a></li>
+        {% empty %}
+            <li>No documents uploaded yet.</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'send_proposal_email' proposal.id %}" class="btn btn-info">Send to Client</a>
+    <button onclick="window.print()" class="btn btn-secondary">Print Proposal</button>
+    {% endif %}
+
+</div>
+{% endblock %}

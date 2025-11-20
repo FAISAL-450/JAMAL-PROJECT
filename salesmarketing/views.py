@@ -42,3 +42,19 @@ def salesmarketing_cb_list(request):
         'customerbills': customerbills_page,
         'query': query
     })
+
+# 🏗️ Sales & Marketing Proposal Document Detailed List View
+def salesmarketing_pc_list(request):
+    query = request.GET.get('q', '').strip()
+
+    proposals = Proposal.objects.filter(department='salesmarketing')
+    
+    if query:
+        proposals = proposals.filter(title__icontains=query)
+
+    proposals_page = get_paginated_queryset(request, proposals, per_page=10)
+
+    return render(request, 'salesmarketing/salesmarketing_pc_list.html', {
+        'proposals': proposals_page,
+        'query': query
+    })
