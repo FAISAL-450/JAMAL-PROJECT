@@ -42,19 +42,21 @@ def construction_cd_list(request):
         'query': query
     })
 
-# 🏗️ Construction CTR List View
-def construction_ctr_list(request):
+# 🏗️ Construction Chloride Test List View
+def construction_ct_list(request):
     query = request.GET.get('q', '').strip()
-    ctrs = Ctr.objects.filter(department='construction')
+    chloridetests = ChlorideTest.objects.filter(department='construction')
 
     if query:
-        ctrs = ctrs.filter(time_interval_min__icontains=query)
+        chloridetests = chloridetests.filter(time_interval_min__icontains=query)
 
-    ctrs_page = get_paginated_queryset(request, ctrs, per_page=10)
+    chloridetests_page = get_paginated_queryset(request, chloridetests, per_page=10)
 
-    return render(request, 'construction/construction_ctr_list.html', {
-        'ctrs': ctrs_page,
+    return render(request, 'construction/construction_ct_list.html', {
+        'chloridetests': chloridetests_page,
         'query': query
     })
+
+
 
 
