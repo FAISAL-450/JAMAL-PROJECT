@@ -6,6 +6,9 @@
 <!-- 📦 Main Dashboard Container -->
 <div class="dashboard-wrapper">
 
+  <!-- 🖨️ Print Preview Button -->
+  <button class="print-button" onclick="printPreview()">🖨️ Print Preview</button>
+
   <!-- 🔔 Flash Messages -->
   {% if messages %}
     {% for message in messages %}
@@ -16,117 +19,138 @@
     {% endfor %}
   {% endif %}
 
-  <!-- 📝 Chloride Test Form Section -->
-{% if not readonly %}
-<section class="form-section">
-  <header class="form" onclick="toggleForm()">
-    <h2><i class="fas fa-flask"></i> CHLORIDE TEST FORM <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span></h2>
-  </header>
-
-  <div id="formContent" class="form-content" style="display: block;">
-    <form method="post">
-      {% csrf_token %}
-      {{ form.non_field_errors }}
-
-      <div class="form-grid">
-        <div class="form-cell">{{ form.time_interval_min.label_tag }}{{ form.time_interval_min }}</div>
-        <div class="form-cell">{{ form.current_ma.label_tag }}{{ form.current_ma }}</div>
-        <div class="form-cell">{{ form.voltage_v.label_tag }}{{ form.voltage_v }}</div>
-        <div class="form-cell">{{ form.charge_passed_coulombs.label_tag }}{{ form.charge_passed_coulombs }}</div>
-        <div class="form-cell">{{ form.specimen_diameter_in.label_tag }}{{ form.specimen_diameter_in }}</div>
-        <div class="form-cell">{{ form.chloride_ion_permeability.label_tag }}{{ form.chloride_ion_permeability }}</div>
-        <div class="form-cell">{{ form.remarks.label_tag }}{{ form.remarks }}</div>
-      </div>
-
-      <div class="form-actions">
-        <button type="submit" class="btn green">
-          {% if mode == 'edit' %}Update{% else %}Save{% endif %}
-        </button>
-        {% if mode != 'list' %}
-          <a href="{% url 'chloridetest_dashboard' %}?q={{ query }}" class="btn gray">Cancel</a>
-        {% endif %}
-      </div>
-    </form>
+  <!-- 🧾 Basic Information Section -->
+  <h2>Basic Information</h2>
+  <div class="form-container basic-info">
+    <div class="form-row">
+      <label for="project-name">Project Name</label>
+      <input type="text" id="project-name" placeholder="Enter project name">
+    </div>
+    <div class="form-row">
+      <label for="location">Location</label>
+      <input type="text" id="location" placeholder="Enter location">
+    </div>
+    <div class="form-row">
+      <label for="client">Client</label>
+      <input type="text" id="client" placeholder="Enter client name">
+    </div>
+    <div class="form-row">
+      <label for="building">Building</label>
+      <input type="text" id="building" placeholder="Enter building name">
+    </div>
   </div>
-</section>
-{% endif %}
 
-<!-- 🔍 Search Section -->
-<section class="filter-section">
-  <h2>🔍 FILTERING</h2>
-  <form method="get">
-    <input type="text" name="q" value="{{ query }}" placeholder="Search by permeability or remarks">
-    <button type="submit" class="btn blue">Filter</button>
-  </form>
-</section>
+  <!-- 📝 Chloride Test Form Section -->
+  {% if not readonly %}
+  <section class="form-section form-container">
+    <header class="form" onclick="toggleForm()">
+      <h2><i class="fas fa-flask"></i> CHLORIDE TEST FORM <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span></h2>
+    </header>
 
-<!-- 📋 Chloride Test List Section -->
-<section class="table-section">
-  <header class="table-header">
-    <h2><i class="fas fa-vials"></i> CHLORIDE TEST LIST</h2>
-  </header>
+    <div id="formContent" class="form-content" style="display: block;">
+      <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
 
-  <table>
-    <thead>
-      <tr>
-        <th>Sl No</th>
-        <th>Time Interval (min)</th>
-        <th>Current (mA)</th>
-        <th>Voltage (V)</th>
-        <th>Charge Passed (C)</th>
-        <th>Specimen Diameter (in)</th>
-        <th>Permeability</th>
-        <th>Remarks</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for test in chloride_tests %}
+        <div class="form-grid">
+          <div class="form-cell">{{ form.time_interval_min.label_tag }}{{ form.time_interval_min }}</div>
+          <div class="form-cell">{{ form.current_ma.label_tag }}{{ form.current_ma }}</div>
+          <div class="form-cell">{{ form.voltage_v.label_tag }}{{ form.voltage_v }}</div>
+          <div class="form-cell">{{ form.charge_passed_coulombs.label_tag }}{{ form.charge_passed_coulombs }}</div>
+          <div class="form-cell">{{ form.specimen_diameter_in.label_tag }}{{ form.specimen_diameter_in }}</div>
+          <div class="form-cell">{{ form.chloride_ion_permeability.label_tag }}{{ form.chloride_ion_permeability }}</div>
+          <div class="form-cell">{{ form.remarks.label_tag }}{{ form.remarks }}</div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn green">
+            {% if mode == 'edit' %}Update{% else %}Save{% endif %}
+          </button>
+          {% if mode != 'list' %}
+            <a href="{% url 'chloridetest_dashboard' %}?q={{ query }}" class="btn gray">Cancel</a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- 🔍 Search Section -->
+  <section class="filter-section">
+    <h2>🔍 FILTERING</h2>
+    <form method="get">
+      <input type="text" name="q" value="{{ query }}" placeholder="Search by permeability or remarks">
+      <button type="submit" class="btn blue">Filter</button>
+    </form>
+  </section>
+
+  <!-- 📋 Chloride Test List Section -->
+  <section class="table-section">
+    <header class="table-header">
+      <h2><i class="fas fa-vials"></i> CHLORIDE TEST LIST</h2>
+    </header>
+
+    <table>
+      <thead>
         <tr>
-          <td>{{ forloop.counter }}</td>
-          <td>{{ test.time_interval_min }}</td>
-          <td>{{ test.current_ma }}</td>
-          <td>{{ test.voltage_v }}</td>
-          <td>{{ test.charge_passed_coulombs }}</td>
-          <td>{{ test.specimen_diameter_in }}</td>
-          <td>{{ test.chloride_ion_permeability }}</td>
-          <td>{{ test.remarks }}</td>
-          <td>
-            {% if is_admin and test.edit_request_pending %}
-              <a href="{% url 'approve_team_permission' test.pk %}" class="btn blue action-btn">
-                <i class="fas fa-check-circle"></i> Approve Request
-              </a>
-            {% endif %}
-
-            {% if test.created_by == current_user %}
-              {% if test.allow_team_edit %}
-                <a href="{% url 'edit_chloride_test' test.pk %}?q={{ query }}" class="btn yellow action-btn">
-                  <i class="fas fa-edit"></i> Edit
-                </a>
-                <form method="post" action="{% url 'delete_chloride_test' test.pk %}?q={{ query }}" style="display:inline;">
-                  {% csrf_token %}
-                  <button type="submit" class="btn red action-btn" onclick="return confirm('Delete this test?');">
-                    <i class="fas fa-trash-alt"></i> Delete
-                  </button>
-                </form>
-              {% elif test.edit_request_pending %}
-                <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Request Pending</span>
-              {% else %}
-                <a href="{% url 'request_team_permission' test.pk %}" class="btn btn-outline-primary action-btn">
-                  <i class="fas fa-paper-plane"></i> Request Edit/Delete
+          <th>Sl No</th>
+          <th>Time Interval (min)</th>
+          <th>Current (mA)</th>
+          <th>Voltage (V)</th>
+          <th>Charge Passed (C)</th>
+          <th>Specimen Diameter (in)</th>
+          <th>Permeability</th>
+          <th>Remarks</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for test in chloride_tests %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ test.time_interval_min }}</td>
+            <td>{{ test.current_ma }}</td>
+            <td>{{ test.voltage_v }}</td>
+            <td>{{ test.charge_passed_coulombs }}</td>
+            <td>{{ test.specimen_diameter_in }}</td>
+            <td>{{ test.chloride_ion_permeability }}</td>
+            <td>{{ test.remarks }}</td>
+            <td>
+              {% if is_admin and test.edit_request_pending %}
+                <a href="{% url 'approve_team_permission' test.pk %}" class="btn blue action-btn">
+                  <i class="fas fa-check-circle"></i> Approve Request
                 </a>
               {% endif %}
-            {% endif %}
-          </td>
-        </tr>
-      {% empty %}
-        <tr><td colspan="9" class="no-data">No chloride test records found.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</section>
 
-<!-- 📋 Pagination Section -->
+              {% if test.created_by == current_user %}
+                {% if test.allow_team_edit %}
+                  <a href="{% url 'edit_chloride_test' test.pk %}?q={{ query }}" class="btn yellow action-btn">
+                    <i class="fas fa-edit"></i> Edit
+                  </a>
+                  <form method="post" action="{% url 'delete_chloride_test' test.pk %}?q={{ query }}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn red action-btn" onclick="return confirm('Delete this test?');">
+                      <i class="fas fa-trash-alt"></i> Delete
+                    </button>
+                  </form>
+                {% elif test.edit_request_pending %}
+                  <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Request Pending</span>
+                {% else %}
+                  <a href="{% url 'request_team_permission' test.pk %}" class="btn btn-outline-primary action-btn">
+                    <i class="fas fa-paper-plane"></i> Request Edit/Delete
+                  </a>
+                {% endif %}
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="9" class="no-data">No chloride test records found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 📋 Pagination Section -->
   {% if chloride_tests.paginator.num_pages > 1 %}
   <footer class="pagination-footer">
     <nav class="pagination">
@@ -142,7 +166,7 @@
   {% endif %}
 </div>
 
-<!-- 🔧 Toggle Script -->
+<!-- 🔧 Toggle + Print Script -->
 <script>
   function toggleForm() {
     const form = document.getElementById('formContent');
@@ -160,9 +184,33 @@
   document.addEventListener('DOMContentLoaded', function () {
     if ("{{ mode }}" === "edit") {
       document.getElementById('formContent').style.display = 'block';
-      document.getElementById('toggle-icon').querySelector('i').classList.replace('fa-chevron-down', 'fa-chevron-up');
+      document.getElementById('toggle-icon').querySelector('i')
+        .classList.replace('fa-chevron-down', 'fa-chevron-up');
     }
   });
+
+  // 🧠 Print Preview Script (CSS loaded separately)
+  function printPreview() {
+    const content = document.querySelector('.basic-info').outerHTML +
+                    document.querySelector('.form-container').outerHTML +
+                    document.querySelector('.table-section').outerHTML;
+
+    const printWindow = window.open('', '', 'width=900,height=700');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Print Preview</title>
+          <link rel="stylesheet" type="text/css" href="{% static 'css/print.css' %}">
+        </head>
+        <body>
+          <div class="print-action">
+            <button onclick="window.print()">🖨️ Print</button>
+          </div>
+          ${content}
+        </body>
+      </html>
+    `);
+  }
 </script>
 
 <!-- 🎨 Custom CSS -->
@@ -579,6 +627,25 @@ td {
   animation: fadeIn 0.3s ease-in-out;
 }
 
+.print-action {
+  margin-bottom: 20px;
+  text-align: right;
+}
+
+.print-action button {
+  background-color: #0078D4; /* Microsoft blue */
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.print-action button:hover {
+  background-color: #005A9E; /* darker blue on hover */
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
@@ -586,6 +653,7 @@ td {
 </style>
 
 {% endblock %}
+
 
 
 
