@@ -60,97 +60,73 @@
     </form>
   </section>
 
-  <!-- 🖨️ Print Preview Button -->
-  <button class="print-button" onclick="printPreview()">🖨️ Print Preview</button>
+<!-- 📋 Chloride Test List Section -->
+<section class="table-section">
+  <header class="table-header">
+    <h2><i class="fas fa-vials"></i> CHLORIDE TEST LIST</h2>
+  </header>
 
-  <!-- 🏗️ Project Details Section -->
-  <h2>Project Details</h2>
-  <div class="form-container">
-      <div class="form-row">
-          <label for="project-name">Project Name</label>
-          <input type="text" id="project-name" placeholder="Enter project name">
-      </div>
-      <div class="form-row">
-          <label for="location">Location</label>
-          <input type="text" id="location" placeholder="Enter location">
-      </div>
-      <div class="form-row">
-          <label for="client">Client</label>
-          <input type="text" id="client" placeholder="Enter client name">
-      </div>
-      <div class="form-row">
-          <label for="building">Building</label>
-          <input type="text" id="building" placeholder="Enter building name">
-      </div>
-  </div>
-
-  <!-- 📋 Chloride Test List Section -->
-  <section class="table-section">
-    <header class="table-header">
-      <h2><i class="fas fa-vials"></i> CHLORIDE TEST LIST</h2>
-    </header>
-
-    <table>
-      <thead>
+  <table>
+    <thead>
+      <tr>
+        <th>Sl No</th>
+        <th>Time Interval (min)</th>
+        <th>Current (mA)</th>
+        <th>Voltage (V)</th>
+        <th>Charge Passed (C)</th>
+        <th>Specimen Diameter (in)</th>
+        <th>Permeability</th>
+        <th>Remarks</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for test in chloride_tests %}
         <tr>
-          <th>Sl No</th>
-          <th>Time Interval (min)</th>
-          <th>Current (mA)</th>
-          <th>Voltage (V)</th>
-          <th>Charge Passed (C)</th>
-          <th>Specimen Diameter (in)</th>
-          <th>Permeability</th>
-          <th>Remarks</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for test in chloride_tests %}
-          <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ test.time_interval_min }}</td>
-            <td>{{ test.current_ma }}</td>
-            <td>{{ test.voltage_v }}</td>
-            <td>{{ test.charge_passed_coulombs }}</td>
-            <td>{{ test.specimen_diameter_in }}</td>
-            <td>{{ test.chloride_ion_permeability }}</td>
-            <td>{{ test.remarks }}</td>
-            <td>
-              {% if is_admin and test.edit_request_pending %}
-                <a href="{% url 'approve_team_permission' test.pk %}" class="btn blue action-btn">
-                  <i class="fas fa-check-circle"></i> Approve Request
+          <td>{{ forloop.counter }}</td>
+          <td>{{ test.time_interval_min }}</td>
+          <td>{{ test.current_ma }}</td>
+          <td>{{ test.voltage_v }}</td>
+          <td>{{ test.charge_passed_coulombs }}</td>
+          <td>{{ test.specimen_diameter_in }}</td>
+          <td>{{ test.chloride_ion_permeability }}</td>
+          <td>{{ test.remarks }}</td>
+          <td>
+            {% if is_admin and test.edit_request_pending %}
+              <a href="{% url 'approve_team_permission' test.pk %}" class="btn blue action-btn">
+                <i class="fas fa-check-circle"></i> Approve Request
+              </a>
+            {% endif %}
+
+            {% if test.created_by == current_user %}
+              {% if test.allow_team_edit %}
+                <a href="{% url 'edit_chloride_test' test.pk %}?q={{ query }}" class="btn yellow action-btn">
+                  <i class="fas fa-edit"></i> Edit
+                </a>
+                <form method="post" action="{% url 'delete_chloride_test' test.pk %}?q={{ query }}" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn red action-btn" onclick="return confirm('Delete this test?');">
+                    <i class="fas fa-trash-alt"></i> Delete
+                  </button>
+                </form>
+              {% elif test.edit_request_pending %}
+                <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Request Pending</span>
+              {% else %}
+                <a href="{% url 'request_team_permission' test.pk %}" class="btn btn-outline-primary action-btn">
+                  <i class="fas fa-paper-plane"></i> Request Edit/Delete
                 </a>
               {% endif %}
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="9" class="no-data">No chloride test records found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
 
-              {% if test.created_by == current_user %}
-                {% if test.allow_team_edit %}
-                  <a href="{% url 'edit_chloride_test' test.pk %}?q={{ query }}" class="btn yellow action-btn">
-                    <i class="fas fa-edit"></i> Edit
-                  </a>
-                  <form method="post" action="{% url 'delete_chloride_test' test.pk %}?q={{ query }}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn red action-btn" onclick="return confirm('Delete this test?');">
-                      <i class="fas fa-trash-alt"></i> Delete
-                    </button>
-                  </form>
-                {% elif test.edit_request_pending %}
-                  <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Request Pending</span>
-                {% else %}
-                  <a href="{% url 'request_team_permission' test.pk %}" class="btn btn-outline-primary action-btn">
-                    <i class="fas fa-paper-plane"></i> Request Edit/Delete
-                  </a>
-                {% endif %}
-              {% endif %}
-            </td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="9" class="no-data">No chloride test records found.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </section>
-
-  <!-- 📋 Pagination Section -->
+<!-- 📋 Pagination Section -->
   {% if chloride_tests.paginator.num_pages > 1 %}
   <footer class="pagination-footer">
     <nav class="pagination">
@@ -166,7 +142,7 @@
   {% endif %}
 </div>
 
-<!-- 🔧 Toggle & Print Script -->
+<!-- 🔧 Toggle Script -->
 <script>
   function toggleForm() {
     const form = document.getElementById('formContent');
@@ -187,83 +163,6 @@
       document.getElementById('toggle-icon').querySelector('i').classList.replace('fa-chevron-down', 'fa-chevron-up');
     }
   });
-
-  // 🧠 Print Preview & Print Script
-  function printPreview() {
-    const content = document.querySelector('.form-container').outerHTML +
-                    document.querySelector('.table-section').outerHTML;
-
-    const printWindow = window.open('', '', 'width=900,height=700');
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Print Preview</title>
-          <style>
-            body {
-              font-family: 'Segoe UI', sans-serif;
-              margin: 40px;
-              color: #333;
-            }
-            h2 {
-              border-bottom: 2px solid #ccc;
-              padding-bottom: 5px;
-            }
-            .form-row {
-              display: flex;
-              margin-bottom: 10px;
-            }
-            label {
-              width: 150px;
-              font-weight: bold;
-            }
-            input {
-              flex: 1;
-              padding: 6px;
-              border: 1px solid #aaa;   /* ✅ fixed */
-              border-radius: 4px;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-top: 20px;
-            }
-            th, td {
-              border: 1px solid #999;
-              padding: 8px;
-              text-align: left;
-            }
-            th {
-              background-color: #f0f0f0;
-            }
-            .print-action {
-              margin-bottom: 20px;
-              text-align: right;
-            }
-            .print-action button {
-              background-color: #0078D4;
-              color: white;
-              border: none;
-              padding: 8px 16px;
-              font-size: 14px;
-              border-radius: 4px;
-              cursor: pointer;
-            }
-            .print-action button:hover {
-              background-color: #005A9E;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="print-action">
-            <button onclick="window.print()">🖨️ Print</button>
-          </div>
-          ${content}
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.focus();
-  }
 </script>
 
 <!-- 🎨 Custom CSS -->
