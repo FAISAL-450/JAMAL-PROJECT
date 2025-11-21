@@ -17,48 +17,48 @@
   {% endif %}
 
   <!-- 📝 Chloride Test Form Section -->
-  {% if not readonly %}
-  <section class="form-section">
-    <header class="form" onclick="toggleForm()">
-      <h2><i class="fas fa-flask"></i> CHLORIDE TEST FORM <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span></h2>
-    </header>
+{% if not readonly %}
+<section class="form-section">
+  <header class="form" onclick="toggleForm()">
+    <h2><i class="fas fa-flask"></i> CHLORIDE TEST FORM <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span></h2>
+  </header>
 
-    <div id="formContent" class="form-content" style="display: block;">
-      <form method="post">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
+  <div id="formContent" class="form-content" style="display: block;">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
 
-        <div class="form-grid">
-          <div class="form-cell">{{ form.time_interval_min.label_tag }}{{ form.time_interval_min }}</div>
-          <div class="form-cell">{{ form.current_ma.label_tag }}{{ form.current_ma }}</div>
-          <div class="form-cell">{{ form.voltage_v.label_tag }}{{ form.voltage_v }}</div>
-          <div class="form-cell">{{ form.charge_passed_coulombs.label_tag }}{{ form.charge_passed_coulombs }}</div>
-          <div class="form-cell">{{ form.specimen_diameter_in.label_tag }}{{ form.specimen_diameter_in }}</div>
-          <div class="form-cell">{{ form.chloride_ion_permeability.label_tag }}{{ form.chloride_ion_permeability }}</div>
-          <div class="form-cell">{{ form.remarks.label_tag }}{{ form.remarks }}</div>
-        </div>
+      <div class="form-grid">
+        <div class="form-cell">{{ form.time_interval_min.label_tag }}{{ form.time_interval_min }}</div>
+        <div class="form-cell">{{ form.current_ma.label_tag }}{{ form.current_ma }}</div>
+        <div class="form-cell">{{ form.voltage_v.label_tag }}{{ form.voltage_v }}</div>
+        <div class="form-cell">{{ form.charge_passed_coulombs.label_tag }}{{ form.charge_passed_coulombs }}</div>
+        <div class="form-cell">{{ form.specimen_diameter_in.label_tag }}{{ form.specimen_diameter_in }}</div>
+        <div class="form-cell">{{ form.chloride_ion_permeability.label_tag }}{{ form.chloride_ion_permeability }}</div>
+        <div class="form-cell">{{ form.remarks.label_tag }}{{ form.remarks }}</div>
+      </div>
 
-        <div class="form-actions">
-          <button type="submit" class="btn green">
-            {% if mode == 'edit' %}Update{% else %}Save{% endif %}
-          </button>
-          {% if mode != 'list' %}
-            <a href="{% url 'chloridetest_dashboard' %}?q={{ query }}" class="btn gray">Cancel</a>
-          {% endif %}
-        </div>
-      </form>
-    </div>
-  </section>
-  {% endif %}
-
-  <!-- 🔍 Search Section -->
-  <section class="filter-section">
-    <h2>🔍 FILTERING</h2>
-    <form method="get">
-      <input type="text" name="q" value="{{ query }}" placeholder="Search by permeability or remarks">
-      <button type="submit" class="btn blue">Filter</button>
+      <div class="form-actions">
+        <button type="submit" class="btn green">
+          {% if mode == 'edit' %}Update{% else %}Save{% endif %}
+        </button>
+        {% if mode != 'list' %}
+          <a href="{% url 'chloridetest_dashboard' %}?q={{ query }}" class="btn gray">Cancel</a>
+        {% endif %}
+      </div>
     </form>
-  </section>
+  </div>
+</section>
+{% endif %}
+
+<!-- 🔍 Search Section -->
+<section class="filter-section">
+  <h2>🔍 FILTERING</h2>
+  <form method="get">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search by permeability or remarks">
+    <button type="submit" class="btn blue">Filter</button>
+  </form>
+</section>
 
 <!-- 📋 Chloride Test List Section -->
 <section class="table-section">
