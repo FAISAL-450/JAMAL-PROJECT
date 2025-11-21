@@ -45,15 +45,41 @@
         th {
             background-color: #f2f2f2;
         }
+        .print-button {
+            background-color: #0078D4;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .print-button:hover {
+            background-color: #005A9E;
+        }
     </style>
 
+    <!-- 🖨️ Print Preview Button -->
+    <button class="print-button" onclick="printPreview()">🖨️ Print Preview</button>
+
     <h2>Project Details</h2>
-    <div class="heading-container">
-        <div class="heading-inputs">
-            <input type="text" placeholder="Project Name">
-            <input type="text" placeholder="Location">
-            <input type="text" placeholder="Client">
-            <input type="text" placeholder="Building">
+    <div class="form-container">
+        <div class="form-row">
+            <label for="project-name">Project Name</label>
+            <input type="text" id="project-name" placeholder="Enter project name">
+        </div>
+        <div class="form-row">
+            <label for="location">Location</label>
+            <input type="text" id="location" placeholder="Enter location">
+        </div>
+        <div class="form-row">
+            <label for="client">Client</label>
+            <input type="text" id="client" placeholder="Enter client name">
+        </div>
+        <div class="form-row">
+            <label for="building">Building</label>
+            <input type="text" id="building" placeholder="Enter building name">
         </div>
     </div>
 
@@ -98,7 +124,89 @@
         </table>
     </div>
 </div>
+
+<!-- 🧠 Print Preview & Print Script -->
+<script>
+function printPreview() {
+  const content = document.querySelector('.form-container').outerHTML +
+                  document.querySelector('.table-section').outerHTML;
+
+  const printWindow = window.open('', '', 'width=900,height=700');
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Print Preview</title>
+        <style>
+          body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 40px;
+            color: #333;
+          }
+          h2 {
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 5px;
+          }
+          .form-row {
+            display: flex;
+            margin-bottom: 10px;
+          }
+          label {
+            width: 150px;
+            font-weight: bold;
+          }
+          input {
+            flex: 1;
+            padding: 6px;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+          }
+          th, td {
+            border: 1px solid #999;
+            padding: 8px;
+            text-align: left;
+          }
+          th {
+            background-color: #f0f0f0;
+          }
+          .print-action {
+            margin-bottom: 20px;
+            text-align: right;
+          }
+          .print-action button {
+            background-color: #0078D4;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+          }
+          .print-action button:hover {
+            background-color: #005A9E;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="print-action">
+          <button onclick="window.print()">🖨️ Print</button>
+        </div>
+        ${content}
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.focus();
+}
+</script>
+
 {% endblock %}
+
+
 
 
 

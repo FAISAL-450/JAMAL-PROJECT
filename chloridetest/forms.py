@@ -31,4 +31,3 @@ class ChlorideTestReadingForm(forms.ModelForm):
             'chloride_ion_permeability': forms.TextInput(attrs={'class': 'form-control'}),
             'remarks': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
-
