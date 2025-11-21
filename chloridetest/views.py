@@ -7,8 +7,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 
-from .models import ChlorideTestReading
-from .forms import ChlorideTestReadingForm
+from .models import ChlorideTest
+from .forms import ChlorideTestForm
 
 # B - Azure Admin Check
 def is_azure_admin(user):
@@ -16,7 +16,7 @@ def is_azure_admin(user):
 
 # C - Filtering Function
 def filter_chloride_tests(query=None, user=None, exclude_user=None):
-    queryset = ChlorideTestReading.objects.all()
+    queryset = ChlorideTest.objects.all()
 
     if user:
         queryset = queryset.filter(created_by=user)
@@ -48,7 +48,7 @@ def get_paginated_queryset(request, queryset, per_page=10):
 @login_required
 def chloridetest_dashboard(request):
     query = request.GET.get("q", "").strip()
-    form = ChlorideTestReadingForm(request.POST or None)
+    form = ChlorideTestForm(request.POST or None)
     is_admin = is_azure_admin(request.user)
 
     chloride_tests = filter_chloride_tests(query=query, user=request.user if not is_admin else None)
@@ -79,7 +79,7 @@ def chloridetest_dashboard(request):
 @login_required
 def admin_dashboard(request):
     query = request.GET.get("q", "").strip()
-    chloride_tests = ChlorideTestReading.objects.all()
+    chloride_tests = ChlorideTest.objects.all()
 
     if query:
         chloride_tests = chloride_tests.filter(
@@ -92,7 +92,7 @@ def admin_dashboard(request):
     context = {
         "chloride_tests": chloride_tests_page,
         "query": query,
-        "form": ChlorideTestReadingForm(),
+        "form": ChlorideTestForm(),
         "mode": "admin",
         "readonly": True,
         "is_admin": True,
@@ -103,14 +103,14 @@ def admin_dashboard(request):
 # G - Edit View
 @login_required
 def edit_chloride_test(request, pk):
-    test = get_object_or_404(ChlorideTestReading, pk=pk)
+    test = get_object_or_404(ChlorideTest, pk=pk)
     is_admin = is_azure_admin(request.user)
 
     if not (is_admin or (test.created_by == request.user and test.allow_team_edit)):
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
-    form = ChlorideTestReadingForm(request.POST or None, instance=test)
+    form = ChlorideTestForm(request.POST or None, instance=test)
 
     if form.is_valid():
         updated_test = form.save(commit=False)
@@ -144,7 +144,7 @@ def edit_chloride_test(request, pk):
 # H - Delete View
 @login_required
 def delete_chloride_test(request, pk):
-    test = get_object_or_404(ChlorideTestReading, pk=pk)
+    test = get_object_or_404(ChlorideTest, pk=pk)
     is_admin = is_azure_admin(request.user)
 
     if not (is_admin or (test.created_by == request.user and test.allow_team_edit)):
@@ -168,7 +168,7 @@ def delete_chloride_test(request, pk):
 @user_passes_test(is_azure_admin)
 @login_required
 def approve_team_permission(request, pk):
-    test = get_object_or_404(ChlorideTestReading, pk=pk)
+    test = get_object_or_404(ChlorideTest, pk=pk)
     test.allow_team_edit = True
     test.edit_request_pending = False
     test.updated_by = request.user
@@ -179,7 +179,7 @@ def approve_team_permission(request, pk):
 # J - Team Member Requests Edit/Delete Access
 @login_required
 def request_team_permission(request, pk):
-    test = get_object_or_404(ChlorideTestReading, pk=pk)
+    test = get_object_or_404(ChlorideTest, pk=pk)
 
     if test.created_by != request.user:
         raise PermissionDenied
@@ -192,6 +192,4 @@ def request_team_permission(request, pk):
         messages.info(request, f"⏳ Request already pending for '{test}'.")
 
     return redirect(reverse('chloridetest_dashboard'))
-
-
 

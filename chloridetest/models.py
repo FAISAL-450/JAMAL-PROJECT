@@ -25,12 +25,12 @@ class ChloridetestProfile(models.Model):
 
     class Meta:
         ordering = ['user__username']
-        verbose_name = "Chloride Test Role Profile"
-        verbose_name_plural = "Chloride Test Role Profiles"
+        verbose_name = "Chloridetest Role Profile"
+        verbose_name_plural = "Chloridetest Role Profiles"
 
 
 # Main model for storing chloride test readings
-class ChlorideTestReading(models.Model):
+class ChlorideTest(models.Model):
     time_interval_min = models.IntegerField(
         help_text="Time interval in minutes"
     )
@@ -78,7 +78,7 @@ class ChlorideTestReading(models.Model):
     created_by = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='created_chloride_tests',
+        related_name='created_chloridetests',
         help_text="User who created this test record"
     )
     created_at = models.DateTimeField(
@@ -90,7 +90,7 @@ class ChlorideTestReading(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='updated_chloride_tests',
+        related_name='updated_chloridetests',
         help_text="User who last updated this test record"
     )
     updated_at = models.DateTimeField(
@@ -103,8 +103,14 @@ class ChlorideTestReading(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-        verbose_name = "Chloride Test Reading"
-        verbose_name_plural = "Chloride Test Readings"
+        verbose_name = "Chloride Test"
+        verbose_name_plural = "Chloride Tests"
+        indexes = [
+            models.Index(fields=['created_at']),
+            models.Index(fields=['chloride_ion_permeability']),
+        ]
+
+
 
 
 

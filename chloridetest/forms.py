@@ -1,9 +1,9 @@
 from django import forms
-from .models import ChlorideTestReading
+from .models import ChlorideTest
 
-class ChlorideTestReadingForm(forms.ModelForm):
+class ChlorideTestForm(forms.ModelForm):
     class Meta:
-        model = ChlorideTestReading
+        model = ChlorideTest
         fields = [
             'time_interval_min',
             'current_ma',
@@ -55,4 +55,6 @@ class ChlorideTestReadingForm(forms.ModelForm):
                 'rows': 3
             }),
         }
+
+
 

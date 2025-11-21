@@ -7,3 +7,4 @@ class ChloridetestConfig(AppConfig):
     def ready(self):
         # Import signals to register them
         import chloridetest.signals
+

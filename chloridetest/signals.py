@@ -9,3 +9,5 @@ from .models import ChloridetestProfile
 def create_chloridetest_profile(sender, instance, created, **kwargs):
     if created:
         ChloridetestProfile.objects.create(user=instance)
+
+

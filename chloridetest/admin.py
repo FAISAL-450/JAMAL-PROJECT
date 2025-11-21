@@ -1,6 +1,6 @@
 # A - Import Required Modules
 from django.contrib import admin
-from .models import ChloridetestProfile, ChlorideTestReading
+from .models import ChloridetestProfile, ChlorideTest
 
 # B - Azure Admin Email
 AZURE_ADMIN_EMAIL = 'admin@dzignscapeprofessionals.onmicrosoft.com'
@@ -27,20 +27,21 @@ class ChloridetestProfileAdmin(AzureAdminOnlyMixin, admin.ModelAdmin):
     search_fields = ['user__username']
     ordering = ['user__username']
 
-# E - ChlorideTestReading Admin
-@admin.register(ChlorideTestReading)
-class ChlorideTestReadingAdmin(AzureAdminOnlyMixin, admin.ModelAdmin):
+# E - ChlorideTest Admin
+@admin.register(ChlorideTest)
+class ChlorideTestAdmin(AzureAdminOnlyMixin, admin.ModelAdmin):
     list_display = [
         'time_interval_min',
-        'chloride_ion_permeability',
+        'current_ma',
         'created_by',
         'team',
         'created_at'
     ]
-    list_filter = ['team', 'created_by', 'chloride_ion_permeability']
+    list_filter = ['team', 'created_by']
     search_fields = [
-        'chloride_ion_permeability',
-        'remarks',
+        'time_interval_min',
+        'current_ma',
         'created_by__username'
     ]
     ordering = ['-created_at']
+
