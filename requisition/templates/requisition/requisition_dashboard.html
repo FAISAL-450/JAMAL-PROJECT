@@ -1,13 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
-
 {% block title %}Requisition Dashboard{% endblock %}
-
 {% block content %}
-<!-- A - Main Dashboard Container -->
+
+<!-- 📦 Main Dashboard Container -->
 <div class="dashboard-wrapper">
 
-  <!-- B - Flash Messages -->
+  <!-- 🔔 Flash Messages -->
   {% if messages %}
     {% for message in messages %}
       <div class="alert-box">
@@ -17,14 +16,11 @@
     {% endfor %}
   {% endif %}
 
-  <!-- C - Requisition Form Section -->
+  <!-- 📝 Requisition Form Section -->
   {% if not readonly %}
   <section class="form-section">
     <header class="form" onclick="toggleForm()">
-      <h2>
-        <i class="fas fa-file-alt"></i> REQUISITION FORM
-        <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span>
-      </h2>
+      <h2><i class="fas fa-file-alt"></i> REQUISITION FORM <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span></h2>
     </header>
 
     <div id="formContent" class="form-content" style="display: block;">
@@ -33,25 +29,16 @@
         {{ form.non_field_errors }}
 
         <div class="form-grid">
-          <!-- C1 - Basic Information -->
-          <div class="form-cell">{{ basic_form.project_name.label_tag }}{{ basic_form.project_name }}</div>
-          <div class="form-cell">{{ basic_form.requisition_date.label_tag }}{{ basic_form.requisition_date }}</div>
-          <div class="form-cell">{{ basic_form.requisition_no.label_tag }}{{ basic_form.requisition_no }}</div>
-          <div class="form-cell">{{ basic_form.prepared_by.label_tag }}{{ basic_form.prepared_by }}</div>
-          <div class="form-cell">{{ basic_form.delivery_date.label_tag }}{{ basic_form.delivery_date }}</div>
-
-          <!-- C2 - Requisition Item -->
-          <div class="form-cell">{{ item_form.project_name_fpr.label_tag }}{{ item_form.project_name_fpr }}</div>
-          <div class="form-cell">{{ item_form.PR_date.label_tag }}{{ item_form.PR_date }}</div>
-          <div class="form-cell">{{ item_form.PR_no.label_tag }}{{ item_form.PR_no }}</div>
-          <div class="form-cell">{{ item_form.name_of_resource.label_tag }}{{ item_form.name_of_resource }}</div>
-          <div class="form-cell">{{ item_form.resource_unit.label_tag }}{{ item_form.resource_unit }}</div>
-          <div class="form-cell">{{ item_form.quantity.label_tag }}{{ item_form.quantity }}</div>
-          <div class="form-cell">{{ item_form.unit_price.label_tag }}{{ item_form.unit_price }}</div>
-          <div class="form-cell">{{ item_form.status.label_tag }}{{ item_form.status }}</div>
+          <div class="form-cell">{{ form.project_name_fpr.label_tag }}{{ form.project_name_fpr }}</div>
+          <div class="form-cell">{{ form.PR_date.label_tag }}{{ form.PR_date }}</div>
+          <div class="form-cell">{{ form.PR_no.label_tag }}{{ form.PR_no }}</div>
+          <div class="form-cell">{{ form.name_of_resource.label_tag }}{{ form.name_of_resource }}</div>
+          <div class="form-cell">{{ form.resource_unit.label_tag }}{{ form.resource_unit }}</div>
+          <div class="form-cell">{{ form.quantity.label_tag }}{{ form.quantity }}</div>
+          <div class="form-cell">{{ form.unit_price.label_tag }}{{ form.unit_price }}</div>
+          <div class="form-cell">{{ form.status.label_tag }}{{ form.status }}</div>
         </div>
 
-        <!-- C3 - Form Actions -->
         <div class="form-actions">
           <button type="submit" class="btn green">
             {% if mode == 'edit' %}Update{% else %}Save{% endif %}
@@ -65,16 +52,16 @@
   </section>
   {% endif %}
 
-  <!-- D - Search Section -->
+  <!-- 🔍 Search Section -->
   <section class="filter-section">
     <h2>🔍 FILTERING</h2>
     <form method="get">
-      <input type="text" name="q" value="{{ query }}" placeholder="Search by requisition no, project, or resource">
+      <input type="text" name="q" value="{{ query }}" placeholder="Search by PR No, Resource, or Project">
       <button type="submit" class="btn blue">Filter</button>
     </form>
   </section>
 
-  <!-- E - Requisition List Section -->
+  <!-- 📋 Requisition List Section -->
   <section class="table-section">
     <header class="table-header">
       <h2><i class="fas fa-list"></i> REQUISITION LIST</h2>
@@ -84,12 +71,13 @@
       <thead>
         <tr>
           <th>Sl No</th>
-          <th>PR No</th>
           <th>Project</th>
-          <th>Resource</th>
+          <th>PR Date</th>
+          <th>PR No</th>
+          <th>Resource Name</th>
+          <th>Unit</th>
           <th>Quantity</th>
           <th>Unit Price</th>
-          <th>Total Amount</th>
           <th>Status</th>
           <th>Actions</th>
         </tr>
@@ -98,13 +86,14 @@
         {% for requisition in requisitions %}
           <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ requisition.PR_no }}</td>
             <td>{{ requisition.project_name_fpr }}</td>
+            <td>{{ requisition.PR_date }}</td>
+            <td>{{ requisition.PR_no }}</td>
             <td>{{ requisition.name_of_resource }}</td>
+            <td>{{ requisition.resource_unit }}</td>
             <td>{{ requisition.quantity }}</td>
             <td>{{ requisition.unit_price }}</td>
-            <td>{{ requisition.total_amount }}</td>
-            <td>{{ requisition.get_status_display }}</td>
+            <td>{{ requisition.status }}</td>
             <td>
               {% if is_admin and requisition.edit_request_pending %}
                 <a href="{% url 'approve_team_permission' requisition.pk %}" class="btn blue action-btn">
@@ -134,13 +123,13 @@
             </td>
           </tr>
         {% empty %}
-          <tr><td colspan="9" class="no-data">No requisition records found.</td></tr>
+          <tr><td colspan="10" class="no-data">No requisition records found.</td></tr>
         {% endfor %}
       </tbody>
     </table>
   </section>
 
-  <!-- F - Pagination Section -->
+  <!-- 📋 Pagination Section -->
   {% if requisitions.paginator.num_pages > 1 %}
   <footer class="pagination-footer">
     <nav class="pagination">
@@ -156,7 +145,7 @@
   {% endif %}
 </div>
 
-<!-- G - Toggle Script -->
+<!-- 🔧 Toggle Script -->
 <script>
   function toggleForm() {
     const form = document.getElementById('formContent');

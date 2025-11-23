@@ -1,6 +1,8 @@
+# A - Import Required Modules
 from django.urls import path
 from . import views
 
+# B - URL Patterns
 urlpatterns = [
     # 🔹 Team dashboard: team members manage their own requisitions
     path('dashboard/', views.requisition_dashboard, name='requisition_dashboard'),

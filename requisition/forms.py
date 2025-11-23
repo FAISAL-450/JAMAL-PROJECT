@@ -1,47 +1,5 @@
 from django import forms
-from .models import RequisitionItem, BasicInformation, Project
-
-class BasicInformationForm(forms.ModelForm):
-    class Meta:
-        model = BasicInformation
-        fields = [
-            'project_name',
-            'requisition_date',
-            'requisition_no',
-            'prepared_by',
-            'delivery_date',
-        ]
-
-        labels = {
-            'project_name': 'Project Name',
-            'requisition_date': 'Requisition Date',
-            'requisition_no': 'Requisition Number',
-            'prepared_by': 'Prepared By',
-            'delivery_date': 'Delivery Date',
-        }
-
-        widgets = {
-            'project_name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter project name'
-            }),
-            'requisition_date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
-            }),
-            'requisition_no': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter requisition number'
-            }),
-            'prepared_by': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter preparer name'
-            }),
-            'delivery_date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
-            }),
-        }
+from .models import RequisitionItem, Project
 
 class RequisitionItemForm(forms.ModelForm):
     class Meta:
@@ -106,7 +64,6 @@ class RequisitionItemForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         self.fields['project_name_fpr'].empty_label = "--------- Select Project Name ---------"
-
         # Define allowed emails for dropdown access
         allowed_emails = [
             'jasim@dzignscapeprofessionals.onmicrosoft.com',

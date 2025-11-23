@@ -8,3 +8,4 @@ class RequisitionConfig(AppConfig):
         # Import signals to register them
         import requisition.signals
 
+

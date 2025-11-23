@@ -29,16 +29,6 @@ class RequisitionProfile(models.Model):
         verbose_name = "Requisition Role Profile"
         verbose_name_plural = "Requisition Role Profiles"
 
-class BasicInformation(models.Model):
-    project_name = models.CharField(max_length=200)
-    requisition_date = models.DateField()
-    requisition_no = models.CharField(max_length=50, unique=True)
-    prepared_by = models.CharField(max_length=200)
-    delivery_date = models.DateField(null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.requisition_no} - {self.project_name}"
-
 class RequisitionItem(models.Model):
     STATUS_CHOICES = [
         ('draft', 'Draft'),

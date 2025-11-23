@@ -12,11 +12,10 @@ from .forms import RequisitionItemForm
 
 # B - Azure Admin Check
 def is_azure_admin(user):
-    return user.email.strip().lower() == "admin@dzignscapeprofessionals.onmicrosoft.com"
+    return user.email == 'admin@dzignscapeprofessionals.onmicrosoft.com'
 
 # C - Filtering Function
 def filter_requisitions(query=None, user=None, exclude_user=None):
-    """Filter requisitions based on query, user, or exclusion rules."""
     queryset = RequisitionItem.objects.all()
 
     if user:
@@ -27,16 +26,15 @@ def filter_requisitions(query=None, user=None, exclude_user=None):
 
     if query:
         queryset = queryset.filter(
-            Q(PR_no__icontains=query)
-            | Q(name_of_resource__icontains=query)
-            | Q(project_name_fpr__name__icontains=query)
+            Q(PR_no__icontains=query) |
+            Q(name_of_resource__icontains=query) |
+            Q(project_name_fpr__name__icontains=query)
         )
 
     return queryset
 
 # D - Reusable Pagination Function
 def get_paginated_queryset(request, queryset, per_page=10):
-    """Paginate any queryset with graceful fallbacks."""
     paginator = Paginator(queryset, per_page)
     page_number = request.GET.get("page")
 
@@ -51,15 +49,11 @@ def get_paginated_queryset(request, queryset, per_page=10):
 @login_required
 def requisition_dashboard(request):
     query = request.GET.get("q", "").strip()
+    form = RequisitionItemForm(request.POST or None, user=request.user)
     is_admin = is_azure_admin(request.user)
 
-    requisitions = filter_requisitions(
-        query=query,
-        user=request.user if not is_admin else None
-    )
+    requisitions = filter_requisitions(query=query, user=request.user if not is_admin else None)
     requisitions_page = get_paginated_queryset(request, requisitions)
-
-    form = RequisitionItemForm(request.POST or None, user=request.user)
 
     if not is_admin and request.method == "POST" and form.is_valid():
         requisition = form.save(commit=False)
@@ -91,9 +85,9 @@ def admin_dashboard(request):
 
     if query:
         requisitions = requisitions.filter(
-            Q(PR_no__icontains=query)
-            | Q(name_of_resource__icontains=query)
-            | Q(project_name_fpr__name__icontains=query)
+            Q(PR_no__icontains=query) |
+            Q(name_of_resource__icontains=query) |
+            Q(project_name_fpr__name__icontains=query)
         )
 
     requisitions_page = get_paginated_queryset(request, requisitions)
@@ -125,13 +119,14 @@ def edit_requisition(request, pk):
         updated_req = form.save(commit=False)
         updated_req.updated_by = request.user
 
+        # Reset team permission after edit
         if not is_admin:
             updated_req.allow_team_edit = False
             updated_req.edit_request_pending = False
 
         updated_req.save()
         messages.success(request, "✏️ Requisition record updated successfully.")
-        redirect_url = "admin_dashboard" if is_admin else "requisition_dashboard"
+        redirect_url = 'admin_dashboard' if is_admin else 'requisition_dashboard'
         return redirect(f"{reverse(redirect_url)}?q={query}")
 
     requisitions = filter_requisitions(query=query, user=request.user if not is_admin else None)
@@ -160,11 +155,11 @@ def delete_requisition(request, pk):
 
     query = request.GET.get("q", "").strip()
 
-    if request.method == "POST":
+    if request.method == 'POST':
         pr_no = requisition.PR_no
         requisition.delete()
         messages.success(request, f"🗑️ Requisition '{pr_no}' deleted successfully.")
-        redirect_url = "admin_dashboard" if is_admin else "requisition_dashboard"
+        redirect_url = 'admin_dashboard' if is_admin else 'requisition_dashboard'
         return redirect(f"{reverse(redirect_url)}?q={query}")
 
     return render(request, "requisition/confirm_delete.html", {
@@ -181,11 +176,8 @@ def approve_team_permission(request, pk):
     requisition.edit_request_pending = False
     requisition.updated_by = request.user
     requisition.save()
-    messages.success(
-        request,
-        f"✅ Edit/delete permission granted for '{requisition.PR_no}'. Team member can now proceed."
-    )
-    return redirect(reverse("admin_dashboard"))
+    messages.success(request, f"✅ Edit/delete permission granted for '{requisition.PR_no}'. Team member can now proceed.")
+    return redirect(reverse('admin_dashboard'))
 
 # J - Team Member Requests Edit/Delete Access
 @login_required
@@ -198,15 +190,8 @@ def request_team_permission(request, pk):
     if not requisition.edit_request_pending:
         requisition.edit_request_pending = True
         requisition.save()
-        messages.success(
-            request,
-            f"📩 Request sent to admin for '{requisition.PR_no}'. Awaiting approval."
-        )
+        messages.success(request, f"📩 Request sent to admin for '{requisition.PR_no}'. Awaiting approval.")
     else:
-        messages.info(
-            request,
-            f"⏳ Request already pending for '{requisition.PR_no}'."
-        )
+        messages.info(request, f"⏳ Request already pending for '{requisition.PR_no}'.")
 
-    return redirect(reverse("requisition_dashboard"))
-
+    return redirect(reverse('requisition_dashboard'))
