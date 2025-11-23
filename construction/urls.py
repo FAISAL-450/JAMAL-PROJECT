@@ -6,6 +6,7 @@ urlpatterns = [
     path('contractor-detailed/', views.construction_cd_list, name='construction_cd_list'),
     
     path('ct-detailed/', views.construction_ct_list, name='construction_ct_list'),
+    path('requisition-detailed/', views.construction_pr_list, name='construction_pr_list'),
 
 
 ]

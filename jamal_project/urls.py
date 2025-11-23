@@ -34,6 +34,7 @@ path('customerbill/', include('customerbill.urls')),
 path('chloridetest/', include('chloridetest.urls')),
 
 path('proposals/', include('proposals.urls')),
+path('requisition/', include('requisition.urls')),
 
 
 ]

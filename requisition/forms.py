@@ -1,0 +1,128 @@
+from django import forms
+from .models import RequisitionItem, BasicInformation, Project
+
+class BasicInformationForm(forms.ModelForm):
+    class Meta:
+        model = BasicInformation
+        fields = [
+            'project_name',
+            'requisition_date',
+            'requisition_no',
+            'prepared_by',
+            'delivery_date',
+        ]
+
+        labels = {
+            'project_name': 'Project Name',
+            'requisition_date': 'Requisition Date',
+            'requisition_no': 'Requisition Number',
+            'prepared_by': 'Prepared By',
+            'delivery_date': 'Delivery Date',
+        }
+
+        widgets = {
+            'project_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter project name'
+            }),
+            'requisition_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'requisition_no': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter requisition number'
+            }),
+            'prepared_by': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter preparer name'
+            }),
+            'delivery_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+        }
+
+class RequisitionItemForm(forms.ModelForm):
+    class Meta:
+        model = RequisitionItem
+        fields = [
+            'project_name_fpr',
+            'PR_date',
+            'PR_no',
+            'name_of_resource',
+            'resource_unit',
+            'quantity',
+            'unit_price',
+            'status',
+        ]
+
+        labels = {
+            'project_name_fpr': 'Project Name',
+            'PR_date': 'PR Date',
+            'PR_no': 'PR Number',
+            'name_of_resource': 'Resource Name',
+            'resource_unit': 'Unit',
+            'quantity': 'Quantity',
+            'unit_price': 'Unit Price',
+            'status': 'Status',
+        }
+
+        widgets = {
+            'project_name_fpr': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'PR_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'PR_no': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter PR number'
+            }),
+            'name_of_resource': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter resource name'
+            }),
+            'resource_unit': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter unit (e.g., kg, pcs)'
+            }),
+            'quantity': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter quantity'
+            }),
+            'unit_price': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter unit price'
+            }),
+            'status': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+        self.fields['project_name_fpr'].empty_label = "--------- Select Project Name ---------"
+
+        # Define allowed emails for dropdown access
+        allowed_emails = [
+            'jasim@dzignscapeprofessionals.onmicrosoft.com',
+            'lemon@dzignscapeprofessionals.onmicrosoft.com',
+        ]
+        normalized_emails = [email.lower().strip() for email in allowed_emails]
+
+        # Filter queryset based on user
+        if user and user.email.lower().strip() in normalized_emails:
+            queryset = Project.objects.filter(created_by=user)
+        else:
+            queryset = Project.objects.none()
+
+        # Preserve selected value during edit
+        if self.instance.pk and self.instance.project_name_fpr:
+            selected = Project.objects.filter(pk=self.instance.project_name_fpr.pk)
+            queryset = selected | queryset
+
+        self.fields['project_name_fpr'].queryset = queryset

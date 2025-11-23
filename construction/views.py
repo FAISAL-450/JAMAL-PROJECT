@@ -57,6 +57,19 @@ def construction_ct_list(request):
         'query': query
     })
 
+# 🏗️ Construction Requisition List View
+def construction_pr_list(request):
+    query = request.GET.get('q', '').strip()
+    requisitions = Requisition.objects.filter(department='construction')
 
+    if query:
+        requisitions = requisitions.filter(pr_no__icontains=query)
+
+    requisitions_page = get_paginated_queryset(request, requisitions, per_page=10)
+
+    return render(request, 'construction/construction_pr_list.html', {
+        'requisitions': requisitions_page,
+        'query': query
+    })
 
 
