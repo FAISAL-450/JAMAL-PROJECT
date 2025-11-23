@@ -17,15 +17,15 @@
   {% endif %}
 
   <!-- 🧾 Basic Information Section -->
-<h2>Basic Information</h2>
-<div class="form-container basic-info">
+<h2 class="section-title">Basic Information</h2>
+<div class="form-card">
   <div class="form-row">
     <label for="project-name">Project Name</label>
     <input type="text" id="project-name" placeholder="Enter project name">
   </div>
   <div class="form-row">
     <label for="pr-date">PR Date</label>
-    <input type="text" id="pr-date" placeholder="Enter PR date">
+    <input type="date" id="pr-date">
   </div>
   <div class="form-row">
     <label for="pr-no">PR No</label>
@@ -33,7 +33,7 @@
   </div>
   <div class="form-row">
     <label for="delivery-date">Delivery Date</label>
-    <input type="text" id="delivery-date" placeholder="Enter delivery date">
+    <input type="date" id="delivery-date">
   </div>
 </div>
 
@@ -205,31 +205,6 @@
   padding: 30px;    
   
 }
-
-
-
-
-.heading-container {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 20px;
-}
-
-.heading-inputs {
-  display: flex;
-  flex-direction: column;
-  width: 250px;
-}
-
-.heading-inputs input {
-  margin-bottom: 10px;
-  padding: 8px;
-  width: 100%;
-}
-
-
-
-
 
 /* Whole User Form Section */
 .form-section {
@@ -627,6 +602,62 @@ td {
   display: none; /* Hidden by default, toggled via JS */
   animation: fadeIn 0.3s ease-in-out;
 }
+
+
+
+
+/* Section title-(Basic Information) */
+.section-title {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: #333;
+  border-left: 4px solid #4CAF50;
+  padding-left: 8px;
+}
+
+/* Card container-(Basic Information) */
+.form-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  max-width: 600px;
+}
+
+/* Row layout-(Basic Information) */
+.form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+/* Label styling-(Basic Information) */
+.form-row label {
+  flex: 0 0 180px;
+  font-weight: 600;
+  color: #555;
+}
+
+/* Input styling-(Basic Information) */
+.form-row input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+/* Smart hover/focus effect-(Basic Information) */
+.form-row input:focus {
+  border-color: #4CAF50;
+  box-shadow: 0 0 5px rgba(76, 175, 80, 0.4);
+  outline: none;
+}
+
+
+
+
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-5px); }
