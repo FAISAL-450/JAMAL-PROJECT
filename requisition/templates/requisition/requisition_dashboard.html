@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Requisition Dashboard{% endblock %}
-{% block content %}
 
-<!-- 📦 Main Dashboard Container -->
+{% block title %}Requisition Dashboard{% endblock %}
+
+{% block content %}
+<!-- A - Main Dashboard Container -->
 <div class="dashboard-wrapper">
 
-  <!-- 🔔 Flash Messages -->
+  <!-- B - Flash Messages -->
   {% if messages %}
     {% for message in messages %}
       <div class="alert-box">
@@ -16,11 +17,14 @@
     {% endfor %}
   {% endif %}
 
-  <!-- 📝 Requisition Form Section -->
+  <!-- C - Requisition Form Section -->
   {% if not readonly %}
   <section class="form-section">
     <header class="form" onclick="toggleForm()">
-      <h2><i class="fas fa-file-alt"></i> REQUISITION FORM <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span></h2>
+      <h2>
+        <i class="fas fa-file-alt"></i> REQUISITION FORM
+        <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span>
+      </h2>
     </header>
 
     <div id="formContent" class="form-content" style="display: block;">
@@ -29,14 +33,14 @@
         {{ form.non_field_errors }}
 
         <div class="form-grid">
-          <!-- Basic Information Form -->
+          <!-- C1 - Basic Information -->
           <div class="form-cell">{{ basic_form.project_name.label_tag }}{{ basic_form.project_name }}</div>
           <div class="form-cell">{{ basic_form.requisition_date.label_tag }}{{ basic_form.requisition_date }}</div>
           <div class="form-cell">{{ basic_form.requisition_no.label_tag }}{{ basic_form.requisition_no }}</div>
           <div class="form-cell">{{ basic_form.prepared_by.label_tag }}{{ basic_form.prepared_by }}</div>
           <div class="form-cell">{{ basic_form.delivery_date.label_tag }}{{ basic_form.delivery_date }}</div>
 
-          <!-- Requisition Item Form -->
+          <!-- C2 - Requisition Item -->
           <div class="form-cell">{{ item_form.project_name_fpr.label_tag }}{{ item_form.project_name_fpr }}</div>
           <div class="form-cell">{{ item_form.PR_date.label_tag }}{{ item_form.PR_date }}</div>
           <div class="form-cell">{{ item_form.PR_no.label_tag }}{{ item_form.PR_no }}</div>
@@ -47,6 +51,7 @@
           <div class="form-cell">{{ item_form.status.label_tag }}{{ item_form.status }}</div>
         </div>
 
+        <!-- C3 - Form Actions -->
         <div class="form-actions">
           <button type="submit" class="btn green">
             {% if mode == 'edit' %}Update{% else %}Save{% endif %}
@@ -60,7 +65,7 @@
   </section>
   {% endif %}
 
-  <!-- 🔍 Search Section -->
+  <!-- D - Search Section -->
   <section class="filter-section">
     <h2>🔍 FILTERING</h2>
     <form method="get">
@@ -69,7 +74,7 @@
     </form>
   </section>
 
-  <!-- 📋 Requisition List Section -->
+  <!-- E - Requisition List Section -->
   <section class="table-section">
     <header class="table-header">
       <h2><i class="fas fa-list"></i> REQUISITION LIST</h2>
@@ -135,7 +140,7 @@
     </table>
   </section>
 
-  <!-- 📋 Pagination Section -->
+  <!-- F - Pagination Section -->
   {% if requisitions.paginator.num_pages > 1 %}
   <footer class="pagination-footer">
     <nav class="pagination">
@@ -151,7 +156,7 @@
   {% endif %}
 </div>
 
-<!-- 🔧 Toggle Script -->
+<!-- G - Toggle Script -->
 <script>
   function toggleForm() {
     const form = document.getElementById('formContent');
