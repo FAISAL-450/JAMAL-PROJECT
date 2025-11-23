@@ -20,44 +20,20 @@
 <h2>Basic Information</h2>
 <div class="form-container basic-info">
   <div class="form-row">
-    <div class="form-label">
-      {{ basic_form.project_name.label_tag }}
-    </div>
-    <div class="form-input">
-      {{ basic_form.project_name }}
-    </div>
+    <label for="project-name">Project Name</label>
+    <input type="text" id="project-name" placeholder="Enter project name">
   </div>
   <div class="form-row">
-    <div class="form-label">
-      {{ basic_form.requisition_date.label_tag }}
-    </div>
-    <div class="form-input">
-      {{ basic_form.requisition_date }}
-    </div>
+    <label for="pr-date">PR Date</label>
+    <input type="text" id="pr-date" placeholder="Enter PR date">
   </div>
   <div class="form-row">
-    <div class="form-label">
-      {{ basic_form.requisition_no.label_tag }}
-    </div>
-    <div class="form-input">
-      {{ basic_form.requisition_no }}
-    </div>
+    <label for="pr-no">PR No</label>
+    <input type="text" id="pr-no" placeholder="Enter PR number">
   </div>
   <div class="form-row">
-    <div class="form-label">
-      {{ basic_form.prepared_by.label_tag }}
-    </div>
-    <div class="form-input">
-      {{ basic_form.prepared_by }}
-    </div>
-  </div>
-  <div class="form-row">
-    <div class="form-label">
-      {{ basic_form.delivery_date.label_tag }}
-    </div>
-    <div class="form-input">
-      {{ basic_form.delivery_date }}
-    </div>
+    <label for="delivery-date">Delivery Date</label>
+    <input type="text" id="delivery-date" placeholder="Enter delivery date">
   </div>
 </div>
 
@@ -248,7 +224,6 @@
 .form-input {
   flex: 1; /* input takes remaining space */
 }
-
 
 
 /* Whole User Form Section */
