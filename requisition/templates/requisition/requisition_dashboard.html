@@ -666,8 +666,17 @@ td {
 }
 
 /* Entry-Box styling-(Basic Information) */
-.form-card .form-row input[type="text"] {
-  height: 10px !important; /* test override */
+.form-card .form-row input {
+  height: 13px !important;
+  box-sizing: border-box;
+}
+
+.form-card .form-row input[type="date"] {
+  height: 13px;              /* desired height */
+  box-sizing: border-box;
+  padding: 8px 12px;
+  line-height: 1.5;
+  font-size: 14px;
 }
 
 
