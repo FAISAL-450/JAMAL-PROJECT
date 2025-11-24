@@ -17,20 +17,24 @@
   {% endif %}
 
   <!-- 🧾 Basic Information Section -->
-<h2 class="section-title">Basic Information</h2>
 <div class="form-card">
+  <h2 class="section-title">Basic Information</h2>
+  
   <div class="form-row">
     <label for="project-name">Project Name</label>
     <input type="text" id="project-name" placeholder="Enter project name">
   </div>
+  
   <div class="form-row">
     <label for="pr-date">PR Date</label>
     <input type="date" id="pr-date">
   </div>
+  
   <div class="form-row">
     <label for="pr-no">PR No</label>
     <input type="text" id="pr-no" placeholder="Enter PR number">
   </div>
+  
   <div class="form-row">
     <label for="delivery-date">Delivery Date</label>
     <input type="date" id="delivery-date">
@@ -609,9 +613,10 @@ td {
 /* Section title-(Basic Information) */
 .section-title {
   font-size: 1.5rem;
+  margin-top: 40px;
   margin-bottom: 15px;
+  margin-left: -13px;
   color: #333;
-  border-left: 4px solid #4CAF50;
   padding-left: 8px;
 }
 
@@ -622,7 +627,12 @@ td {
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  max-width: 600px;
+  width: 98%;
+  margin-bottom: 20px;
+  margin-left: -13px;
+  max-height: 450px;  /* cap height */
+  overflow-y: auto;   /* scroll if content exceeds */
+
 }
 
 /* Row layout-(Basic Information) */
@@ -655,9 +665,10 @@ td {
   outline: none;
 }
 
-
-
-
+/* Entry-Box styling-(Basic Information) */
+.form-card input[type="text"] {
+  height: 20px;   /* smaller input box */
+}
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-5px); }
@@ -666,3 +677,5 @@ td {
 </style>
 
 {% endblock %}
+
+
