@@ -17,65 +17,80 @@
   {% endif %}
 
   <!-- 🧾 Basic Information Section -->
+{% if not is_admin %}
 <div class="form-card">
-  <h2 class="section-title">Basic Information</h2>
-  
-  <div class="form-row">
-    <label for="project-name">Project Name</label>
-    <input type="text" id="project-name" placeholder="Enter project name">
-  </div>
-  
-  <div class="form-row">
-    <label for="pr-date">PR Date</label>
-    <input type="date" id="pr-date">
-  </div>
-  
-  <div class="form-row">
-    <label for="pr-no">PR No</label>
-    <input type="text" id="pr-no" placeholder="Enter PR number">
-  </div>
-  
-  <div class="form-row">
-    <label for="delivery-date">Delivery Date</label>
-    <input type="date" id="delivery-date">
+  <h2 class="section-title" onclick="toggleForm()">
+    <!-- Left-side smart info icon -->
+    <i class="fas fa-info-circle title-icon"></i>
+    
+    Basic Information 
+    
+    <!-- Right-side toggle icon -->
+    <span id="toggle-icon"><i class="fa fa-chevron-down"></i></span>
+  </h2>
+
+  <div id="formContent" style="display:none;">
+    <div class="form-row">
+      <label for="project-name">Project Name</label>
+      <input type="text" id="project-name" placeholder="Enter project name">
+    </div>
+    
+    <div class="form-row">
+      <label for="pr-date">PR Date</label>
+      <input type="date" id="pr-date">
+    </div>
+    
+    <div class="form-row">
+      <label for="pr-no">PR No</label>
+      <input type="text" id="pr-no" placeholder="Enter PR number">
+    </div>
+    
+    <div class="form-row">
+      <label for="delivery-date">Delivery Date</label>
+      <input type="date" id="delivery-date">
+    </div>
   </div>
 </div>
+{% endif %}
 
   <!-- 📝 Requisition Form Section -->
-  {% if not readonly %}
-  <section class="form-section">
-    <header class="form" onclick="toggleForm()">
-      <h2><i class="fas fa-file-alt"></i> REQUISITION FORM <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span></h2>
-    </header>
+{% if not readonly %}
+<section class="form-section">
+  <header class="form" onclick="toggleRequisitionForm()">
+    <h2>
+      <i class="fas fa-file-alt"></i> REQUISITION FORM 
+      <span id="toggle-icon-requisition"><i class="fas fa-chevron-down"></i></span>
+    </h2>
+  </header>
 
-    <div id="formContent" class="form-content" style="display: block;">
-      <form method="post">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
+  <div id="formContentRequisition" class="form-content" style="display: block;">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
 
-        <div class="form-grid">
-          <div class="form-cell">{{ form.project_name_fpr.label_tag }}{{ form.project_name_fpr }}</div>
-          <div class="form-cell">{{ form.PR_date.label_tag }}{{ form.PR_date }}</div>
-          <div class="form-cell">{{ form.PR_no.label_tag }}{{ form.PR_no }}</div>
-          <div class="form-cell">{{ form.name_of_resource.label_tag }}{{ form.name_of_resource }}</div>
-          <div class="form-cell">{{ form.resource_unit.label_tag }}{{ form.resource_unit }}</div>
-          <div class="form-cell">{{ form.quantity.label_tag }}{{ form.quantity }}</div>
-          <div class="form-cell">{{ form.unit_price.label_tag }}{{ form.unit_price }}</div>
-          <div class="form-cell">{{ form.status.label_tag }}{{ form.status }}</div>
-        </div>
+      <div class="form-grid">
+        <div class="form-cell">{{ form.project_name_fpr.label_tag }}{{ form.project_name_fpr }}</div>
+        <div class="form-cell">{{ form.PR_date.label_tag }}{{ form.PR_date }}</div>
+        <div class="form-cell">{{ form.PR_no.label_tag }}{{ form.PR_no }}</div>
+        <div class="form-cell">{{ form.name_of_resource.label_tag }}{{ form.name_of_resource }}</div>
+        <div class="form-cell">{{ form.resource_unit.label_tag }}{{ form.resource_unit }}</div>
+        <div class="form-cell">{{ form.quantity.label_tag }}{{ form.quantity }}</div>
+        <div class="form-cell">{{ form.unit_price.label_tag }}{{ form.unit_price }}</div>
+        <div class="form-cell">{{ form.status.label_tag }}{{ form.status }}</div>
+      </div>
 
-        <div class="form-actions">
-          <button type="submit" class="btn green">
-            {% if mode == 'edit' %}Update{% else %}Save{% endif %}
-          </button>
-          {% if mode != 'list' %}
-            <a href="{% url 'requisition_dashboard' %}?q={{ query }}" class="btn gray">Cancel</a>
-          {% endif %}
-        </div>
-      </form>
-    </div>
-  </section>
-  {% endif %}
+      <div class="form-actions">
+        <button type="submit" class="btn green">
+          {% if mode == 'edit' %}Update{% else %}Save{% endif %}
+        </button>
+        {% if mode != 'list' %}
+          <a href="{% url 'requisition_dashboard' %}?q={{ query }}" class="btn gray">Cancel</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</section>
+{% endif %}
 
   <!-- 🔍 Search Section -->
   <section class="filter-section">
@@ -87,72 +102,79 @@
   </section>
 
   <!-- 📋 Requisition List Section -->
-  <section class="table-section">
-    <header class="table-header">
-      <h2><i class="fas fa-list"></i> REQUISITION LIST</h2>
-    </header>
+<section class="table-section">
+  <header class="table-header">
+    <h2><i class="fas fa-list"></i> REQUISITION LIST</h2>
+  </header>
 
-    <table>
-      <thead>
+  <table>
+    <thead>
+      <tr>
+        <th>Sl No</th>
+        <th>Project</th>
+        <th>PR Date</th>
+        <th>PR No</th>
+        <th>Resource Name</th>
+        <th>Unit</th>
+        <th>Quantity</th>
+        <th>Unit Price</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for requisition in requisitions %}
         <tr>
-          <th>Sl No</th>
-          <th>Project</th>
-          <th>PR Date</th>
-          <th>PR No</th>
-          <th>Resource Name</th>
-          <th>Unit</th>
-          <th>Quantity</th>
-          <th>Unit Price</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for requisition in requisitions %}
-          <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ requisition.project_name_fpr }}</td>
-            <td>{{ requisition.PR_date }}</td>
-            <td>{{ requisition.PR_no }}</td>
-            <td>{{ requisition.name_of_resource }}</td>
-            <td>{{ requisition.resource_unit }}</td>
-            <td>{{ requisition.quantity }}</td>
-            <td>{{ requisition.unit_price }}</td>
-            <td>{{ requisition.status }}</td>
-            <td>
-              {% if is_admin and requisition.edit_request_pending %}
-                <a href="{% url 'approve_team_permission' requisition.pk %}" class="btn blue action-btn">
-                  <i class="fas fa-check-circle"></i> Approve Request
+          <td>{{ forloop.counter }}</td>
+          <td>{{ requisition.project_name_fpr }}</td>
+          <td>{{ requisition.PR_date }}</td>
+          <td>{{ requisition.PR_no }}</td>
+          <td>{{ requisition.name_of_resource }}</td>
+          <td>{{ requisition.resource_unit }}</td>
+          <td>{{ requisition.quantity }}</td>
+          <td>{{ requisition.unit_price }}</td>
+          <td>{{ requisition.status }}</td>
+          <td>
+            {% if is_admin and requisition.edit_request_pending %}
+              <a href="{% url 'approve_team_permission' requisition.pk %}" class="btn blue action-btn">
+                <i class="fas fa-check-circle"></i> Approve Request
+              </a>
+            {% endif %}
+
+            {% if not is_admin and requisition.created_by == current_user %}
+              {% if requisition.allow_team_edit %}
+                <a href="{% url 'edit_requisition' requisition.pk %}?q={{ query }}" class="btn yellow action-btn">
+                  <i class="fas fa-edit"></i> Edit
+                </a>
+                <form method="post" action="{% url 'delete_requisition' requisition.pk %}?q={{ query }}" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn red action-btn" onclick="return confirm('Delete this requisition?');">
+                    <i class="fas fa-trash-alt"></i> Delete
+                  </button>
+                </form>
+              {% elif requisition.edit_request_pending %}
+                <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Request Pending</span>
+              {% else %}
+                <a href="{% url 'request_team_permission' requisition.pk %}" class="btn btn-outline-primary action-btn">
+                  <i class="fas fa-paper-plane"></i> Request Edit/Delete
                 </a>
               {% endif %}
-
-              {% if requisition.created_by == current_user %}
-                {% if requisition.allow_team_edit %}
-                  <a href="{% url 'edit_requisition' requisition.pk %}?q={{ query }}" class="btn yellow action-btn">
-                    <i class="fas fa-edit"></i> Edit
-                  </a>
-                  <form method="post" action="{% url 'delete_requisition' requisition.pk %}?q={{ query }}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn red action-btn" onclick="return confirm('Delete this requisition?');">
-                      <i class="fas fa-trash-alt"></i> Delete
-                    </button>
-                  </form>
-                {% elif requisition.edit_request_pending %}
-                  <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Request Pending</span>
-                {% else %}
-                  <a href="{% url 'request_team_permission' requisition.pk %}" class="btn btn-outline-primary action-btn">
-                    <i class="fas fa-paper-plane"></i> Request Edit/Delete
-                  </a>
-                {% endif %}
-              {% endif %}
-            </td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="10" class="no-data">No requisition records found.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </section>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="10" class="no-data">No requisition records found.</td></tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      {% if is_admin %}
+      <tr class="table-footer">
+        <td colspan="10">Prepared By | Checked By | Approved By</td>
+      </tr>
+      {% endif %}
+    </tfoot>
+  </table>
+</section>
 
   <!-- 📋 Pagination Section -->
   {% if requisitions.paginator.num_pages > 1 %}
@@ -170,7 +192,7 @@
   {% endif %}
 </div>
 
-<!-- 🔧 Toggle Script -->
+<!-- 🔧 Toggle Script-(Basic Information) -->
 <script>
   function toggleForm() {
     const form = document.getElementById('formContent');
@@ -186,9 +208,38 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
+    // Auto-expand if mode is "edit"
     if ("{{ mode }}" === "edit") {
-      document.getElementById('formContent').style.display = 'block';
-      document.getElementById('toggle-icon').querySelector('i').classList.replace('fa-chevron-down', 'fa-chevron-up');
+      const form = document.getElementById('formContent');
+      const icon = document.getElementById('toggle-icon').querySelector('i');
+      form.style.display = 'block';
+      icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+    }
+  });
+</script>
+
+<!-- 🔧 Toggle Script-(Requisition Form) -->
+<script>
+  function toggleRequisitionForm() {
+    const form = document.getElementById('formContentRequisition');
+    const icon = document.getElementById('toggle-icon-requisition').querySelector('i');
+
+    if (form.style.display === 'none') {
+      form.style.display = 'block';
+      icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+    } else {
+      form.style.display = 'none';
+      icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Auto-expand if mode is "edit"
+    if ("{{ mode }}" === "edit") {
+      const form = document.getElementById('formContentRequisition');
+      const icon = document.getElementById('toggle-icon-requisition').querySelector('i');
+      form.style.display = 'block';
+      icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
     }
   });
 </script>
@@ -226,7 +277,7 @@
   font-size: 18px;
   color: #0d0d0e;
   margin-top: 2px;
-  margin-bottom: -8px;
+  margin-bottom: 15px;
 
 }
 
@@ -613,11 +664,16 @@ td {
 /* Section title-(Basic Information) */
 .section-title {
   font-size: 1.5rem;
-  margin-top: 30px;
-  margin-bottom: 15px;
+  margin-top: 4px;
+  margin-bottom: -6px;
   margin-left: -13px;
   color: #333;
   padding-left: 8px;
+}
+
+/* Whole Form Section-(Basic Information) */
+.form-section {
+  padding: 25px 20px;  /* 30px top/bottom, 20px left/right */
 }
 
 /* Card container-(Basic Information) */
@@ -628,7 +684,7 @@ td {
   padding: 20px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
   width: 98%;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
   margin-left: -13px;
   max-height: 350px;  /* cap height */
   overflow-y: auto;   /* scroll if content exceeds */
@@ -688,5 +744,4 @@ td {
 </style>
 
 {% endblock %}
-
 
