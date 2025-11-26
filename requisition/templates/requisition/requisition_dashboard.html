@@ -6,14 +6,6 @@
 <!-- 📦 Main Dashboard Container -->
 <div class="dashboard-wrapper">
 
-<!-- 🖨️ Print Preview Button -->
-  <div class="print-controls">
-    <button type="button" class="print-button" onclick="printPreview()">🖨️ Print Preview</button>
-  </div>
-
-  <!-- Wrap all printable content -->
-  <div id="printable-section">
-
   <!-- 🔔 Flash Messages -->
   {% if messages %}
     {% for message in messages %}
@@ -23,6 +15,14 @@
       </div>
     {% endfor %}
   {% endif %}
+
+  <!-- 🖨️ Print Preview Button -->
+  <div class="print-controls">
+    <button type="button" class="print-button" onclick="printPreview()">🖨️ Print Preview</button>
+  </div>
+
+  <!-- Wrap all printable content -->
+  <div id="printable-section">
 
   <!-- 🧾 Basic Information Section -->
   {% if not is_admin %}
@@ -183,8 +183,6 @@
 </section>
 
 </div> <!-- end printable-section -->
-
-</div> <!-- end dashboard-wrapper -->
 
   <!-- 📋 Pagination Section -->
   {% if requisitions.paginator.num_pages > 1 %}
