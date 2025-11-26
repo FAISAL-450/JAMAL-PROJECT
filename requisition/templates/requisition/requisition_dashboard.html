@@ -282,44 +282,36 @@ function printPreview() {
     return;
   }
 
+  // Sync input values into their attributes
+  section.querySelectorAll('input').forEach(input => {
+    input.setAttribute('value', input.value);
+  });
+
   const content = section.outerHTML;
   const printWindow = window.open('', 'print-preview', 'width=900,height=700');
-
-  if (!printWindow) {
-    alert("Popup blocked. Please allow popups for this site.");
-    return;
-  }
 
   const html = `
     <!DOCTYPE html>
     <html>
       <head>
-        <meta charset="utf-8">
         <title>Print Preview</title>
         <link rel="stylesheet" href="{% static 'css/print.css' %}">
         <style>
-          /* Hide requisition form and filtering in print */
           .form-section, .filter-section { display: none !important; }
-          /* Show Basic Info and List table */
           #formContent { display: block !important; }
           .action-btn, .print-controls { display: none !important; }
-          body { font-family: Arial, sans-serif; margin: 20px; }
           table { border-collapse: collapse; width: 100%; }
-          th, td { border: 1px solid #333; padding: 6px; text-align: left; }
+          th, td { border: 1px solid #333; padding: 6px; }
         </style>
       </head>
       <body>
         ${content}
         <script>
-          window.onload = function() {
-            setTimeout(function() { window.print(); }, 200);
-          };
+          window.onload = function() { setTimeout(() => window.print(), 200); };
         <\/script>
       </body>
     </html>
   `;
-
-  printWindow.document.open();
   printWindow.document.write(html);
   printWindow.document.close();
   printWindow.focus();
