@@ -6,6 +6,14 @@
 <!-- 📦 Main Dashboard Container -->
 <div class="dashboard-wrapper">
 
+<!-- 🖨️ Print Preview Button -->
+  <div class="print-controls">
+    <button type="button" class="print-button" onclick="printPreview()">🖨️ Print Preview</button>
+  </div>
+
+  <!-- Wrap all printable content -->
+  <div id="printable-section">
+
   <!-- 🔔 Flash Messages -->
   {% if messages %}
     {% for message in messages %}
@@ -174,6 +182,10 @@
   </table>
 </section>
 
+</div> <!-- end printable-section -->
+
+</div> <!-- end dashboard-wrapper -->
+
   <!-- 📋 Pagination Section -->
   {% if requisitions.paginator.num_pages > 1 %}
   <footer class="pagination-footer">
@@ -262,52 +274,46 @@
   });
 </script>
 
-<!-- 🖨️ Print Preview Button -->
-<div class="print-controls">
-  <button class="print-button" onclick="printPreview()">🖨️ Print Preview</button>
-</div>
-
 <!-- 🧠 Print Preview Script -->
 <script>
 function printPreview() {
-  // Find the printable section
   const section = document.querySelector('#printable-section');
   if (!section) {
     alert("Printable section not found!");
     return;
   }
-
-  // Grab the whole printable section (Basic Info + List Table + Footer)
   const content = section.outerHTML;
-
-  // Open a new window for print preview
-  const printWindow = window.open('', '', 'width=900,height=700');
-
-  // Write the content into the new window
-  printWindow.document.write(`
+  const printWindow = window.open('', 'print-preview', 'width=900,height=700');
+  if (!printWindow) {
+    alert("Popup blocked. Please allow popups for this site.");
+    return;
+  }
+  const html = `
+    <!DOCTYPE html>
     <html>
       <head>
+        <meta charset="utf-8">
         <title>Print Preview</title>
-        <link rel="stylesheet" href="/static/css/print.css">
+        <link rel="stylesheet" href="{% static 'css/print.css' %}">
         <style>
-          /* Optional: force Basic Info open when printing */
-          #formContent { display: block !important; }
-          /* Optional: hide action buttons in print */
           .action-btn, .print-controls { display: none !important; }
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          table { border-collapse: collapse; width: 100%; }
+          th, td { border: 1px solid #333; padding: 6px; text-align: left; }
         </style>
       </head>
       <body>
         ${content}
         <script>
-          // Auto-trigger print once the window loads
           window.onload = function() {
-            window.print();
+            setTimeout(function() { window.print(); }, 200);
           };
         <\/script>
       </body>
     </html>
-  `);
-
+  `;
+  printWindow.document.open();
+  printWindow.document.write(html);
   printWindow.document.close();
   printWindow.focus();
 }
