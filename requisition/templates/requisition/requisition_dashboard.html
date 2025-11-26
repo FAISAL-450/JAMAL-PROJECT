@@ -183,6 +183,7 @@
 </section>
 
 </div> <!-- end printable-section -->
+</div> <!-- end dashboard-wrapper -->
 
   <!-- 📋 Pagination Section -->
   {% if requisitions.paginator.num_pages > 1 %}
@@ -280,12 +281,15 @@ function printPreview() {
     alert("Printable section not found!");
     return;
   }
+
   const content = section.outerHTML;
   const printWindow = window.open('', 'print-preview', 'width=900,height=700');
+
   if (!printWindow) {
     alert("Popup blocked. Please allow popups for this site.");
     return;
   }
+
   const html = `
     <!DOCTYPE html>
     <html>
@@ -294,6 +298,10 @@ function printPreview() {
         <title>Print Preview</title>
         <link rel="stylesheet" href="{% static 'css/print.css' %}">
         <style>
+          /* Hide requisition form and filtering in print */
+          .form-section, .filter-section { display: none !important; }
+          /* Show Basic Info and List table */
+          #formContent { display: block !important; }
           .action-btn, .print-controls { display: none !important; }
           body { font-family: Arial, sans-serif; margin: 20px; }
           table { border-collapse: collapse; width: 100%; }
@@ -310,6 +318,7 @@ function printPreview() {
       </body>
     </html>
   `;
+
   printWindow.document.open();
   printWindow.document.write(html);
   printWindow.document.close();
