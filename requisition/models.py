@@ -18,7 +18,7 @@ class RequisitionProfile(models.Model):
         max_length=50,
         choices=ROLE_CHOICES,
         default='pr-manager',
-        help_text="Defines the user's role in requisition manage"
+        help_text="Defines the user's role in requisition management"
     )
 
     def __str__(self):
@@ -29,6 +29,8 @@ class RequisitionProfile(models.Model):
         verbose_name = "Requisition Role Profile"
         verbose_name_plural = "Requisition Role Profiles"
 
+
+# Purchase Requisition Model
 class RequisitionItem(models.Model):
     STATUS_CHOICES = [
         ('draft', 'Draft'),
@@ -51,7 +53,19 @@ class RequisitionItem(models.Model):
     resource_unit = models.CharField(max_length=50)
     quantity = models.DecimalField(max_digits=12, decimal_places=2)
     unit_price = models.DecimalField(max_digits=12, decimal_places=2)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    total_amount = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        editable=False,
+        default=0,
+        help_text="Auto-calculated as Quantity × Unit Price"
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='draft'
+    )
 
     team = models.CharField(
         max_length=50,
@@ -89,9 +103,10 @@ class RequisitionItem(models.Model):
         help_text="Timestamp when the record was last updated"
     )
 
-    @property
-    def total_amount(self):
-        return (self.quantity or 0) * (self.unit_price or 0)
+    def save(self, *args, **kwargs):
+        # Auto-calculate Total Amount before saving
+        self.total_amount = (self.quantity or 0) * (self.unit_price or 0)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.PR_no} - {self.name_of_resource}"

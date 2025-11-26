@@ -2,6 +2,18 @@ from django import forms
 from .models import RequisitionItem, Project
 
 class RequisitionItemForm(forms.ModelForm):
+    # ✅ Add total_amount as a disabled field (read-only)
+    total_amount = forms.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        required=False,
+        label="Total Amount",
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'readonly': 'readonly',
+        })
+    )
+
     class Meta:
         model = RequisitionItem
         fields = [
@@ -13,6 +25,7 @@ class RequisitionItemForm(forms.ModelForm):
             'quantity',
             'unit_price',
             'status',
+            
         ]
 
         labels = {
@@ -24,39 +37,18 @@ class RequisitionItemForm(forms.ModelForm):
             'quantity': 'Quantity',
             'unit_price': 'Unit Price',
             'status': 'Status',
+            'total_amount': 'Total Amount',
         }
 
         widgets = {
-            'project_name_fpr': forms.Select(attrs={
-                'class': 'form-control'
-            }),
-            'PR_date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
-            }),
-            'PR_no': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter PR number'
-            }),
-            'name_of_resource': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter resource name'
-            }),
-            'resource_unit': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter unit (e.g., kg, pcs)'
-            }),
-            'quantity': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter quantity'
-            }),
-            'unit_price': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter unit price'
-            }),
-            'status': forms.Select(attrs={
-                'class': 'form-control'
-            }),
+            'project_name_fpr': forms.Select(attrs={'class': 'form-control'}),
+            'PR_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'PR_no': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter PR number'}),
+            'name_of_resource': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter resource name'}),
+            'resource_unit': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter unit (e.g., kg, pcs)'}),
+            'quantity': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter quantity'}),
+            'unit_price': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter unit price'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -64,6 +56,7 @@ class RequisitionItemForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         self.fields['project_name_fpr'].empty_label = "--------- Select Project Name ---------"
+
         # Define allowed emails for dropdown access
         allowed_emails = [
             'jasim@dzignscapeprofessionals.onmicrosoft.com',
@@ -83,3 +76,9 @@ class RequisitionItemForm(forms.ModelForm):
             queryset = selected | queryset
 
         self.fields['project_name_fpr'].queryset = queryset
+
+        # ✅ Pre-fill total_amount from instance (calculated in model.save)
+        if self.instance.pk:
+            self.fields['total_amount'].initial = self.instance.total_amount
+        else:
+            self.fields['total_amount'].initial = 0

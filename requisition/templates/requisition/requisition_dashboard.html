@@ -17,80 +17,76 @@
   {% endif %}
 
   <!-- 🧾 Basic Information Section -->
-{% if not is_admin %}
-<div class="form-card">
-  <h2 class="section-title" onclick="toggleForm()">
-    <!-- Left-side smart info icon -->
-    <i class="fas fa-info-circle title-icon"></i>
-    
-    Basic Information 
-    
-    <!-- Right-side toggle icon -->
-    <span id="toggle-icon"><i class="fa fa-chevron-down"></i></span>
-  </h2>
+  {% if not is_admin %}
+  <div class="form-card">
+    <h2 class="section-title" onclick="toggleForm()">
+      <!-- Left-side smart info icon -->
+      <i class="fas fa-info-circle title-icon"></i>
+      Basic Information 
+      <!-- Right-side toggle icon -->
+      <span id="toggle-icon"><i class="fa fa-chevron-down"></i></span>
+    </h2>
 
-  <div id="formContent" style="display:none;">
-    <div class="form-row">
-      <label for="project-name">Project Name</label>
-      <input type="text" id="project-name" placeholder="Enter project name">
-    </div>
-    
-    <div class="form-row">
-      <label for="pr-date">PR Date</label>
-      <input type="date" id="pr-date">
-    </div>
-    
-    <div class="form-row">
-      <label for="pr-no">PR No</label>
-      <input type="text" id="pr-no" placeholder="Enter PR number">
-    </div>
-    
-    <div class="form-row">
-      <label for="delivery-date">Delivery Date</label>
-      <input type="date" id="delivery-date">
+    <div id="formContent" style="display:none;">
+      <div class="form-row">
+        <label for="project-name">Project Name</label>
+        <input type="text" id="project-name" placeholder="Enter project name">
+      </div>
+      <div class="form-row">
+        <label for="pr-date">PR Date</label>
+        <input type="date" id="pr-date">
+      </div>
+      <div class="form-row">
+        <label for="pr-no">PR No</label>
+        <input type="text" id="pr-no" placeholder="Enter PR number">
+      </div>
+      <div class="form-row">
+        <label for="delivery-date">Delivery Date</label>
+        <input type="date" id="delivery-date">
+      </div>
     </div>
   </div>
-</div>
-{% endif %}
+  {% endif %}
 
   <!-- 📝 Requisition Form Section -->
-{% if not readonly %}
-<section class="form-section">
-  <header class="form" onclick="toggleRequisitionForm()">
-    <h2>
-      <i class="fas fa-file-alt"></i> REQUISITION FORM 
-      <span id="toggle-icon-requisition"><i class="fas fa-chevron-down"></i></span>
-    </h2>
-  </header>
+  {% if not readonly %}
+  <section class="form-section">
+    <header class="form" onclick="toggleRequisitionForm()">
+      <h2>
+        <i class="fas fa-file-alt"></i> REQUISITION FORM 
+        <span id="toggle-icon-requisition"><i class="fas fa-chevron-down"></i></span>
+      </h2>
+    </header>
 
-  <div id="formContentRequisition" class="form-content" style="display: block;">
-    <form method="post">
-      {% csrf_token %}
-      {{ form.non_field_errors }}
+    <div id="formContentRequisition" class="form-content" style="display: block;">
+      <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
 
-      <div class="form-grid">
-        <div class="form-cell">{{ form.project_name_fpr.label_tag }}{{ form.project_name_fpr }}</div>
-        <div class="form-cell">{{ form.PR_date.label_tag }}{{ form.PR_date }}</div>
-        <div class="form-cell">{{ form.PR_no.label_tag }}{{ form.PR_no }}</div>
-        <div class="form-cell">{{ form.name_of_resource.label_tag }}{{ form.name_of_resource }}</div>
-        <div class="form-cell">{{ form.resource_unit.label_tag }}{{ form.resource_unit }}</div>
-        <div class="form-cell">{{ form.quantity.label_tag }}{{ form.quantity }}</div>
-        <div class="form-cell">{{ form.unit_price.label_tag }}{{ form.unit_price }}</div>
-        <div class="form-cell">{{ form.status.label_tag }}{{ form.status }}</div>
-      </div>
+        <div class="form-grid">
+          <div class="form-cell">{{ form.project_name_fpr.label_tag }}{{ form.project_name_fpr }}</div>
+          <div class="form-cell">{{ form.PR_date.label_tag }}{{ form.PR_date }}</div>
+          <div class="form-cell">{{ form.PR_no.label_tag }}{{ form.PR_no }}</div>
+          <div class="form-cell">{{ form.name_of_resource.label_tag }}{{ form.name_of_resource }}</div>
+          <div class="form-cell">{{ form.resource_unit.label_tag }}{{ form.resource_unit }}</div>
+          <div class="form-cell">{{ form.quantity.label_tag }}{{ form.quantity }}</div>
+          <div class="form-cell">{{ form.unit_price.label_tag }}{{ form.unit_price }}</div>
+          <div class="form-cell">{{ form.total_amount.label_tag }}{{ form.total_amount }}</div>
+          <div class="form-cell">{{ form.status.label_tag }}{{ form.status }}</div>
+        </div>
 
-      <div class="form-actions">
-        <button type="submit" class="btn green">
-          {% if mode == 'edit' %}Update{% else %}Save{% endif %}
-        </button>
-        {% if mode != 'list' %}
-          <a href="{% url 'requisition_dashboard' %}?q={{ query }}" class="btn gray">Cancel</a>
-        {% endif %}
-      </div>
-    </form>
-  </div>
-</section>
-{% endif %}
+        <div class="form-actions">
+          <button type="submit" class="btn green">
+            {% if mode == 'edit' %}Update{% else %}Save{% endif %}
+          </button>
+          {% if mode != 'list' %}
+            <a href="{% url 'requisition_dashboard' %}?q={{ query }}" class="btn gray">Cancel</a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </section>
+  {% endif %}
 
   <!-- 🔍 Search Section -->
   <section class="filter-section">
@@ -118,6 +114,7 @@
         <th>Unit</th>
         <th>Quantity</th>
         <th>Unit Price</th>
+        <th>Total Amount</th>
         <th>Status</th>
         <th>Actions</th>
       </tr>
@@ -133,6 +130,7 @@
           <td>{{ requisition.resource_unit }}</td>
           <td>{{ requisition.quantity }}</td>
           <td>{{ requisition.unit_price }}</td>
+          <td>{{ requisition.total_amount }}</td>
           <td>{{ requisition.status }}</td>
           <td>
             {% if is_admin and requisition.edit_request_pending %}
@@ -163,13 +161,13 @@
           </td>
         </tr>
       {% empty %}
-        <tr><td colspan="10" class="no-data">No requisition records found.</td></tr>
+        <tr><td colspan="11" class="no-data">No requisition records found.</td></tr>
       {% endfor %}
     </tbody>
     <tfoot>
-      {% if is_admin %}
+      {% if not is_admin %}
       <tr class="table-footer">
-        <td colspan="10">Prepared By | Checked By | Approved By</td>
+        <td colspan="11">Prepared By | Checked By | Approved By</td>
       </tr>
       {% endif %}
     </tfoot>
@@ -191,6 +189,26 @@
   </footer>
   {% endif %}
 </div>
+
+<!-- Auto Calculation Script-(Total Amount = Quantity * Unit Price) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const qtyInput = document.getElementById("id_quantity");
+      const priceInput = document.getElementById("id_unit_price");
+      const totalInput = document.getElementById("id_total_amount");
+
+      function updateTotal() {
+        const qty = parseFloat(qtyInput.value) || 0;
+        const price = parseFloat(priceInput.value) || 0;
+        totalInput.value = (qty * price).toFixed(2);
+      }
+
+      if (qtyInput && priceInput && totalInput) {
+        qtyInput.addEventListener("input", updateTotal);
+        priceInput.addEventListener("input", updateTotal);
+      }
+    });
+  </script>
 
 <!-- 🔧 Toggle Script-(Basic Information) -->
 <script>
@@ -744,4 +762,5 @@ td {
 </style>
 
 {% endblock %}
+
 
