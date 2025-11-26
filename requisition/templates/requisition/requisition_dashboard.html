@@ -262,6 +262,38 @@
   });
 </script>
 
+<!-- 🖨️ Print Preview Button -->
+<div class="print-controls">
+  <button class="print-button" onclick="printPreview()">🖨️ Print Preview</button>
+</div>
+
+<!-- 🧠 Print Preview Script -->
+<script>
+function printPreview() {
+  // Grab the whole printable section (Basic Info + List Table + Footer)
+  const content = document.querySelector('#printable-section').outerHTML;
+
+  const printWindow = window.open('', '', 'width=900,height=700');
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Print Preview</title>
+        <link rel="stylesheet" href="/static/css/print.css">
+      </head>
+      <body>
+        <div class="print-action">
+          <button onclick="window.print()">🖨️ Print</button>
+        </div>
+        ${content}
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.focus();
+}
+</script>
+
+
 <!-- 🎨 Custom CSS -->
 <style>
 /* Global Style-Whole Body Container */
