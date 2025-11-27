@@ -302,6 +302,12 @@ function printPreview() {
           .action-btn, .print-controls { display: none !important; }
           table { border-collapse: collapse; width: 100%; }
           th, td { border: 1px solid #333; padding: 6px; }
+
+          /* Hide Status and Actions columns */
+          th:nth-child(10), td:nth-child(10),
+          th:nth-child(11), td:nth-child(11) {
+            display: none !important;
+          }
         </style>
       </head>
       <body>
@@ -312,6 +318,7 @@ function printPreview() {
       </body>
     </html>
   `;
+
   printWindow.document.write(html);
   printWindow.document.close();
   printWindow.focus();
@@ -798,6 +805,7 @@ td {
   box-sizing: border-box;
 }
 
+/* Date-Entry Box-Increase/Decrease-(Basic Information) */
 .form-card .form-row input[type="date"] {
   height: 40px;              /* desired height */
   box-sizing: border-box;
@@ -806,6 +814,11 @@ td {
   font-size: 14px;
 }
 
+/* Hide-10th-Column-Status and  Hide-11th-Column-Actions*/
+th:nth-child(10), td:nth-child(10),
+th:nth-child(11), td:nth-child(11) {
+  display: none !important;
+}
 
 
 @keyframes fadeIn {
