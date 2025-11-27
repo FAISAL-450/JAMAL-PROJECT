@@ -288,25 +288,6 @@ function printPreview() {
   });
 
   const content = section.outerHTML;
-
-  // Add footer HTML
-  const footer = `
-    <div class="print-footer" style="margin-top:40px; text-align:center;">
-      <table style="width:100%; border-collapse:collapse; margin-top:20px;">
-        <tr>
-          <td style="border:1px solid #333; padding:10px; text-align:center;">Prepared By</td>
-          <td style="border:1px solid #333; padding:10px; text-align:center;">Checked By</td>
-          <td style="border:1px solid #333; padding:10px; text-align:center;">Approved By</td>
-        </tr>
-        <tr>
-          <td style="height:60px; border:1px solid #333;"></td>
-          <td style="height:60px; border:1px solid #333;"></td>
-          <td style="height:60px; border:1px solid #333;"></td>
-        </tr>
-      </table>
-    </div>
-  `;
-
   const printWindow = window.open('', 'print-preview', 'width=900,height=700');
 
   const html = `
@@ -325,14 +306,12 @@ function printPreview() {
       </head>
       <body>
         ${content}
-        ${footer}
         <script>
           window.onload = function() { setTimeout(() => window.print(), 200); };
         <\/script>
       </body>
     </html>
   `;
-
   printWindow.document.write(html);
   printWindow.document.close();
   printWindow.focus();
