@@ -283,8 +283,14 @@ function printPreview() {
   }
 
   // Sync input values into their attributes so they appear in print
-  section.querySelectorAll('input').forEach(input => {
-    input.setAttribute('value', input.value);
+  section.querySelectorAll('input, textarea, select').forEach(el => {
+    if (el.tagName.toLowerCase() === 'select') {
+      // Show selected option text
+      const selected = el.options[el.selectedIndex];
+      if (selected) el.setAttribute('data-print-value', selected.text);
+    } else {
+      el.setAttribute('value', el.value);
+    }
   });
 
   const content = section.outerHTML;
@@ -297,9 +303,11 @@ function printPreview() {
         <title>Print Preview</title>
         <link rel="stylesheet" href="{% static 'css/print.css' %}">
         <style>
+          /* General layout cleanup */
           .form-section, .filter-section { display: none !important; }
           #formContent { display: block !important; }
           .action-btn, .print-controls { display: none !important; }
+
           table { border-collapse: collapse; width: 100%; }
           th, td { border: 1px solid #333; padding: 6px; }
 
@@ -309,8 +317,10 @@ function printPreview() {
             display: none !important;
           }
 
-          /* 🟢 Make inputs look like plain text (no border, no background) */
-          #formContent input {
+          /* Inputs look like plain text */
+          #formContent input,
+          #formContent textarea,
+          #formContent select {
             border: none !important;
             outline: none !important;
             box-shadow: none !important;
@@ -318,15 +328,30 @@ function printPreview() {
             font-size: 14px;
             padding: 2px 0;
             pointer-events: none; /* prevent cursor in print preview */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
           }
 
-          /* 🟢 Hide date picker icons */
+          /* Hide date picker icons */
           input[type="date"]::-webkit-calendar-picker-indicator {
             display: none !important;
             -webkit-appearance: none;
           }
           input[type="date"] {
             -moz-appearance: textfield; /* Firefox */
+            appearance: none;
+          }
+
+          /* Select elements: show selected option text only */
+          select::after {
+            content: attr(data-print-value);
+          }
+          select option { display: none; }
+
+          /* Textareas: show value as plain text */
+          textarea {
+            white-space: pre-wrap;
           }
         </style>
       </head>
@@ -839,6 +864,12 @@ th:nth-child(10), td:nth-child(10),
 th:nth-child(11), td:nth-child(11) {
   display: none !important;
 }
+
+
+@page {
+  margin: 15mm; /* adjust as needed */
+}
+
 
 
 @keyframes fadeIn {
