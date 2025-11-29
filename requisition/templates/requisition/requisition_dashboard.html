@@ -17,9 +17,11 @@
   {% endif %}
 
   <!-- 🖨️ Print Preview Button -->
+{% if not is_admin %}
   <div class="print-controls">
     <button type="button" class="print-button" onclick="printPreview()">🖨️ Print Preview</button>
   </div>
+{% endif %}
 
   <!-- Wrap all printable content -->
   <div id="printable-section">
@@ -786,7 +788,7 @@ td {
 
 /* Section title-(Basic Information) */
 .section-title {
-  font-size: 1.5rem;
+  font-size: 18px;
   margin-top: 4px;
   margin-bottom: -6px;
   margin-left: -13px;
