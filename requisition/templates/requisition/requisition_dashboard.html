@@ -17,9 +17,11 @@
   {% endif %}
 
   <!-- 🖨️ Print Preview Button -->
+{% if not is_admin %}
   <div class="print-controls">
     <button type="button" class="print-button" onclick="printPreview()">🖨️ Print Preview</button>
   </div>
+{% endif %}
 
   <!-- Wrap all printable content -->
   <div id="printable-section">
@@ -801,12 +803,16 @@ td {
   box-sizing: border-box;
 }
 
-.form-card .form-row input[type="date"] {
-  height: 40px;              /* desired height */
-  box-sizing: border-box;
-  padding: 8px 12px;
-  line-height: 1.5;
-  font-size: 14px;
+
+
+/* 🎨 Print Preview Button Styling */
+.print-controls {
+  margin-top: 20px;    /* space above the container */
+  margin-bottom: 20px; /* space below the container */
+  margin-left: -13px;   /* space from the left side */
+  background-color: blue; /* solid blue background */
+  padding: 10px;       /* spacing inside the container */
+  border-radius: 6px;  /* rounded corners */
 }
 
 
