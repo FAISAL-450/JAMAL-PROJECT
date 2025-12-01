@@ -289,12 +289,26 @@ function printPreview() {
     return;
   }
 
-  // Sync input values into their attributes
+  // Sync input values
   section.querySelectorAll('input').forEach(input => {
     input.setAttribute('value', input.value);
   });
 
-  const content = section.outerHTML;
+  // Clone section so we can safely modify
+  const clone = section.cloneNode(true);
+
+  // Find table and remove Status (col 9) & Actions (col 10)
+  clone.querySelectorAll('table').forEach(table => {
+    table.querySelectorAll('tr').forEach(row => {
+      const cells = row.querySelectorAll('th, td');
+      // Remove Status
+      if (cells[9]) cells[9].remove();
+      // Remove Actions
+      if (cells[10]) cells[10].remove();
+    });
+  });
+
+  const content = clone.outerHTML;
   const printWindow = window.open('', 'print-preview', 'width=900,height=700');
 
   const html = `
