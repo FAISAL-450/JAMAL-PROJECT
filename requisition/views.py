@@ -15,21 +15,36 @@ def is_azure_admin(user):
     return user.email == 'admin@dzignscapeprofessionals.onmicrosoft.com'
 
 # C - Filtering Function
-def filter_requisitions(query=None, user=None, exclude_user=None):
+def filter_requisitions(query=None, user=None, exclude_user=None, project=None, pr_no=None):
     queryset = RequisitionItem.objects.all()
 
+    # User-based filters
     if user:
         queryset = queryset.filter(created_by=user)
 
     if exclude_user:
         queryset = queryset.exclude(created_by=exclude_user)
 
+    # Free-text search across multiple fields
     if query:
         queryset = queryset.filter(
             Q(PR_no__icontains=query) |
             Q(name_of_resource__icontains=query) |
-            Q(project_name_fpr__name__icontains=query)
+            Q(project_name_fpr__name_of_project__icontains=query)
         )
+
+    # Step 1: Filter by Project
+    if project:
+        queryset = queryset.filter(project_name_fpr__name_of_project__icontains=project)
+
+        # Step 2: Filter by PR No (only within selected project)
+        if pr_no:
+            queryset = queryset.filter(PR_no__icontains=pr_no)
+
+    else:
+        # If no project is selected, allow global PR No search
+        if pr_no:
+            queryset = queryset.filter(PR_no__icontains=pr_no)
 
     return queryset
 
@@ -45,14 +60,22 @@ def get_paginated_queryset(request, queryset, per_page=10):
     except EmptyPage:
         return paginator.page(paginator.num_pages)
 
-# E - Unified Dashboard View
+# E - Team Dashboard View
 @login_required
 def requisition_dashboard(request):
     query = request.GET.get("q", "").strip()
+    project = request.GET.get("project", "").strip()
+    pr_no = request.GET.get("pr_no", "").strip()
+
     form = RequisitionItemForm(request.POST or None, user=request.user)
     is_admin = is_azure_admin(request.user)
 
-    requisitions = filter_requisitions(query=query, user=request.user if not is_admin else None)
+    requisitions = filter_requisitions(
+        query=query,
+        user=request.user if not is_admin else None,
+        project=project,
+        pr_no=pr_no
+    )
     requisitions_page = get_paginated_queryset(request, requisitions)
 
     if not is_admin and request.method == "POST" and form.is_valid():
@@ -63,11 +86,15 @@ def requisition_dashboard(request):
         requisition.team = getattr(profile, "role", "pr-manager")
         requisition.save()
         messages.success(request, "✅ Requisition record created successfully.")
-        return redirect(f"{reverse('requisition_dashboard')}?q={query}")
+        return redirect(
+            f"{reverse('requisition_dashboard')}?q={query}&project={project}&pr_no={pr_no}"
+        )
 
     context = {
         "requisitions": requisitions_page,
         "query": query,
+        "project": project,
+        "pr_no": pr_no,
         "form": form,
         "mode": "list",
         "readonly": is_admin,
@@ -81,20 +108,21 @@ def requisition_dashboard(request):
 @login_required
 def admin_dashboard(request):
     query = request.GET.get("q", "").strip()
-    requisitions = RequisitionItem.objects.all()
+    project = request.GET.get("project", "").strip()
+    pr_no = request.GET.get("pr_no", "").strip()
 
-    if query:
-        requisitions = requisitions.filter(
-            Q(PR_no__icontains=query) |
-            Q(name_of_resource__icontains=query) |
-            Q(project_name_fpr__name__icontains=query)
-        )
-
+    requisitions = filter_requisitions(
+        query=query,
+        project=project,
+        pr_no=pr_no
+    )
     requisitions_page = get_paginated_queryset(request, requisitions)
 
     context = {
         "requisitions": requisitions_page,
         "query": query,
+        "project": project,
+        "pr_no": pr_no,
         "form": RequisitionItemForm(user=request.user),
         "mode": "admin",
         "readonly": True,

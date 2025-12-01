@@ -98,14 +98,19 @@
   </section>
   {% endif %}
 
-  <!-- 🔍 Search Section -->
-  <section class="filter-section">
-    <h2>🔍 FILTERING</h2>
-    <form method="get">
-      <input type="text" name="q" value="{{ query }}" placeholder="Search by PR No, Resource, or Project">
-      <button type="submit" class="btn blue">Filter</button>
-    </form>
-  </section>
+ <!-- 🔍 Search Section -->
+<section class="filter-section">
+  <h2>🔍 FILTERING</h2>
+  <form method="get" class="filter-form">
+    <!-- Project filter box -->
+    <input type="text" name="project" value="{{ project }}" placeholder="Search by Project Name">
+
+    <!-- PR No filter box -->
+    <input type="text" name="pr_no" value="{{ pr_no }}" placeholder="Search by PR No">
+
+    <button type="submit" class="btn blue">Filter</button>
+  </form>
+</section>
 
   <!-- 📋 Requisition List Section -->
 <section class="table-section">
@@ -548,6 +553,59 @@ function printPreview() {
   background-color: #005fa3;
 }
 
+
+
+
+
+/* Labels for clarity above inputs */
+.filter-section label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #34495e;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* Optional: vertical layout (top-down) */
+.filter-section form.column-layout {
+  flex-direction: column; /* stack inputs vertically */
+  gap: 15px;
+}
+
+/* Input hover effect */
+.filter-section input[type="text"]:hover {
+  border-color: #0078d4;
+  background-color: #f9fbfd;
+}
+
+/* Smooth transitions for inputs and buttons */
+.filter-section input[type="text"],
+.filter-section .btn.blue {
+  transition: all 0.25s ease-in-out;
+}
+
+/* Button lift effect on hover */
+.filter-section .btn.blue:hover {
+  background-color: #005fa3;
+  transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .filter-section {
+    margin-left: 0;
+    padding: 15px;
+  }
+  .filter-section input[type="text"],
+  .filter-section .btn.blue {
+    width: 100%; /* full width on mobile */
+  }
+}
+
+
+
+
+
 /* Table Section with Action Buttons-(Edit & Delete) */
 /* Only Table Section based */
 .table-section {
@@ -803,19 +861,28 @@ td {
   box-sizing: border-box;
 }
 
-
-
-/* 🎨 Print Preview Button Styling */
+/* Print Preview Button Styling */
 .print-controls {
-  margin-top: 20px;    /* space above the container */
-  margin-bottom: 20px; /* space below the container */
-  margin-left: -13px;   /* space from the left side */
-  color: blue;   
-  padding: 10px;       /* spacing inside the container */
-  border-radius: 6px;  /* rounded corners */
+  margin-top: 15px;     /* space above the button */
+  margin-left: -13px;    /* space from the left */
+  margin-bottom: 15px;  /* space below the button */
 }
 
+.print-button {
+  background-color: #0078d4;   /* blue background */
+  color: #fff;                 /* white text */
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: 'Trebuchet MS', sans-serif;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
 
+.print-button:hover {
+  background-color: #005fa3;   /* darker blue on hover */
+}
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-5px); }
@@ -824,7 +891,3 @@ td {
 </style>
 
 {% endblock %}
-
-
-
-
