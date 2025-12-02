@@ -26,33 +26,40 @@
   <!-- Wrap all printable content -->
   <div id="printable-section">
 
-  <!-- 🧾 Basic Information Section -->
+  <!-- 🧾 Purchase Requisition Heading -->
+<div class="form-card">
+  <h2 class="section-title-PR">
+    Purchase Requisition
+  </h2>
+</div>
+
+    <!-- 🧾 Basic Information Section -->
   {% if not is_admin %}
   <div class="form-card">
     <h2 class="section-title" onclick="toggleForm()">
       <!-- Left-side smart info icon -->
       <i class="fas fa-info-circle title-icon"></i>
-      Basic Information 
+      BASIC INFORMATION 
       <!-- Right-side toggle icon -->
       <span id="toggle-icon"><i class="fa fa-chevron-down"></i></span>
     </h2>
 
     <div id="formContent" style="display:none;">
       <div class="form-row">
-        <label for="project-name">Project Name</label>
+        <label for="project-name">Project Name:</label>
         <input type="text" id="project-name" placeholder="Enter project name">
       </div>
       <div class="form-row">
-        <label for="pr-date">PR Date</label>
-        <input type="date" id="pr-date">
+        <label for="pr-date">PR Date:</label>
+        <input type="text" id="pr-date">
       </div>
       <div class="form-row">
-        <label for="pr-no">PR No</label>
+        <label for="pr-no">PR No:</label>
         <input type="text" id="pr-no" placeholder="Enter PR number">
       </div>
       <div class="form-row">
-        <label for="delivery-date">Delivery Date</label>
-        <input type="date" id="delivery-date">
+        <label for="delivery-date">Delivery Date:</label>
+        <input type="text" id="delivery-date">
       </div>
     </div>
   </div>
@@ -179,14 +186,13 @@
         <tr><td colspan="11" class="no-data">No requisition records found.</td></tr>
       {% endfor %}
     </tbody>
-    <tfoot>
-      {% if not is_admin %}
-      <tr class="table-footer">
-        <td colspan="11">Prepared By | Checked By | Approved By</td>
-      </tr>
-      {% endif %}
-    </tfoot>
   </table>
+
+  {% if not is_admin %}
+  <div class="table-footer">
+    Prepared By | Checked By | Approved By
+  </div>
+  {% endif %}
 </section>
 
 </div> <!-- end printable-section -->
@@ -301,10 +307,8 @@ function printPreview() {
   clone.querySelectorAll('table').forEach(table => {
     table.querySelectorAll('tr').forEach(row => {
       const cells = row.querySelectorAll('th, td');
-      // Remove Status
-      if (cells[9]) cells[9].remove();
-      // Remove Actions
-      if (cells[10]) cells[10].remove();
+      if (cells[9]) cells[9].remove();   // Remove Status
+      if (cells[10]) cells[10].remove(); // Remove Actions
     });
   });
 
@@ -323,10 +327,15 @@ function printPreview() {
           .action-btn, .print-controls { display: none !important; }
           table { border-collapse: collapse; width: 100%; }
           th, td { border: 1px solid #333; padding: 6px; }
+
+          /* 🎯 Hide headings in Print Preview */
+          .form-card .section-title { display: none !important; }   /* hides BASIC INFORMATION heading */
+          .table-section .table-header { display: none !important; } /* hides REQUISITION LIST heading */
         </style>
       </head>
       <body>
         ${content}
+
         <script>
           window.onload = function() { setTimeout(() => window.print(), 200); };
         <\/script>
@@ -811,7 +820,7 @@ td {
 
 /* Section title-(Basic Information) */
 .section-title {
-  font-size: 1.5rem;
+  font-size: 18px;
   margin-top: 4px;
   margin-bottom: -6px;
   margin-left: -13px;
@@ -860,6 +869,7 @@ td {
   border: 1px solid #ccc;
   border-radius: 6px;
   transition: border-color 0.3s, box-shadow 0.3s;
+
 }
 
 /* Smart hover/focus effect-(Basic Information) */
@@ -873,6 +883,7 @@ td {
 .form-card .form-row input {
   height: 30px !important;
   box-sizing: border-box;
+
 }
 
 /* Print Preview Button Styling */
@@ -898,6 +909,48 @@ td {
   background-color: #005fa3;   /* darker blue on hover */
 }
 
+
+
+
+
+/* Purchase Requisition Heading Styling */
+.section-title-PR {
+  font-size: 18px;          /* heading size */
+  font-weight: 700;         /* bold for emphasis */
+  color: #333;              /* dark gray text */
+  margin: 0;                /* remove default margins */
+  padding: 10px 0;          /* space above/below */
+  text-transform: uppercase;/* make text all caps */
+  letter-spacing: 1px;      /* slight spacing for clarity */
+ 
+}
+
+/* Optional: container card for heading */
+.requisition-controls {
+  margin-top: 15px;     /* space above */
+  margin-left: -13px;   /* align with other cards */
+  margin-bottom: 15px;  /* space below */
+}
+
+/* Prepared by+Checked by+Approved by-(Up-down) */
+.table-footer {
+  margin-top: 60px;       /* more space above footer (pushing it down from table) */
+  margin-bottom: 40px;    /* extra space below footer */
+  text-align: center;
+  font-weight: 600;
+}
+
+
+/* Print styling → no border */
+@media print {
+  .form-row input {
+    border: none !important;   /* ✅ no border in print preview */
+    outline: none !important;  /* remove any outline */
+    padding: 6px;              /* keep clean spacing */
+  }
+}
+
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
@@ -905,3 +958,4 @@ td {
 </style>
 
 {% endblock %}
+
