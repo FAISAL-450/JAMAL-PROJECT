@@ -329,8 +329,15 @@ function printPreview() {
           th, td { border: 1px solid #333; padding: 6px; }
 
           /* 🎯 Hide headings in Print Preview */
-          .form-card .section-title { display: none !important; }   /* hides BASIC INFORMATION heading */
-          .table-section .table-header { display: none !important; } /* hides REQUISITION LIST heading */
+          .form-card .section-title { display: none !important; }
+          .table-section .table-header { display: none !important; }
+
+          /* 📌 Push footer down from table */
+          .table-footer {
+            margin-top: 40px;   /* space below table */
+            text-align: center;
+            font-weight: bold;
+          }
         </style>
       </head>
       <body>
