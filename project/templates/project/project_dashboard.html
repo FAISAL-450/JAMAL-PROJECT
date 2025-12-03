@@ -19,7 +19,7 @@
 {% if not readonly %}
   <section class="form-section">
     <header class="form" onclick="toggleForm()">
-      <h2><i class="fas fa-tasks"></i> PROJECT FORM <span id="toggle-icon"><i class="fas fa-chevron-down"></i></span></h2>
+      <h2><i class="fas fa-tasks"></i> PROJECT FORM <span id="toggle-icon"><i class="fas fa-square"></i></span></h2>
     </header>
 
     <div id="formContent" class="form-content" style="display: block;">
@@ -126,23 +126,23 @@
     const icon = document.getElementById('toggle-icon').querySelector('i');
     if (form.style.display === 'none') {
       form.style.display = 'block';
-      icon.classList.remove('fa-chevron-down');
-      icon.classList.add('fa-chevron-up');
+      icon.classList.remove('far', 'fa-square'); // outline
+      icon.classList.add('fas', 'fa-square');    // solid
     } else {
       form.style.display = 'none';
-      icon.classList.remove('fa-chevron-up');
-      icon.classList.add('fa-chevron-down');
+      icon.classList.remove('fas', 'fa-square'); // solid
+      icon.classList.add('far', 'fa-square');    // outline
     }
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    const mode = "{{ mode }}";
+    const mode = "{{ mode }}"; // server-side variable
+    const form = document.getElementById('formContent');
+    const icon = document.getElementById('toggle-icon').querySelector('i');
     if (mode === "edit") {
-      const form = document.getElementById('formContent');
-      const icon = document.getElementById('toggle-icon').querySelector('i');
       form.style.display = 'block';
-      icon.classList.remove('fa-chevron-down');
-      icon.classList.add('fa-chevron-up');
+      icon.classList.remove('far', 'fa-square');
+      icon.classList.add('fas', 'fa-square');
     }
   });
 </script>
@@ -527,29 +527,14 @@ td {
   background-color: #cce4f7;
 }
 
-/* Toggle Button Container */
-#toggle-icon {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
-  color: #000000ff;
-  background-color: #ffffff;   /* Toggle Icon-Background Color */
-  padding: 8px 14px;
-  border: 1px solid #fbfcfdff;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
+/* Outline square (far fa-square) → red */
+#toggle-icon .far.fa-square {
+  color: red;
 }
 
-#toggle-icon:hover {
-  background-color: #ffffff;   /* Toggle Icon-Inside-Background Color */
-}
-
-#toggle-icon i {
-  font-size: 20px;   /* Toggle Icon-Increase/Decrease */
-  transition: transform 0.3s ease;
+/* Solid square (fas fa-square) → blue */
+#toggle-icon .fas.fa-square {
+  color: blue;
 }
 
 #formContent {
