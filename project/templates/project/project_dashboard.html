@@ -17,10 +17,15 @@
 
   <!-- 📝 Project Form Section -->
 {% if not readonly %}
-  <section class="form-section">
-    <header class="form" onclick="toggleForm()">
-      <h2><i class="fas fa-tasks"></i> PROJECT FORM <span id="toggle-icon"><i class="fas fa-square"></i></span></h2>
-    </header>
+<section class="form-section">
+  <header class="form" onclick="toggleForm()">
+    <h2>
+      <i class="fas fa-tasks"></i> PROJECT FORM 
+      <span id="toggle-icon">
+        <button id="toggle-btn" class="btn-red"></button>
+      </span>
+    </h2>
+  </header>
 
     <div id="formContent" class="form-content" style="display: block;">
       <form method="post" autocomplete="off">
@@ -123,26 +128,36 @@
 <script>
   function toggleForm() {
     const form = document.getElementById('formContent');
-    const icon = document.getElementById('toggle-icon').querySelector('i');
-    if (form.style.display === 'none') {
+    const btn = document.getElementById('toggle-btn');
+
+    if (form.style.display === 'none' || form.style.display === '') {
+      // Show form
       form.style.display = 'block';
-      icon.classList.remove('far', 'fa-square'); // outline
-      icon.classList.add('fas', 'fa-square');    // solid
+      // Switch button to blue
+      btn.classList.remove('btn-red');
+      btn.classList.add('btn-blue');
     } else {
+      // Hide form
       form.style.display = 'none';
-      icon.classList.remove('fas', 'fa-square'); // solid
-      icon.classList.add('far', 'fa-square');    // outline
+      // Switch button back to red
+      btn.classList.remove('btn-blue');
+      btn.classList.add('btn-red');
     }
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    const mode = "{{ mode }}"; // server-side variable
+    const mode = "{{ mode }}";
     const form = document.getElementById('formContent');
-    const icon = document.getElementById('toggle-icon').querySelector('i');
+    const btn = document.getElementById('toggle-btn');
+
     if (mode === "edit") {
       form.style.display = 'block';
-      icon.classList.remove('far', 'fa-square');
-      icon.classList.add('fas', 'fa-square');
+      btn.classList.remove('btn-red');
+      btn.classList.add('btn-blue');
+    } else {
+      form.style.display = 'none';
+      btn.classList.remove('btn-blue');
+      btn.classList.add('btn-red');
     }
   });
 </script>
@@ -412,7 +427,6 @@ table {
   font-size: 15px;
 }
 
-
 thead {
   background-color: #f3f3f3;
 }
@@ -511,7 +525,6 @@ td {
   color: #0078d4;
   font-weight: 500;
 }
-
 .page-link {
   padding: 6px 12px;
   font-size: 16px;
@@ -527,14 +540,29 @@ td {
   background-color: #cce4f7;
 }
 
-/* Outline square (far fa-square) → red */
-#toggle-icon .far.fa-square {
-  color: red;
+/* Toggle Button Container */
+#toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  color: #000000ff;
+  background-color: #ffffff;   /* Toggle Icon-Background Color */
+  padding: 8px 14px;
+  border: 1px solid #fbfcfdff;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
 }
 
-/* Solid square (fas fa-square) → blue */
-#toggle-icon .fas.fa-square {
-  color: blue;
+#toggle-icon:hover {
+  background-color: #ffffff;   /* Toggle Icon-Inside-Background Color */
+}
+
+#toggle-icon i {
+  font-size: 20px;   /* Toggle Icon-Increase/Decrease */
+  transition: transform 0.3s ease;
 }
 
 #formContent {
@@ -548,10 +576,46 @@ td {
   animation: fadeIn 0.3s ease-in-out;
 }
 
+
+
+
+/* Base button style */
+#toggle-btn {
+  width: 23px;
+  height: 23px;
+  border: none;
+  cursor: pointer;
+  display: inline-block;
+  border-radius: 4px;
+  position: relative;          /* allows movement */
+}
+
+/* Red state */
+.btn-red {
+  background-color: red;
+  animation: moveLeft 0.5s ease forwards;
+}
+
+/* Blue state */
+.btn-blue {
+  background-color: #0078d4;
+  animation: moveLeft 0.5s ease forwards;
+}
+
+/* Keyframes: move left then return */
+@keyframes moveLeft {
+  0%   { left: 0; }
+  50%  { left: -50px; }   /* shift left */
+  100% { left: 0; }       /* back to same position */
+}
+
+
+
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 </style>
+
 {% endblock %}
