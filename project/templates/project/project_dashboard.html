@@ -86,7 +86,8 @@
             <td>{{ project.contact_person_name }}</td>
             <td>{{ project.contact_person_number }}</td>
             <td>
-            {% if not readonly and project.created_by == request.user %}
+            {% if not readonly %}
+              {% if is_admin or project.created_by == request.user %}
                 <a href="{% url 'edit_project' project.pk %}?q={{ query }}" class="btn yellow action-btn">
                   <i class="fas fa-edit"></i> Edit
                 </a>
