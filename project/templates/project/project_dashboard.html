@@ -540,31 +540,6 @@ td {
   background-color: #cce4f7;
 }
 
-/* Toggle Button Container */
-#toggle-icon {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
-  color: #000000ff;
-  background-color: #ffffff;   /* Toggle Icon-Background Color */
-  padding: 8px 14px;
-  border: 1px solid #fbfcfdff;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
-}
-
-#toggle-icon:hover {
-  background-color: #ffffff;   /* Toggle Icon-Inside-Background Color */
-}
-
-#toggle-icon i {
-  font-size: 20px;   /* Toggle Icon-Increase/Decrease */
-  transition: transform 0.3s ease;
-}
-
 #formContent {
   margin-top: 16px;
   padding: 20px;
@@ -575,9 +550,6 @@ td {
   display: none; /* Hidden by default, toggled via JS */
   animation: fadeIn 0.3s ease-in-out;
 }
-
-
-
 
 /* Base button style */
 #toggle-btn {
@@ -608,9 +580,6 @@ td {
   50%  { left: -50px; }   /* shift left */
   100% { left: 0; }       /* back to same position */
 }
-
-
-
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-5px); }

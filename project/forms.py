@@ -36,3 +36,5 @@ class ProjectForm(forms.ModelForm):
                 'placeholder': 'Enter contact number'
             }),
         }
+
+

@@ -5,8 +5,8 @@ class ProjectConfig(AppConfig):
     name = 'project'
 
     def ready(self):
-        # Import signals to connect them when the app is ready
         import project.signals
+
 
 
 

@@ -12,11 +12,7 @@ from .forms import ProjectForm
 
 # B - Azure Admin Check
 def is_azure_admin(user):
-    admin_emails = {
-        'admin@dzignscapeprofessionals.onmicrosoft.com',
-        'based@dzignscapeprofessionals.onmicrosoft.com'
-    }
-    return user.email in admin_emails
+    return user.email == 'admin@dzignscapeprofessionals.onmicrosoft.com'
 
 # C - Filtering Function
 def filter_projects(query=None, user=None, exclude_user=None):
@@ -63,7 +59,7 @@ def project_dashboard(request):
 
     projects_page = get_paginated_queryset(request, projects)
 
-    # Save logic: only non-admin users can submit
+    # Save logic: Team member can submit
     if not is_azure_admin(request.user) and request.method == "POST" and form.is_valid():
         project = form.save(commit=False)
         project.created_by = request.user
@@ -102,7 +98,7 @@ def admin_dashboard(request):
     }
     return render(request, "project/project_dashboard.html", context)
 
-# G - Edit View (Only owner can edit)
+# G - Edit View (Team member can edit)
 @user_passes_test(lambda u: not is_azure_admin(u))
 @login_required
 def edit_project(request, pk):
@@ -132,8 +128,7 @@ def edit_project(request, pk):
     }
     return render(request, "project/project_dashboard.html", context)
 
-
-# H - Delete View (Only owner can delete)
+# H - Delete View (Team member can delete)
 @user_passes_test(lambda u: not is_azure_admin(u))
 @login_required
 def delete_project(request, pk):

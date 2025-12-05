@@ -1,11 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Role list for-project app
+# Role list for project app (only Manager)
 ROLE_CHOICES = [
     ('manager', 'Manager'),
 ]
 
+# Profile model to assign roles to users
 class ProjectProfile(models.Model):
     user = models.OneToOneField(
         User,
@@ -27,6 +28,7 @@ class ProjectProfile(models.Model):
         verbose_name = "Project Role Profile"
         verbose_name_plural = "Project Role Profiles"
 
+# Main model for storing project details
 class Project(models.Model):
     name_of_project = models.CharField(
         max_length=100,
@@ -47,6 +49,7 @@ class Project(models.Model):
     team = models.CharField(
         max_length=50,
         choices=ROLE_CHOICES,
+        default='manager',
         help_text="Team responsible for this project"
     )
     created_by = models.ForeignKey(
@@ -57,6 +60,19 @@ class Project(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
+    updated_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='updated_projects',
+        help_text="User who last updated this project record"
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        help_text="Timestamp when the record was last updated"
+    )
+
     def __str__(self):
         return self.name_of_project
 
@@ -64,7 +80,6 @@ class Project(models.Model):
         ordering = ['-created_at']
         verbose_name = "Project"
         verbose_name_plural = "Projects"
-
 
 
 
