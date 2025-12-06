@@ -61,18 +61,19 @@
     </form>
   </section>
 
-  <!-- 📋 Project List -->
+<!-- 📋 Project List Section -->
 <section class="table-section">
   <header class="table-header">
-    <h2><i class="fas fa-list"></i> PROJECT LIST</h2>
+    <h2><i class="fas fa-project-diagram"></i> PROJECT LIST</h2>
   </header>
+
   <table>
     <thead>
       <tr>
         <th>Sl No</th>
         <th>Name of Project</th>
-        <th>Detailed Project Address</th>
-        <th>Name of Contact Person</th>
+        <th>Project Address</th>
+        <th>Contact Person</th>
         <th>Contact Number</th>
         <th>Actions</th>
       </tr>
@@ -86,8 +87,14 @@
           <td>{{ project.contact_person_name }}</td>
           <td>{{ project.contact_person_number }}</td>
           <td>
-            {% if not readonly %}
-              {% if is_admin or project.created_by == request.user %}
+            {% if is_admin and project.edit_request_pending %}
+              <a href="{% url 'approve_team_permission' project.pk %}" class="btn blue action-btn">
+                <i class="fas fa-check-circle"></i> Approve Request
+              </a>
+            {% endif %}
+
+            {% if project.created_by == current_user %}
+              {% if project.allow_team_edit %}
                 <a href="{% url 'edit_project' project.pk %}?q={{ query }}" class="btn yellow action-btn">
                   <i class="fas fa-edit"></i> Edit
                 </a>
@@ -97,12 +104,18 @@
                     <i class="fas fa-trash-alt"></i> Delete
                   </button>
                 </form>
+              {% elif project.edit_request_pending %}
+                <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Request Pending</span>
+              {% else %}
+                <a href="{% url 'request_team_permission' project.pk %}" class="btn btn-outline-primary action-btn">
+                  <i class="fas fa-paper-plane"></i> Request Edit/Delete
+                </a>
               {% endif %}
             {% endif %}
           </td>
         </tr>
       {% empty %}
-        <tr><td colspan="7" class="no-data">No project records found.</td></tr>
+        <tr><td colspan="6" class="no-data">No project records found.</td></tr>
       {% endfor %}
     </tbody>
   </table>
