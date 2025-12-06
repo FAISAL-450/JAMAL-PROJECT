@@ -64,17 +64,18 @@
 <!-- 📋 Project List Section -->
 <section class="table-section">
   <header class="table-header">
-    <h2><i class="fas fa-project-diagram"></i> PROJECT LIST</h2>
+    <h2><i class="fas fa-list"></i> PROJECT LIST</h2>
   </header>
 
   <table>
     <thead>
       <tr>
         <th>Sl No</th>
-        <th>Name of Project</th>
+        <th>Project Name</th>
         <th>Project Address</th>
         <th>Contact Person</th>
         <th>Contact Number</th>
+        <th>Status</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -87,13 +88,22 @@
           <td>{{ project.contact_person_name }}</td>
           <td>{{ project.contact_person_number }}</td>
           <td>
+            {% if project.allow_team_edit %}
+              <span class="badge badge-success"><i class="fas fa-unlock"></i> Editable</span>
+            {% elif project.edit_request_pending %}
+              <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Request Pending</span>
+            {% else %}
+              <span class="badge badge-secondary"><i class="fas fa-lock"></i> Locked</span>
+            {% endif %}
+          </td>
+          <td>
             {% if is_admin and project.edit_request_pending %}
               <a href="{% url 'approve_team_permission' project.pk %}" class="btn blue action-btn">
                 <i class="fas fa-check-circle"></i> Approve Request
               </a>
             {% endif %}
 
-            {% if project.created_by == current_user %}
+            {% if not is_admin and project.created_by == current_user %}
               {% if project.allow_team_edit %}
                 <a href="{% url 'edit_project' project.pk %}?q={{ query }}" class="btn yellow action-btn">
                   <i class="fas fa-edit"></i> Edit
@@ -115,7 +125,7 @@
           </td>
         </tr>
       {% empty %}
-        <tr><td colspan="6" class="no-data">No project records found.</td></tr>
+        <tr><td colspan="7" class="no-data">No project records found.</td></tr>
       {% endfor %}
     </tbody>
   </table>

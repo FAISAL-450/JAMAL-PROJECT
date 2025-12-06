@@ -118,13 +118,13 @@ def edit_project(request, pk):
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
-    form = ProjectForm(request.POST or None, instance=project)
+    form = ProjectForm(request.POST or None, instance=project, user=request.user)
 
     if form.is_valid():
         updated_project = form.save(commit=False)
         updated_project.updated_by = request.user
 
-        # 👇 Reset team permission after edit
+        # Reset team permission after edit
         if not is_admin:
             updated_project.allow_team_edit = False
             updated_project.edit_request_pending = False
@@ -145,7 +145,7 @@ def edit_project(request, pk):
         "projects": projects_page,
         "readonly": is_admin,
         "is_admin": is_admin,
-        "current_user": request.user
+        "current_user": request.user,
     }
     return render(request, "project/project_dashboard.html", context)
 
@@ -170,7 +170,7 @@ def delete_project(request, pk):
 
     return render(request, "project/confirm_delete.html", {
         "project": project,
-        "query": query
+        "query": query,
     })
 
 
@@ -203,5 +203,7 @@ def request_team_permission(request, pk):
         messages.info(request, f"⏳ Request already pending for '{project.name_of_project}'.")
 
     return redirect(reverse('project_dashboard'))
+
+
 
 
