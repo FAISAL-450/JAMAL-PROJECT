@@ -10,14 +10,9 @@ from django.core.exceptions import PermissionDenied
 from .models import Project
 from .forms import ProjectForm
 
-
 # B - Azure Admin Check
 def is_azure_admin(user):
-    return user.email in {
-        'admin@dzignscapeprofessionals.onmicrosoft.com',
-        'based@dzignscapeprofessionals.onmicrosoft.com'
-    }
-
+    return user.email == 'admin@dzignscapeprofessionals.onmicrosoft.com'
 
 # C - Filtering Function
 def filter_projects(query=None, user=None, exclude_user=None):
@@ -38,7 +33,6 @@ def filter_projects(query=None, user=None, exclude_user=None):
 
     return queryset
 
-
 # D - Reusable Pagination Function
 def get_paginated_queryset(request, queryset, per_page=10):
     paginator = Paginator(queryset, per_page)
@@ -51,24 +45,31 @@ def get_paginated_queryset(request, queryset, per_page=10):
     except EmptyPage:
         return paginator.page(paginator.num_pages)
 
-
-# E - Unified Dashboard View
+# E - Team Dashboard View (List View + Form Submission)
 @login_required
 def project_dashboard(request):
     query = request.GET.get("q", "").strip()
     form = ProjectForm(request.POST or None)
-    is_admin = is_azure_admin(request.user)
 
-    projects = filter_projects(query=query, user=request.user if not is_admin else None)
+    # Role-based data filtering
+    if is_azure_admin(request.user):
+        projects = filter_projects(query=query, exclude_user=request.user)
+    else:
+        projects = filter_projects(query=query, user=request.user)
+
     projects_page = get_paginated_queryset(request, projects)
 
-    if not is_admin and request.method == "POST" and form.is_valid():
+    # Save logic: Team member can submit
+    if not is_azure_admin(request.user) and request.method == "POST" and form.is_valid():
         project = form.save(commit=False)
         project.created_by = request.user
-        profile = getattr(request.user, "project_profile", None)
-        project.team = getattr(profile, "role", "manager")
+        project.team = getattr(
+            getattr(request.user, "project_profile", None),
+            "role",
+            "manager"
+        )
         project.save()
-        messages.success(request, "✅ Project record created successfully.")
+        messages.success(request, "✅ Project detailed record created successfully.")
         return redirect(f"{reverse('project_dashboard')}?q={query}")
 
     context = {
@@ -76,27 +77,16 @@ def project_dashboard(request):
         "query": query,
         "form": form,
         "mode": "list",
-        "readonly": is_admin,
-        "is_admin": is_admin,
-        "current_user": request.user
+        "readonly": is_azure_admin(request.user)
     }
     return render(request, "project/project_dashboard.html", context)
 
-
-# F - Admin Dashboard View
+# F - Admin Dashboard View (Azure Admin only, read-only)
 @user_passes_test(is_azure_admin)
 @login_required
 def admin_dashboard(request):
     query = request.GET.get("q", "").strip()
-    projects = Project.objects.all()
-
-    if query:
-        projects = projects.filter(
-            Q(name_of_project__icontains=query) |
-            Q(project_address__icontains=query) |
-            Q(contact_person_name__icontains=query)
-        )
-
+    projects = filter_projects(query=query, exclude_user=request.user)
     projects_page = get_paginated_queryset(request, projects)
 
     context = {
@@ -104,40 +94,28 @@ def admin_dashboard(request):
         "query": query,
         "form": ProjectForm(),
         "mode": "admin",
-        "readonly": True,
-        "is_admin": True,
-        "current_user": request.user
+        "readonly": True
     }
     return render(request, "project/project_dashboard.html", context)
 
-
-# G - Edit View
+# G - Edit View (Team member can edit)
+@user_passes_test(lambda u: not is_azure_admin(u))
 @login_required
 def edit_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
-    is_admin = is_azure_admin(request.user)
 
-    if not (is_admin or (project.created_by == request.user and project.allow_team_edit)):
+    if project.created_by != request.user:
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
-    form = ProjectForm(request.POST or None, instance=project, user=request.user)
+    form = ProjectForm(request.POST or None, instance=project)
 
     if form.is_valid():
-        updated_project = form.save(commit=False)
-        updated_project.updated_by = request.user
+        form.save()
+        messages.success(request, "✏️ Project detailed record updated successfully.")
+        return redirect(f"{reverse('project_dashboard')}?q={query}")
 
-        # Reset team permission after edit
-        if not is_admin:
-            updated_project.allow_team_edit = False
-            updated_project.edit_request_pending = False
-
-        updated_project.save()
-        messages.success(request, "✏️ Project record updated successfully.")
-        redirect_url = 'admin_dashboard' if is_admin else 'project_dashboard'
-        return redirect(f"{reverse(redirect_url)}?q={query}")
-
-    projects = filter_projects(query=query, user=request.user if not is_admin else None)
+    projects = filter_projects(query=query, user=request.user)
     projects_page = get_paginated_queryset(request, projects)
 
     context = {
@@ -146,20 +124,17 @@ def edit_project(request, pk):
         "project": project,
         "query": query,
         "projects": projects_page,
-        "readonly": is_admin,
-        "is_admin": is_admin,
-        "current_user": request.user,
+        "readonly": False
     }
     return render(request, "project/project_dashboard.html", context)
 
-
-# H - Delete View
+# H - Delete View (Team member can delete)
+@user_passes_test(lambda u: not is_azure_admin(u))
 @login_required
 def delete_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
-    is_admin = is_azure_admin(request.user)
 
-    if not (is_admin or (project.created_by == request.user and project.allow_team_edit)):
+    if project.created_by != request.user:
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
@@ -168,45 +143,9 @@ def delete_project(request, pk):
         name = project.name_of_project
         project.delete()
         messages.success(request, f"🗑️ Project '{name}' deleted successfully.")
-        redirect_url = 'admin_dashboard' if is_admin else 'project_dashboard'
-        return redirect(f"{reverse(redirect_url)}?q={query}")
+        return redirect(f"{reverse('project_dashboard')}?q={query}")
 
     return render(request, "project/confirm_delete.html", {
         "project": project,
-        "query": query,
+        "query": query
     })
-
-
-# I - Admin Approves Edit/Delete Request
-@user_passes_test(is_azure_admin)
-@login_required
-def approve_team_permission(request, pk):
-    project = get_object_or_404(Project, pk=pk)
-    project.allow_team_edit = True
-    project.edit_request_pending = False
-    project.updated_by = request.user
-    project.save()
-    messages.success(request, f"✅ Edit/delete permission granted for '{project.name_of_project}'. Team member can now proceed.")
-    return redirect(reverse('admin_dashboard'))
-
-
-# J - Team Member Requests Edit/Delete Access
-@login_required
-def request_team_permission(request, pk):
-    project = get_object_or_404(Project, pk=pk)
-
-    if project.created_by != request.user:
-        raise PermissionDenied
-
-    if not project.edit_request_pending:
-        project.edit_request_pending = True
-        project.save()
-        messages.success(request, f"📩 Request sent to admin for '{project.name_of_project}'. Awaiting approval.")
-    else:
-        messages.info(request, f"⏳ Request already pending for '{project.name_of_project}'.")
-
-    return redirect(reverse('project_dashboard'))
-
-
-
-

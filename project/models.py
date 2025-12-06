@@ -52,14 +52,6 @@ class Project(models.Model):
         default='manager',
         help_text="Team responsible for this project"
     )
-    allow_team_edit = models.BooleanField(
-        default=False,
-        help_text="If True, allows the team member who created this record to edit/delete it"
-    )
-    edit_request_pending = models.BooleanField(  # ✅ NEW FIELD
-        default=False,
-        help_text="If True, indicates the team member has requested edit/delete access"
-    )
     created_by = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -88,7 +80,6 @@ class Project(models.Model):
         ordering = ['-created_at']
         verbose_name = "Project"
         verbose_name_plural = "Projects"
-
 
 
 

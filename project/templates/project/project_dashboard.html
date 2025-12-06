@@ -27,74 +27,66 @@
     </h2>
   </header>
 
-  <div id="formContent" class="form-content" style="display: block;">
-    <form method="post" autocomplete="off">
-      {% csrf_token %}
-      {{ form.non_field_errors }}
+    <div id="formContent" class="form-content" style="display: block;">
+      <form method="post" autocomplete="off">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
 
-      <div class="form-grid">
-        <div class="form-cell">{{ form.name_of_project.label_tag }}{{ form.name_of_project }}</div>
-        <div class="form-cell">{{ form.project_address.label_tag }}{{ form.project_address }}</div>
-        <div class="form-cell">{{ form.contact_person_name.label_tag }}{{ form.contact_person_name }}</div>
-        <div class="form-cell">{{ form.contact_person_number.label_tag }}{{ form.contact_person_number }}</div>
-      </div>
+        <div class="form-grid">
+          <div class="form-cell">{{ form.name_of_project.label_tag }}{{ form.name_of_project }}</div>
+          <div class="form-cell">{{ form.project_address.label_tag }}{{ form.project_address }}</div>
+          <div class="form-cell">{{ form.contact_person_name.label_tag }}{{ form.contact_person_name }}</div>
+          <div class="form-cell">{{ form.contact_person_number.label_tag }}{{ form.contact_person_number }}</div>
+        </div>
 
-      <div class="form-actions">
-        <button type="submit" class="btn green">
-          {% if mode == 'edit' %}Update{% else %}Save{% endif %}
-        </button>
-        {% if mode != 'list' %}
-          <a href="{% url 'project_dashboard' %}" class="btn gray">Cancel</a>
-        {% endif %}
-      </div>
-    </form>
-  </div>
-</section>
+        <div class="form-actions">
+          <button type="submit" class="btn green">
+            {% if mode == 'edit' %}Update{% else %}Save{% endif %}
+          </button>
+          {% if mode != 'list' %}
+            <a href="{% url 'project_dashboard' %}" class="btn gray">Cancel</a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </section>
 {% endif %}
 
-<!-- 🔍 Filter/Search -->
-<section class="filter-section">
-  <h2>🔍 FILTERING</h2>
-  <form method="get">
-    <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search by project name">
-    <button type="submit" class="btn blue">Filter</button>
-  </form>
-</section>
+  <!-- 🔍 Filter/Search -->
+  <section class="filter-section">
+    <h2>🔍 FILTERING</h2>
+    <form method="get">
+      <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search by project name">
+      <button type="submit" class="btn blue">Filter</button>
+    </form>
+  </section>
 
-<!-- 📋 Project List Section -->
-<section class="table-section">
-  <header class="table-header">
-    <h2><i class="fas fa-list"></i> PROJECT LIST</h2>
-  </header>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Sl No</th>
-        <th>Project Name</th>
-        <th>Project Address</th>
-        <th>Contact Person</th>
-        <th>Contact Number</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for project in projects %}
+  <!-- 📋 Project List -->
+  <section class="table-section">
+    <header class="table-header">
+      <h2><i class="fas fa-list"></i> PROJECT LIST</h2>
+    </header>
+    <table>
+      <thead>
         <tr>
-          <td>{{ forloop.counter }}</td>
-          <td>{{ project.name_of_project }}</td>
-          <td>{{ project.project_address }}</td>
-          <td>{{ project.contact_person_name }}</td>
-          <td>{{ project.contact_person_number }}</td>
-          <td>
-            {% if is_admin and project.edit_request_pending %}
-              <a href="{% url 'approve_team_permission' project.pk %}" class="btn blue action-btn">
-                <i class="fas fa-check-circle"></i> Approve Request
-              </a>
-            {% endif %}
-
-            {% if not is_admin and project.created_by == current_user %}
-              {% if project.allow_team_edit %}
+          <th>Sl No</th>
+          <th>Name of Project</th>
+          <th>Detailed Project Address</th>
+          <th>Name of Contact Person</th>
+          <th>Contact Number</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for project in projects %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ project.name_of_project }}</td>
+            <td>{{ project.project_address }}</td>
+            <td>{{ project.contact_person_name }}</td>
+            <td>{{ project.contact_person_number }}</td>
+            <td>
+            {% if not readonly and project.created_by == request.user %}
                 <a href="{% url 'edit_project' project.pk %}?q={{ query }}" class="btn yellow action-btn">
                   <i class="fas fa-edit"></i> Edit
                 </a>
@@ -104,37 +96,31 @@
                     <i class="fas fa-trash-alt"></i> Delete
                   </button>
                 </form>
-              {% elif project.edit_request_pending %}
-                <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Request Pending</span>
-              {% else %}
-                <a href="{% url 'request_team_permission' project.pk %}" class="btn btn-outline-primary action-btn">
-                  <i class="fas fa-paper-plane"></i> Request Edit/Delete
-                </a>
               {% endif %}
-            {% endif %}
-          </td>
-        </tr>
-      {% empty %}
-        <tr><td colspan="6" class="no-data">No project records found.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</section>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="no-data">No project records found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
 
-  <!-- 📋 Pagination -->
-  {% if projects.paginator.num_pages > 1 %}
-    <footer class="pagination-footer">
-      <nav class="pagination">
-        {% if projects.has_previous %}
-          <a href="?q={{ query }}&page={{ projects.previous_page_number }}" class="page-link">Previous</a>
-        {% endif %}
-        <span class="page-info">Page {{ projects.number }} of {{ projects.paginator.num_pages }}</span>
-        {% if projects.has_next %}
-          <a href="?q={{ query }}&page={{ projects.next_page_number }}" class="page-link">Next</a>
-        {% endif %}
-      </nav>
-    </footer>
-  {% endif %}
+    <!-- 📋 Pagination -->
+    {% if projects.paginator.num_pages > 1 %}
+      <footer class="pagination-footer">
+        <nav class="pagination">
+          {% if projects.has_previous %}
+            <a href="?q={{ query }}&page={{ projects.previous_page_number }}" class="page-link">Previous</a>
+          {% endif %}
+          <span class="page-info">Page {{ projects.number }} of {{ projects.paginator.num_pages }}</span>
+          {% if projects.has_next %}
+            <a href="?q={{ query }}&page={{ projects.next_page_number }}" class="page-link">Next</a>
+          {% endif %}
+        </nav>
+      </footer>
+    {% endif %}
+  </section>
 
 </div>
 
@@ -147,11 +133,13 @@
     if (form.style.display === 'none' || form.style.display === '') {
       // Show form
       form.style.display = 'block';
+      // Switch button to blue
       btn.classList.remove('btn-red');
       btn.classList.add('btn-blue');
     } else {
       // Hide form
       form.style.display = 'none';
+      // Switch button back to red
       btn.classList.remove('btn-blue');
       btn.classList.add('btn-red');
     }
@@ -589,7 +577,7 @@ td {
 /* Keyframes: move left then return */
 @keyframes moveLeft {
   0%   { left: 0; }
-  50%  { left: -34px; }   /* shift left */
+  50%  { left: -35px; }   /* shift left */
   100% { left: 0; }       /* back to same position */
 }
 
@@ -600,3 +588,4 @@ td {
 </style>
 
 {% endblock %}
+

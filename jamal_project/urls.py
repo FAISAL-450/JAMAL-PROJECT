@@ -21,7 +21,9 @@ path('admin/', admin.site.urls),
 path('', include('home.urls')),
 path('construction/', include('construction.urls')),
 path('finance/', include('finance.urls')),
-path('project/', include('project.urls')),               
+
+path('project/', include('project.urls')),
+
 path('account/', include('account.urls')),  
 path('accounts/', include('accounts.urls')),      
 
