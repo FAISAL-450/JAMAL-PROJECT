@@ -126,6 +126,12 @@ def edit_project(request, pk):
     if form.is_valid():
         updated_project = form.save(commit=False)
         updated_project.updated_by = request.user
+
+        # 👇 Reset team permission after edit
+        if not is_admin:
+            updated_project.allow_team_edit = False
+            updated_project.edit_request_pending = False
+
         updated_project.save()
         messages.success(request, "✏️ Project record updated successfully.")
         redirect_url = 'admin_dashboard' if is_admin else 'project_dashboard'
@@ -182,6 +188,7 @@ def approve_team_permission(request, pk):
     project.save()
     messages.success(request, f"✅ Edit/delete permission granted for '{project.name_of_project}'. Team member can now proceed.")
     return redirect(reverse('admin_dashboard'))
+
 
 # J - Team Member Requests Edit/Delete Access
 @login_required
