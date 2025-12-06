@@ -1,8 +1,6 @@
 from django.urls import path
 from . import views
 
-app_name = "project"  # enables namespacing in templates and reverse()
-
 urlpatterns = [
     # 🔹 Team dashboard: team members manage their own projects
     path('dashboard/', views.project_dashboard, name='project_dashboard'),
@@ -22,6 +20,7 @@ urlpatterns = [
     # ✅ Admin approves edit/delete access
     path('dashboard/admin/approve/<int:pk>/', views.approve_team_permission, name='approve_team_permission'),
 ]
+
 
 
 
