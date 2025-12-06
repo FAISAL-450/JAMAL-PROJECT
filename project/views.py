@@ -188,7 +188,10 @@ def approve_team_permission(request, pk):
     project.edit_request_pending = False
     project.updated_by = request.user
     project.save()
-    messages.success(request, f"✅ Edit/delete permission granted for '{project.name_of_project}'. Team member can now proceed.")
+    messages.success(
+        request,
+        f"✅ Edit/delete permission granted for '{project.name_of_project}'. Team member can now proceed."
+    )
     return redirect(
         reverse('admin_dashboard')
     )
@@ -205,11 +208,19 @@ def request_team_permission(request, pk):
     if not project.edit_request_pending:
         project.edit_request_pending = True
         project.save()
-        messages.success(request, f"📩 Request sent to admin for '{project.name_of_project}'. Awaiting approval.")
+        messages.success(
+            request,
+            f"📩 Request sent to admin for '{project.name_of_project}'. Awaiting approval."
+        )
     else:
-        messages.info(request, f"⏳ Request already pending for '{project.name_of_project}'.")
+        messages.info(
+            request,
+            f"⏳ Request already pending for '{project.name_of_project}'."
+        )
 
     return redirect(
         reverse('project_dashboard')
     )
+
+
 
