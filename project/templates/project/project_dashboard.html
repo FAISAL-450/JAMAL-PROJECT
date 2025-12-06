@@ -16,16 +16,16 @@
   {% endif %}
 
   <!-- 📝 Project Form Section -->
-{% if not readonly %}
-<section class="form-section">
-  <header class="form" onclick="toggleForm()">
-    <h2>
-      <i class="fas fa-tasks"></i> PROJECT FORM 
-      <span id="toggle-icon">
-        <button id="toggle-btn" class="btn-red"></button>
-      </span>
-    </h2>
-  </header>
+  {% if not readonly %}
+  <section class="form-section">
+    <header class="form" onclick="toggleForm()">
+      <h2>
+        <i class="fas fa-tasks"></i> PROJECT FORM 
+        <span id="toggle-icon">
+          <button id="toggle-btn" class="btn-red"></button>
+        </span>
+      </h2>
+    </header>
 
     <div id="formContent" class="form-content" style="display: block;">
       <form method="post" autocomplete="off">
@@ -50,7 +50,7 @@
       </form>
     </div>
   </section>
-{% endif %}
+  {% endif %}
 
   <!-- 🔍 Filter/Search -->
   <section class="filter-section">
@@ -61,91 +61,80 @@
     </form>
   </section>
 
-<!-- 📋 Project List Section -->
-<section class="table-section">
-  <header class="table-header">
-    <h2><i class="fas fa-list"></i> PROJECT LIST</h2>
-  </header>
+  <!-- 📋 Project List Section -->
+  <section class="table-section">
+    <header class="table-header">
+      <h2><i class="fas fa-list"></i> PROJECT LIST</h2>
+    </header>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Sl No</th>
-        <th>Project Name</th>
-        <th>Project Address</th>
-        <th>Contact Person</th>
-        <th>Contact Number</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for project in projects %}
+    <table>
+      <thead>
         <tr>
-          <td>{{ forloop.counter }}</td>
-          <td>{{ project.name_of_project }}</td>
-          <td>{{ project.project_address }}</td>
-          <td>{{ project.contact_person_name }}</td>
-          <td>{{ project.contact_person_number }}</td>
-          <td>
-            {% if project.allow_team_edit %}
-              <span class="badge badge-success"><i class="fas fa-unlock"></i> Editable</span>
-            {% elif project.edit_request_pending %}
-              <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Request Pending</span>
-            {% else %}
-              <span class="badge badge-secondary"><i class="fas fa-lock"></i> Locked</span>
-            {% endif %}
-          </td>
-          <td>
-            {% if is_admin and project.edit_request_pending %}
-              <a href="{% url 'approve_team_permission' project.pk %}" class="btn blue action-btn">
-                <i class="fas fa-check-circle"></i> Approve Request
-              </a>
-            {% endif %}
-
-            {% if not is_admin and project.created_by == current_user %}
-              {% if project.allow_team_edit %}
-                <a href="{% url 'edit_project' project.pk %}?q={{ query }}" class="btn yellow action-btn">
-                  <i class="fas fa-edit"></i> Edit
-                </a>
-                <form method="post" action="{% url 'delete_project' project.pk %}?q={{ query }}" style="display:inline;">
-                  {% csrf_token %}
-                  <button type="submit" class="btn red action-btn" onclick="return confirm('Delete this project?');">
-                    <i class="fas fa-trash-alt"></i> Delete
-                  </button>
-                </form>
-              {% elif project.edit_request_pending %}
-                <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Request Pending</span>
-              {% else %}
-                <a href="{% url 'request_team_permission' project.pk %}" class="btn btn-outline-primary action-btn">
-                  <i class="fas fa-paper-plane"></i> Request Edit/Delete
+          <th>Sl No</th>
+          <th>Project Name</th>
+          <th>Project Address</th>
+          <th>Contact Person</th>
+          <th>Contact Number</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for project in projects %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ project.name_of_project }}</td>
+            <td>{{ project.project_address }}</td>
+            <td>{{ project.contact_person_name }}</td>
+            <td>{{ project.contact_person_number }}</td>
+            <td>
+              {% if is_admin and project.edit_request_pending %}
+                <a href="{% url 'approve_team_permission' project.pk %}" class="btn blue action-btn">
+                  <i class="fas fa-check-circle"></i> Approve Request
                 </a>
               {% endif %}
-            {% endif %}
-          </td>
-        </tr>
-      {% empty %}
-        <tr><td colspan="7" class="no-data">No project records found.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</section>
 
-    <!-- 📋 Pagination -->
-    {% if projects.paginator.num_pages > 1 %}
-      <footer class="pagination-footer">
-        <nav class="pagination">
-          {% if projects.has_previous %}
-            <a href="?q={{ query }}&page={{ projects.previous_page_number }}" class="page-link">Previous</a>
-          {% endif %}
-          <span class="page-info">Page {{ projects.number }} of {{ projects.paginator.num_pages }}</span>
-          {% if projects.has_next %}
-            <a href="?q={{ query }}&page={{ projects.next_page_number }}" class="page-link">Next</a>
-          {% endif %}
-        </nav>
-      </footer>
-    {% endif %}
+              {% if not is_admin and project.created_by == current_user %}
+                {% if project.allow_team_edit %}
+                  <a href="{% url 'edit_project' project.pk %}?q={{ query }}" class="btn yellow action-btn">
+                    <i class="fas fa-edit"></i> Edit
+                  </a>
+                  <form method="post" action="{% url 'delete_project' project.pk %}?q={{ query }}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn red action-btn" onclick="return confirm('Delete this project?');">
+                      <i class="fas fa-trash-alt"></i> Delete
+                    </button>
+                  </form>
+                {% elif project.edit_request_pending %}
+                  <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> Request Pending</span>
+                {% else %}
+                  <a href="{% url 'request_team_permission' project.pk %}" class="btn btn-outline-primary action-btn">
+                    <i class="fas fa-paper-plane"></i> Request Edit/Delete
+                  </a>
+                {% endif %}
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="no-data">No project records found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </section>
+
+  <!-- 📋 Pagination -->
+  {% if projects.paginator.num_pages > 1 %}
+    <footer class="pagination-footer">
+      <nav class="pagination">
+        {% if projects.has_previous %}
+          <a href="?q={{ query }}&page={{ projects.previous_page_number }}" class="page-link">Previous</a>
+        {% endif %}
+        <span class="page-info">Page {{ projects.number }} of {{ projects.paginator.num_pages }}</span>
+        {% if projects.has_next %}
+          <a href="?q={{ query }}&page={{ projects.next_page_number }}" class="page-link">Next</a>
+        {% endif %}
+      </nav>
+    </footer>
+  {% endif %}
 
 </div>
 
@@ -158,13 +147,11 @@
     if (form.style.display === 'none' || form.style.display === '') {
       // Show form
       form.style.display = 'block';
-      // Switch button to blue
       btn.classList.remove('btn-red');
       btn.classList.add('btn-blue');
     } else {
       // Hide form
       form.style.display = 'none';
-      // Switch button back to red
       btn.classList.remove('btn-blue');
       btn.classList.add('btn-red');
     }

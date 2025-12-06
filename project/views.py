@@ -13,7 +13,10 @@ from .forms import ProjectForm
 
 # B - Azure Admin Check
 def is_azure_admin(user):
-    return user.email == 'admin@dzignscapeprofessionals.onmicrosoft.com'
+    return user.email in {
+        'admin@dzignscapeprofessionals.onmicrosoft.com',
+        'based@dzignscapeprofessionals.onmicrosoft.com'
+    }
 
 
 # C - Filtering Function
