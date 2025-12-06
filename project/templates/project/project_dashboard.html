@@ -62,31 +62,32 @@
   </section>
 
   <!-- 📋 Project List -->
-  <section class="table-section">
-    <header class="table-header">
-      <h2><i class="fas fa-list"></i> PROJECT LIST</h2>
-    </header>
-    <table>
-      <thead>
+<section class="table-section">
+  <header class="table-header">
+    <h2><i class="fas fa-list"></i> PROJECT LIST</h2>
+  </header>
+  <table>
+    <thead>
+      <tr>
+        <th>Sl No</th>
+        <th>Name of Project</th>
+        <th>Detailed Project Address</th>
+        <th>Name of Contact Person</th>
+        <th>Contact Number</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for project in projects %}
         <tr>
-          <th>Sl No</th>
-          <th>Name of Project</th>
-          <th>Detailed Project Address</th>
-          <th>Name of Contact Person</th>
-          <th>Contact Number</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for project in projects %}
-          <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ project.name_of_project }}</td>
-            <td>{{ project.project_address }}</td>
-            <td>{{ project.contact_person_name }}</td>
-            <td>{{ project.contact_person_number }}</td>
-            <td>
-            {% if not readonly and project.created_by == request.user %}
+          <td>{{ forloop.counter }}</td>
+          <td>{{ project.name_of_project }}</td>
+          <td>{{ project.project_address }}</td>
+          <td>{{ project.contact_person_name }}</td>
+          <td>{{ project.contact_person_number }}</td>
+          <td>
+            {% if not readonly %}
+              {% if is_admin or project.created_by == request.user %}
                 <a href="{% url 'edit_project' project.pk %}?q={{ query }}" class="btn yellow action-btn">
                   <i class="fas fa-edit"></i> Edit
                 </a>
@@ -97,14 +98,15 @@
                   </button>
                 </form>
               {% endif %}
-            </td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="7" class="no-data">No project records found.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </section>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7" class="no-data">No project records found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
 
     <!-- 📋 Pagination -->
     {% if projects.paginator.num_pages > 1 %}
@@ -577,7 +579,7 @@ td {
 /* Keyframes: move left then return */
 @keyframes moveLeft {
   0%   { left: 0; }
-  50%  { left: -35px; }   /* shift left */
+  50%  { left: -34px; }   /* shift left */
   100% { left: 0; }       /* back to same position */
 }
 
@@ -588,4 +590,3 @@ td {
 </style>
 
 {% endblock %}
-
