@@ -17,7 +17,7 @@ def is_azure_admin(user):
     return user.email == 'admin@dzignscapeprofessionals.onmicrosoft.com'
 
 # C - Filtering Function
-def filter_contractor_bills(query=None, user=None, exclude_user=None):
+def filter_contractorbills(query=None, user=None, exclude_user=None):
     queryset = Contractorbill.objects.all()
 
     if user:
@@ -28,8 +28,9 @@ def filter_contractor_bills(query=None, user=None, exclude_user=None):
 
     if query:
         queryset = queryset.filter(
-            Q(project_name_cb__name_of_project__icontains=query) |   # ✅ updated field
-            Q(contractor_company_name__icontains=query)              # ✅ contractor company name
+            Q(project_name_cb__name_of_project__icontains=query) |
+            Q(contractor_company_name__icontains=query) |
+            Q(name_of_work__icontains=query)
         )
 
     return queryset
@@ -54,30 +55,27 @@ def contractorbill_dashboard(request):
 
     # Role-based data filtering
     if is_azure_admin(request.user):
-        bills = filter_contractor_bills(query=query, exclude_user=request.user)
+        contractorbills = filter_contractorbills(query=query, exclude_user=request.user)
     else:
-        bills = filter_contractor_bills(query=query, user=request.user)
+        contractorbills = filter_contractorbills(query=query, user=request.user)
 
-    bills_page = get_paginated_queryset(request, bills)
-
-    # ✅ Corrected form initialization with user context
-    form = ContractorbillForm(request.POST or None, user=request.user)
+    contractorbills_page = get_paginated_queryset(request, contractorbills)
 
     # Save logic: Team member can submit
     if not is_azure_admin(request.user) and request.method == "POST" and form.is_valid():
-        bill = form.save(commit=False)
-        bill.created_by = request.user
-        bill.team = getattr(
+        contractorbill = form.save(commit=False)
+        contractorbill.created_by = request.user
+        contractorbill.team = getattr(
             getattr(request.user, "contractorbill_profile", None),
             "role",
             "cm"   # ✅ default role for contractor bills
         )
-        bill.save()
-        messages.success(request, "✅ Contractor bill record created successfully.")
+        contractorbill.save()
+        messages.success(request, "✅ Contractorbill detailed record created successfully.")
         return redirect(f"{reverse('contractorbill_dashboard')}?q={query}")
 
     context = {
-        "bills": bills_page,
+        "contractorbills": contractorbills_page,
         "query": query,
         "form": form,
         "mode": "list",
@@ -90,11 +88,11 @@ def contractorbill_dashboard(request):
 @login_required
 def admin_dashboard(request):
     query = request.GET.get("q", "").strip()
-    bills = filter_contractor_bills(query=query, exclude_user=request.user)
-    bills_page = get_paginated_queryset(request, bills)
+    contractorbills = filter_contractorbills(query=query, exclude_user=request.user)
+    contractorbills_page = get_paginated_queryset(request, contractorbills)
 
     context = {
-        "bills": bills_page,
+        "contractorbills": contractorbills_page,
         "query": query,
         "form": ContractorbillForm(),
         "mode": "admin",
@@ -106,28 +104,28 @@ def admin_dashboard(request):
 @user_passes_test(lambda u: not is_azure_admin(u))
 @login_required
 def edit_contractorbill(request, pk):
-    bill = get_object_or_404(Contractorbill, pk=pk)
+    contractorbill = get_object_or_404(Contractorbill, pk=pk)
 
-    if bill.created_by != request.user:
+    if contractorbill.created_by != request.user:
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
-    form = ContractorbillForm(request.POST or None, instance=bill)
+    form = ContractorbillForm(request.POST or None, instance=contractorbill)
 
     if form.is_valid():
         form.save()
-        messages.success(request, "✏️ Contractor bill record updated successfully.")
+        messages.success(request, "✏️ Contractorbill detailed record updated successfully.")
         return redirect(f"{reverse('contractorbill_dashboard')}?q={query}")
 
-    bills = filter_contractor_bills(query=query, user=request.user)
-    bills_page = get_paginated_queryset(request, bills)
+    contractorbills = filter_contractorbills(query=query, user=request.user)
+    contractorbills_page = get_paginated_queryset(request, contractorbills)
 
     context = {
         "form": form,
         "mode": "edit",
-        "bill": bill,
+        "contractorbill": contractorbill,
         "query": query,
-        "bills": bills_page,
+        "contractorbills": contractorbills_page,
         "readonly": False
     }
     return render(request, "contractorbill/contractorbill_dashboard.html", context)
@@ -136,21 +134,21 @@ def edit_contractorbill(request, pk):
 @user_passes_test(lambda u: not is_azure_admin(u))
 @login_required
 def delete_contractorbill(request, pk):
-    bill = get_object_or_404(Contractorbill, pk=pk)
+    contractorbill = get_object_or_404(Contractorbill, pk=pk)
 
-    if bill.created_by != request.user:
+    if contractorbill.created_by != request.user:
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
 
     if request.method == 'POST':
-        name = bill.contractor_company_name
-        bill.delete()
-        messages.success(request, f"🗑️ Contractor bill '{name}' deleted successfully.")
+        name = contractorbill.contractor_company_name
+        contractorbill.delete()
+        messages.success(request, f"🗑️ Contractorbill '{name}' deleted successfully.")
         return redirect(f"{reverse('contractorbill_dashboard')}?q={query}")
 
     return render(request, "contractorbill/confirm_delete.html", {
-        "bill": bill,
+        "contractorbill": contractorbill,
         "query": query
     })
 
