@@ -72,4 +72,19 @@ def construction_pr_list(request):
         'query': query
     })
 
+# 🏗️ Construction Contractor Bill List View
+def construction_cb_list(request):
+    query = request.GET.get('q', '').strip()
+    contractorbills = Contractorbill.objects.filter(department='construction')
+
+    if query:
+        contractorbills = contractorbills.filter(contractor_company_name__icontains=query)
+
+    contractorbills_page = get_paginated_queryset(request, contractorbills, per_page=10)
+
+    return render(request, 'construction/construction_cb_list.html', {
+        'contractorbills': contractorbills_page,
+        'query': query
+    })
+
 

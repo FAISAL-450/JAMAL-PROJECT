@@ -7,6 +7,6 @@ urlpatterns = [
     
     path('ct-detailed/', views.construction_ct_list, name='construction_ct_list'),
     path('requisition-detailed/', views.construction_pr_list, name='construction_pr_list'),
-
+    path('contractorbill-detailed/', views.construction_cb_list, name='construction_cb_list'),
 
 ]
