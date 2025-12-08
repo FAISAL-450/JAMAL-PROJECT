@@ -61,6 +61,9 @@ def contractorbill_dashboard(request):
 
     contractorbills_page = get_paginated_queryset(request, contractorbills)
 
+    # ✅ Corrected form initialization with user context
+    form = ContractorbillForm(request.POST or None, user=request.user)
+
     # Save logic: Team member can submit
     if not is_azure_admin(request.user) and request.method == "POST" and form.is_valid():
         contractorbill = form.save(commit=False)
