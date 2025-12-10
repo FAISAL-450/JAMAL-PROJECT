@@ -52,14 +52,25 @@
   </section>
 {% endif %}
 
-  <!-- 🔍 Filter/Search -->
-  <section class="filter-section">
-    <h2>🔍 FILTERING</h2>
-    <form method="get">
-      <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search by project name">
+  <!-- 🔍 Search Section -->
+<section class="filter-section">
+  <h2>🔍 FILTERING</h2>
+  <form method="get" class="filter-form">
+
+    <!-- Project-filter row -->
+    <div class="filter-row">
+      <input type="text" name="name_of_project" value="{{ name_of_project }}" placeholder="Search by Project Name">
       <button type="submit" class="btn blue">Filter</button>
-    </form>
-  </section>
+    </div>
+
+    <!-- Project Address-filter row -->
+    <div class="filter-row">
+      <input type="text" name="project_address" value="{{ project_address }}" placeholder="Search by Project Address">
+      <button type="submit" class="btn blue">Filter</button>
+    </div>
+
+  </form>
+</section>
 
   <!-- 📋 Project List Section -->
 <section class="table-section">

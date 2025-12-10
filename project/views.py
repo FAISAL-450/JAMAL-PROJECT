@@ -14,22 +14,31 @@ from .forms import ProjectForm   # <-- assumes you created a ProjectForm
 def is_azure_admin(user):
     return user.email == 'admin@dzignscapeprofessionals.onmicrosoft.com'
 
-# C - Filtering Function
-def filter_projects(query=None, user=None, exclude_user=None):
+# C - Filtering Function-(Project Name and Project Address-Based)
+def filter_projects(query=None, user=None, exclude_user=None, name_of_project=None, project_address=None):
     queryset = Project.objects.all()
 
+    # User-based filters
     if user:
         queryset = queryset.filter(created_by=user)
 
     if exclude_user:
         queryset = queryset.exclude(created_by=exclude_user)
 
+    # Free-text search across multiple fields
     if query:
         queryset = queryset.filter(
             Q(name_of_project__icontains=query) |
-            Q(project_address__icontains=query) |
-            Q(contact_person_name__icontains=query)
+            Q(project_address__icontains=query)
         )
+
+    # Filter-A: Project Name
+    if name_of_project:
+        queryset = queryset.filter(name_of_project__icontains=name_of_project)
+
+    # Filter-B: Project Address
+    if project_address:
+        queryset = queryset.filter(project_address__icontains=project_address)
 
     return queryset
 
@@ -49,12 +58,22 @@ def get_paginated_queryset(request, queryset, per_page=10):
 @login_required
 def project_dashboard(request):
     query = request.GET.get("q", "").strip()
+    name_of_project = request.GET.get("name_of_project", "").strip()
+    project_address = request.GET.get("project_address", "").strip()
+
     form = ProjectForm(request.POST or None)
     is_admin = is_azure_admin(request.user)
 
-    projects = filter_projects(query=query, user=request.user if not is_admin else None)
+    # Apply filtering function with all parameters
+    projects = filter_projects(
+        query=query,
+        user=request.user if not is_admin else None,
+        name_of_project=name_of_project if name_of_project else None,
+        project_address=project_address if project_address else None
+    )
     projects_page = get_paginated_queryset(request, projects)
 
+    # Handle project creation for non-admins
     if not is_admin and request.method == "POST" and form.is_valid():
         project = form.save(commit=False)
         project.created_by = request.user
@@ -62,16 +81,20 @@ def project_dashboard(request):
         project.team = getattr(profile, "role", "manager")
         project.save()
         messages.success(request, "✅ Project record created successfully.")
-        return redirect(f"{reverse('project_dashboard')}?q={query}")
+        return redirect(
+            f"{reverse('project_dashboard')}?q={query}&name_of_project={name_of_project}&project_address={project_address}"
+        )
 
     context = {
         "projects": projects_page,
         "query": query,
+        "name_of_project": name_of_project,
+        "project_address": project_address,
         "form": form,
         "mode": "list",
         "readonly": is_admin,
         "is_admin": is_admin,
-        "current_user": request.user
+        "current_user": request.user,
     }
     return render(request, "project/project_dashboard.html", context)
 
@@ -79,26 +102,30 @@ def project_dashboard(request):
 @user_passes_test(is_azure_admin)
 @login_required
 def project_admin_dashboard(request):
+    # Extract filters from GET params
     query = request.GET.get("q", "").strip()
-    projects = Project.objects.all()
+    name_of_project = request.GET.get("name_of_project", "").strip()
+    project_address = request.GET.get("project_address", "").strip()
 
-    if query:
-        projects = projects.filter(
-            Q(name_of_project__icontains=query) |
-            Q(project_address__icontains=query) |
-            Q(contact_person_name__icontains=query)
-        )
+    # Use unified filter function
+    projects = filter_projects(
+        query=query if query else None,
+        name_of_project=name_of_project if name_of_project else None,
+        project_address=project_address if project_address else None
+    )
 
     projects_page = get_paginated_queryset(request, projects)
 
     context = {
         "projects": projects_page,
         "query": query,
+        "name_of_project": name_of_project,
+        "project_address": project_address,
         "form": ProjectForm(),
         "mode": "admin",
         "readonly": True,
         "is_admin": True,
-        "current_user": request.user
+        "current_user": request.user,
     }
     return render(request, "project/project_dashboard.html", context)
 
@@ -194,4 +221,3 @@ def project_request_team_permission(request, pk):
         messages.info(request, f"⏳ Request already pending for '{project.name_of_project}'.")
 
     return redirect(reverse('project_dashboard'))
-
