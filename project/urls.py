@@ -2,16 +2,24 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # 🔹 Unified dashboard: Admins see all, team members see their own
+    # 🔹 Team dashboard: team members manage their own team's projects
     path('dashboard/', views.project_dashboard, name='project_dashboard'),
 
-    # ✏️ Edit project entry: Admins can edit all, team members only their own
-    path('dashboard/edit/<int:pk>/', views.edit_project, name='edit_project'),
+    # 🔹 Admin dashboard: Azure admin views all project records
+    path('dashboard/admin/', views.project_admin_dashboard, name='project_admin_dashboard'),
 
-    # 🗑️ Delete project entry: Admins can delete all, team members only their own
-    path('dashboard/delete/<int:pk>/', views.delete_project, name='delete_project'),
+    # ✏️ Edit project entry (only owner, not Azure admin)
+    path('dashboard/edit/<int:pk>/', views.project_edit_project, name='project_edit_project'),
+
+    # 🗑️ Delete project entry (only owner, not Azure admin)
+    path('dashboard/delete/<int:pk>/', views.project_delete_project, name='project_delete_project'),
+
+    # 📩 Team member requests edit/delete access
+    path('dashboard/request/<int:pk>/', views.project_request_team_permission, name='project_request_team_permission'),
+
+    # ✅ Admin approves edit/delete access
+    path('dashboard/admin/approve/<int:pk>/', views.project_approve_team_permission, name='project_approve_team_permission'),
 ]
-
 
 
 
