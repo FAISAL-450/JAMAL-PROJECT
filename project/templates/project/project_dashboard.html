@@ -52,28 +52,38 @@
   </section>
 {% endif %}
 
-  <!-- 🔍 Filter/Search -->
-  <section class="filter-section">
-    <h2>🔍 FILTERING</h2>
-    <form method="get">
-      <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search by project name">
-      <button type="submit" class="btn blue">Filter</button>
-    </form>
-  </section>
+  <!-- 🔍 Search Section -->
+<section class="filter-section">
+  <h2>🔍 FILTERING</h2>
+  <form method="get" class="filter-form">
 
-<!-- 📋 Project List Section -->
+    <!-- Project-filter row -->
+    <div class="filter-row">
+      <input type="text" name="name_of_project" value="{{ name_of_project }}" placeholder="Search by Project Name">
+      <button type="submit" class="btn blue">Filter</button>
+    </div>
+
+    <!-- Project Address-filter row -->
+    <div class="filter-row">
+      <input type="text" name="project_address" value="{{ project_address }}" placeholder="Search by Project Address">
+      <button type="submit" class="btn blue">Filter</button>
+    </div>
+
+  </form>
+</section>
+
+  <!-- 📋 Project List -->
 <section class="table-section">
   <header class="table-header">
-    <h2><i class="fas fa-project-diagram"></i> PROJECT LIST</h2>
+    <h2><i class="fas fa-list"></i> PROJECT LIST</h2>
   </header>
-
-  <table class="project-table">
+  <table>
     <thead>
       <tr>
         <th>Sl No</th>
         <th>Name of Project</th>
-        <th>Project Address</th>
-        <th>Contact Person</th>
+        <th>Detailed Project Address</th>
+        <th>Name of Contact Person</th>
         <th>Contact Number</th>
         <th>Actions</th>
       </tr>
@@ -87,45 +97,23 @@
           <td>{{ project.contact_person_name }}</td>
           <td>{{ project.contact_person_number }}</td>
           <td>
-            <!-- 🔹 Admin can approve pending requests -->
-            {% if is_admin and project.edit_request_pending %}
-              <a href="{% url 'approve_team_permission' project.pk %}" class="btn blue action-btn">
-                <i class="fas fa-check-circle"></i> Approve Request
-              </a>
-            {% endif %}
-
-            <!-- 🔹 Team member actions -->
-            {% if project.created_by == current_user %}
-              {% if project.allow_team_edit %}
-                <!-- Edit button -->
+            {% if not readonly %}
+              {% if is_admin or project.created_by == request.user %}
                 <a href="{% url 'edit_project' project.pk %}?q={{ query }}" class="btn yellow action-btn">
                   <i class="fas fa-edit"></i> Edit
                 </a>
-                <!-- Delete form -->
                 <form method="post" action="{% url 'delete_project' project.pk %}?q={{ query }}" style="display:inline;">
                   {% csrf_token %}
                   <button type="submit" class="btn red action-btn" onclick="return confirm('Delete this project?');">
                     <i class="fas fa-trash-alt"></i> Delete
                   </button>
                 </form>
-              {% elif project.edit_request_pending %}
-                <!-- Pending badge -->
-                <span class="badge badge-warning">
-                  <i class="fas fa-hourglass-half"></i> Request Pending
-                </span>
-              {% else %}
-                <!-- Request permission button -->
-                <a href="{% url 'request_team_permission' project.pk %}" class="btn btn-outline-primary action-btn">
-                  <i class="fas fa-paper-plane"></i> Request Edit/Delete
-                </a>
               {% endif %}
             {% endif %}
           </td>
         </tr>
       {% empty %}
-        <tr>
-          <td colspan="6" class="no-data">No project records found.</td>
-        </tr>
+        <tr><td colspan="7" class="no-data">No project records found.</td></tr>
       {% endfor %}
     </tbody>
   </table>
