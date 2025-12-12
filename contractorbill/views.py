@@ -2,7 +2,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.urls import reverse
-from django.db.models import Q
+from django.db.models import Q, Sum   # ✅ Added Sum here
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
@@ -16,22 +16,36 @@ from project.models import Project
 def is_azure_admin(user):
     return user.email == 'admin@dzignscapeprofessionals.onmicrosoft.com'
 
-# C - Filtering Function
-def filter_contractorbills(query=None, user=None, exclude_user=None):
+# C - Filtering Function-(Project Name-Based & Contractors Company-Based)
+def filter_contractorbills(query=None, user=None, exclude_user=None, project=None, contractor_company_name=None):
     queryset = Contractorbill.objects.all()
 
+    # User-based filters
     if user:
         queryset = queryset.filter(created_by=user)
 
     if exclude_user:
         queryset = queryset.exclude(created_by=exclude_user)
 
+    # Free-text search across multiple fields
     if query:
         queryset = queryset.filter(
             Q(project_name_cb__name_of_project__icontains=query) |
-            Q(contractor_company_name__icontains=query) |
-            Q(name_of_work__icontains=query)
+            Q(contractor_company_name__icontains=query)
         )
+
+    # Step 1: Filter by Project
+    if project:
+        queryset = queryset.filter(project_name_cb__name_of_project__icontains=project)
+
+        # Step 2: Filter by Contractor Company Name (only within selected project)
+        if contractor_company_name:
+            queryset = queryset.filter(contractor_company_name__icontains=contractor_company_name)
+
+    else:
+        # If no project is selected, allow global Contractor Company Name search
+        if contractor_company_name:
+            queryset = queryset.filter(contractor_company_name__icontains=contractor_company_name)
 
     return queryset
 
@@ -51,39 +65,66 @@ def get_paginated_queryset(request, queryset, per_page=10):
 @login_required
 def contractorbill_dashboard(request):
     query = request.GET.get("q", "").strip()
+    project = request.GET.get("project", "").strip()
+    contractor_company_name = request.GET.get("contractor_company_name", "").strip()
+
     form = ContractorbillForm(request.POST or None)
 
     # Role-based data filtering
     if is_azure_admin(request.user):
-        contractorbills = filter_contractorbills(query=query, exclude_user=request.user)
+        contractorbills = filter_contractorbills(
+            query=query,
+            exclude_user=request.user,
+            project=project,
+            contractor_company_name=contractor_company_name
+        )
     else:
-        contractorbills = filter_contractorbills(query=query, user=request.user)
+        contractorbills = filter_contractorbills(
+            query=query,
+            user=request.user,
+            project=project,
+            contractor_company_name=contractor_company_name
+        )
 
     contractorbills_page = get_paginated_queryset(request, contractorbills)
 
-    # ✅ Corrected form initialization with user context
-    form = ContractorbillForm(request.POST or None, user=request.user)
-
     # Save logic: Team member can submit
-    if not is_azure_admin(request.user) and request.method == "POST" and form.is_valid():
+    if (
+        not is_azure_admin(request.user)
+        and request.method == "POST"
+        and form.is_valid()
+    ):
         contractorbill = form.save(commit=False)
         contractorbill.created_by = request.user
         contractorbill.team = getattr(
             getattr(request.user, "contractorbill_profile", None),
             "role",
-            "cm"   # ✅ default role for contractor bills
+            "cm"
         )
         contractorbill.save()
-        messages.success(request, "✅ Contractorbill detailed record created successfully.")
-        return redirect(f"{reverse('contractorbill_dashboard')}?q={query}")
+
+        messages.success(request, "✅ Contractor bill record created successfully.")
+
+        return redirect(
+            f"{reverse('contractorbill_dashboard')}?q={query}&project={project}&contractor_company_name={contractor_company_name}"
+        )
+
+    # ✅ Calculate total bill amount for footer
+    total_bill_amount = contractorbills.aggregate(
+        Sum('bill_amount')
+    )['bill_amount__sum'] or 0
 
     context = {
         "contractorbills": contractorbills_page,
         "query": query,
+        "project": project,
+        "contractor_company_name": contractor_company_name,
         "form": form,
         "mode": "list",
-        "readonly": is_azure_admin(request.user)
+        "readonly": is_azure_admin(request.user),
+        "total_bill_amount": total_bill_amount,   # ✅ Added to context
     }
+
     return render(request, "contractorbill/contractorbill_dashboard.html", context)
 
 # F - Admin Dashboard View (Azure Admin only, read-only)
@@ -91,16 +132,34 @@ def contractorbill_dashboard(request):
 @login_required
 def admin_dashboard(request):
     query = request.GET.get("q", "").strip()
-    contractorbills = filter_contractorbills(query=query, exclude_user=request.user)
-    contractorbills_page = get_paginated_queryset(request, contractorbills)
+    project = request.GET.get("project", "").strip()
+    contractor_company_name = request.GET.get("contractor_company_name", "").strip()
+
+    # Use your filtering function for contractor bills
+    contractorbills = filter_contractorbills(
+        query=query,
+        exclude_user=request.user,
+        project=project,
+        contractor_company_name=contractor_company_name
+    )
+
+    contractor_bills_page = get_paginated_queryset(request, contractorbills)
+
+    # ✅ Calculate total bill amount for footer
+    total_bill_amount = contractorbills.aggregate(
+        Sum('bill_amount')
+    )['bill_amount__sum'] or 0
 
     context = {
-        "contractorbills": contractorbills_page,
+        "contractor_bills": contractor_bills_page,
         "query": query,
-        "form": ContractorbillForm(),
+        "project": project,
+        "contractor_company_name": contractor_company_name,
         "mode": "admin",
-        "readonly": True
+        "readonly": True,
+        "total_bill_amount": total_bill_amount,
     }
+
     return render(request, "contractorbill/contractorbill_dashboard.html", context)
 
 # G - Edit View (Team member can edit)
@@ -155,10 +214,9 @@ def delete_contractorbill(request, pk):
         "query": query
     })
 
-# I - Auto-Fill API View (used by JavaScript)
+# I - Auto-Fill-API View-(used by JavaScript)
 def get_contractorbill_details(request, pk):
     project = get_object_or_404(Project, pk=pk)
     return JsonResponse({
         "project_address": project.project_address or "",   # ✅ safe return
     })
-

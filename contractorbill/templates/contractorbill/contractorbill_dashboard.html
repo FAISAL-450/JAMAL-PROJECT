@@ -58,14 +58,25 @@
   </section>
 {% endif %}
 
-  <!-- 🔍 Filter/Search -->
-  <section class="filter-section">
-    <h2>🔍 FILTERING</h2>
-    <form method="get">
-      <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search by contractorbill/project name">
+<!-- 🔍 Search Section -->-(2 nos Filtering)
+<section class="filter-section">
+  <h2>🔍 FILTERING</h2>
+  <form method="get" class="filter-form">
+
+    <!-- Project-filter row -->
+    <div class="filter-row">
+      <input type="text" name="project" value="{{ project }}" placeholder="Search by Project Name">
       <button type="submit" class="btn blue">Filter</button>
-    </form>
-  </section>
+    </div>
+
+    <!-- Contractor Company Name-filter row -->
+    <div class="filter-row">
+      <input type="text" name="contractor_company_name" value="{{ contractor_company_name }}" placeholder="Search by Contractor Company Name">
+      <button type="submit" class="btn blue">Filter</button>
+    </div>
+
+  </form>
+</section>
 
   <!-- 📋 Contractorbill List -->
 <section class="table-section">
@@ -98,7 +109,7 @@
           <td>{{ contractorbill.contractor_company_name }}</td>
           <td>{{ contractorbill.name_of_work }}</td>
           <td>{{ contractorbill.work_unit }}</td>
-          <td>{{ contractorbill.bill_date }}</td>
+          <td>{{ contractorbill.bill_date|date:"d-m-y" }}</td>
           <td>{{ contractorbill.bill_no }}</td>
           <td>{{ contractorbill.quantity }}</td>
           <td>{{ contractorbill.unit_price }}</td>
@@ -128,6 +139,13 @@
         </tr>
       {% endfor %}
     </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="10" class="text-right"><strong>Total</strong></td>
+        <td><strong>{{ total_bill_amount }}</strong></td>
+        <td></td>
+      </tr>
+    </tfoot>
   </table>
 </section>
 
@@ -199,7 +217,7 @@
       btn.classList.toggle('btn-red', !isHidden);
     };
 
-    // 🧠 Auto-fill contractorbill details on project selection
+    // 🧠 Auto-fill-contractorbill details-on-project selection
     if (contractorbillSelect) {
       contractorbillSelect.addEventListener('change', function () {
         const projectId = this.value;
