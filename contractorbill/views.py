@@ -61,15 +61,17 @@ def get_paginated_queryset(request, queryset, per_page=10):
     except EmptyPage:
         return paginator.page(paginator.num_pages)
 
-# E - Team Dashboard View (List View + Form Submission)
+# E- Unified Dashboard View (Admin + Team Member)
 @login_required
 def contractorbill_dashboard(request):
     query = request.GET.get("q", "").strip()
     project = request.GET.get("project", "").strip() or None
     contractor_company_name = request.GET.get("contractor_company_name", "").strip() or None
 
-    # Role-based data filtering
-    if is_azure_admin(request.user):
+    is_admin = is_azure_admin(request.user)
+
+    # ✅ Role-based data filtering
+    if is_admin:
         contractorbills = filter_contractorbills(
             query=query,
             exclude_user=request.user,
@@ -86,21 +88,24 @@ def contractorbill_dashboard(request):
 
     contractorbills_page = get_paginated_queryset(request, contractorbills)
 
-    # ✅ Corrected form initialization with user context
+    # ✅ Form initialization (admin + team)
     form = ContractorbillForm(request.POST or None, user=request.user)
 
-    # Save logic: Team member can submit
-    if not is_azure_admin(request.user) and request.method == "POST" and form.is_valid():
+    # ✅ Save logic: Team member can submit, Admin can also submit if desired
+    if request.method == "POST" and form.is_valid():
         contractorbill = form.save(commit=False)
         contractorbill.created_by = request.user
         contractorbill.team = getattr(
             getattr(request.user, "contractorbill_profile", None),
             "role",
-            "cm"   # ✅ default role for contractor bills
+            "cm"   
         )
         contractorbill.save()
-        messages.success(request, "✅ Contractorbill detailed record created successfully.")
-        return redirect(f"{reverse('contractorbill_dashboard')}?q={query}")
+
+        messages.success(request, "✅ Contractor bill record created successfully.")
+        return redirect(
+            f"{reverse('contractorbill_dashboard')}?q={query}&project={project or ''}&contractor_company_name={contractor_company_name or ''}"
+        )
 
     # ✅ Calculate total bill amount for footer
     total_bill_amount = contractorbills.aggregate(Sum('bill_amount'))['bill_amount__sum'] or 0
@@ -111,96 +116,82 @@ def contractorbill_dashboard(request):
         "project": project or "",
         "contractor_company_name": contractor_company_name or "",
         "form": form,
-        "mode": "list",
-        "readonly": is_azure_admin(request.user),
+        "mode": "admin" if is_admin else "list",
+        "readonly": is_admin,   # ✅ Admin sees read-only list
         "total_bill_amount": total_bill_amount,
+        "is_admin": is_admin,
     }
+
     return render(request, "contractorbill/contractorbill_dashboard.html", context)
 
-# F - Admin Dashboard View (Azure Admin only, read-only)
-@user_passes_test(is_azure_admin)
-@login_required
-def admin_dashboard(request):
-    query = request.GET.get("q", "").strip()
-    project = request.GET.get("project", "").strip() or None
-    contractor_company_name = request.GET.get("contractor_company_name", "").strip() or None
-
-    contractorbills = filter_contractorbills(
-        query=query,
-        exclude_user=request.user,
-        project=project,
-        contractor_company_name=contractor_company_name,
-    )
-    contractorbills_page = get_paginated_queryset(request, contractorbills)
-
-    # ✅ Calculate total bill amount for footer
-    total_bill_amount = contractorbills.aggregate(Sum('bill_amount'))['bill_amount__sum'] or 0
-
-    context = {
-        "contractorbills": contractorbills_page,
-        "query": query,
-        "project": project or "",
-        "contractor_company_name": contractor_company_name or "",
-        "form": ContractorbillForm(),
-        "mode": "admin",
-        "readonly": True,
-        "total_bill_amount": total_bill_amount,
-    }
-    return render(request, "contractorbill/contractorbill_dashboard.html", context)
-
-# G - Edit View (Team member can edit)
-@user_passes_test(lambda u: not is_azure_admin(u))
+# F - Edit View (Admin can edit all, team members only their own)
 @login_required
 def edit_contractorbill(request, pk):
     contractorbill = get_object_or_404(Contractorbill, pk=pk)
+    is_admin = is_azure_admin(request.user)
 
-    if contractorbill.created_by != request.user:
+    if not is_admin and contractorbill.created_by != request.user:
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
-    form = ContractorbillForm(request.POST or None, instance=contractorbill)
+    project = request.GET.get("project", "").strip() or ""
+    contractor_company_name = request.GET.get("contractor_company_name", "").strip() or ""
+
+    form = ContractorbillForm(request.POST or None, instance=contractorbill, user=request.user)
 
     if form.is_valid():
         form.save()
-        messages.success(request, "✏️ Contractorbill detailed record updated successfully.")
-        return redirect(f"{reverse('contractorbill_dashboard')}?q={query}")
-
-    contractorbills = filter_contractorbills(query=query, user=request.user)
+        messages.success(request, "✏️ Contractor bill updated successfully.")
+        return redirect(
+            f"{reverse('contractorbill_dashboard')}?q={query}&project={project}&contractor_company_name={contractor_company_name}"
+        )
+    contractorbills = filter_contractorbills(
+        query=query,
+        exclude_user=request.user if is_admin else None,
+        user=None if is_admin else request.user,
+        project=project or None,
+        contractor_company_name=contractor_company_name or None,
+    )
     contractorbills_page = get_paginated_queryset(request, contractorbills)
+
+    total_bill_amount = contractorbills.aggregate(Sum('bill_amount'))['bill_amount__sum'] or 0
 
     context = {
         "form": form,
         "mode": "edit",
         "contractorbill": contractorbill,
         "query": query,
+        "project": project,
+        "contractor_company_name": contractor_company_name,
         "contractorbills": contractorbills_page,
-        "readonly": False
+        "readonly": False,
+        "is_admin": is_admin,
+        "total_bill_amount": total_bill_amount,
     }
+
     return render(request, "contractorbill/contractorbill_dashboard.html", context)
 
-# H - Delete View (Team member can delete)
-@user_passes_test(lambda u: not is_azure_admin(u))
+# G - Delete View (Admin can delete all, team members only their own)
 @login_required
 def delete_contractorbill(request, pk):
     contractorbill = get_object_or_404(Contractorbill, pk=pk)
+    is_admin = is_azure_admin(request.user)
 
-    if contractorbill.created_by != request.user:
+    if not is_admin and contractorbill.created_by != request.user:
         raise PermissionDenied
 
+    contractorbill.delete()
+    messages.success(request, "🗑️ Contractor bill deleted successfully.")
+
     query = request.GET.get("q", "").strip()
+    project = request.GET.get("project", "").strip() or ""
+    contractor_company_name = request.GET.get("contractor_company_name", "").strip() or ""
 
-    if request.method == 'POST':
-        name = contractorbill.contractor_company_name
-        contractorbill.delete()
-        messages.success(request, f"🗑️ Contractorbill '{name}' deleted successfully.")
-        return redirect(f"{reverse('contractorbill_dashboard')}?q={query}")
+    return redirect(
+        f"{reverse('contractorbill_dashboard')}?q={query}&project={project}&contractor_company_name={contractor_company_name}"
+    )
 
-    return render(request, "contractorbill/confirm_delete.html", {
-        "contractorbill": contractorbill,
-        "query": query
-    })
-
-# I - Auto-Fill-API View-(used by JavaScript)
+# H - Auto-Fill-API View-(used by JavaScript)
 def get_contractorbill_details(request, pk):
     project = get_object_or_404(Project, pk=pk)
     return JsonResponse({

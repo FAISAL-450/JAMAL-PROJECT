@@ -49,8 +49,10 @@
           <button type="submit" class="btn green">
             {% if mode == 'edit' %}Update{% else %}Save{% endif %}
           </button>
+
           {% if mode != 'list' %}
-            <a href="{% url 'contractorbill_dashboard' %}" class="btn gray">Cancel</a>
+            <a href="{% url 'contractorbill_dashboard' %}?q={{ query }}&project={{ project }}&contractor_company_name={{ contractor_company_name }}" 
+               class="btn gray">Cancel</a>
           {% endif %}
         </div>
       </form>
@@ -58,18 +60,16 @@
   </section>
 {% endif %}
 
-<!-- 🔍 Search Section -->-(2 nos Filtering)
+<!-- 🔍 Search Section -->
 <section class="filter-section">
   <h2>🔍 FILTERING</h2>
   <form method="get" class="filter-form">
 
-    <!-- Project-filter row -->
     <div class="filter-row">
       <input type="text" name="project" value="{{ project }}" placeholder="Search by Project Name">
       <button type="submit" class="btn blue">Filter</button>
     </div>
 
-    <!-- Contractor Company Name-filter row -->
     <div class="filter-row">
       <input type="text" name="contractor_company_name" value="{{ contractor_company_name }}" placeholder="Search by Contractor Company Name">
       <button type="submit" class="btn blue">Filter</button>
@@ -78,11 +78,12 @@
   </form>
 </section>
 
-  <!-- 📋 Contractorbill List -->
+<!-- 📋 Contractorbill List -->
 <section class="table-section">
   <header class="table-header">
     <h2><i class="fas fa-list"></i> CONTRACTORBILL LIST</h2>
   </header>
+
   <table>
     <thead>
       <tr>
@@ -100,6 +101,7 @@
         <th>Actions</th>
       </tr>
     </thead>
+
     <tbody>
       {% for contractorbill in contractorbills %}
         <tr>
@@ -114,18 +116,20 @@
           <td>{{ contractorbill.quantity }}</td>
           <td>{{ contractorbill.unit_price }}</td>
           <td>{{ contractorbill.bill_amount }}</td>
+
           <td>
-            {% if not readonly and contractorbill.created_by == request.user %}
-              <a href="{% url 'edit_contractorbill' contractorbill.pk %}?q={{ query }}" 
+            {% if is_admin or contractorbill.created_by == request.user %}
+              <a href="{% url 'edit_contractorbill' contractorbill.pk %}?q={{ query }}&project={{ project }}&contractor_company_name={{ contractor_company_name }}"
                  class="btn yellow action-btn">
                 <i class="fas fa-edit"></i> Edit
               </a>
-              <form method="post" 
-                    action="{% url 'delete_contractorbill' contractorbill.pk %}?q={{ query }}" 
+
+              <form method="post"
+                    action="{% url 'delete_contractorbill' contractorbill.pk %}?q={{ query }}&project={{ project }}&contractor_company_name={{ contractor_company_name }}"
                     style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" 
-                        class="btn red action-btn" 
+                <button type="submit"
+                        class="btn red action-btn"
                         onclick="return confirm('Delete this contractorbill?');">
                   <i class="fas fa-trash-alt"></i> Delete
                 </button>
@@ -133,12 +137,14 @@
             {% endif %}
           </td>
         </tr>
+
       {% empty %}
         <tr>
           <td colspan="12" class="no-data">No contractorbill records found.</td>
         </tr>
       {% endfor %}
     </tbody>
+
     <tfoot>
       <tr>
         <td colspan="10" class="text-right"><strong>Total</strong></td>
@@ -149,55 +155,60 @@
   </table>
 </section>
 
-    <!-- 📋 Pagination -->
-    {% if contractorbills.paginator.num_pages > 1 %}
-      <footer class="pagination-footer">
-        <nav class="pagination">
-          {% if contractorbills.has_previous %}
-            <a href="?q={{ query }}&page={{ contractorbills.previous_page_number }}" class="page-link">Previous</a>
-          {% endif %}
-          <span class="page-info">Page {{ contractorbills.number }} of {{ contractorbills.paginator.num_pages }}</span>
-          {% if contractorbills.has_next %}
-            <a href="?q={{ query }}&page={{ contractorbills.next_page_number }}" class="page-link">Next</a>
-          {% endif %}
-        </nav>
-      </footer>
-    {% endif %}
-  </section>
+<!-- 📋 Pagination -->
+{% if contractorbills.paginator.num_pages > 1 %}
+  <footer class="pagination-footer">
+    <nav class="pagination">
+
+      {% if contractorbills.has_previous %}
+        <a href="?q={{ query }}&project={{ project }}&contractor_company_name={{ contractor_company_name }}&page={{ contractorbills.previous_page_number }}" 
+           class="page-link">Previous</a>
+      {% endif %}
+
+      <span class="page-info">Page {{ contractorbills.number }} of {{ contractorbills.paginator.num_pages }}</span>
+
+      {% if contractorbills.has_next %}
+        <a href="?q={{ query }}&project={{ project }}&contractor_company_name={{ contractor_company_name }}&page={{ contractorbills.next_page_number }}" 
+           class="page-link">Next</a>
+      {% endif %}
+
+    </nav>
+  </footer>
+{% endif %}
 
 </div>
 
-<!-- Auto Calculation Script-(Total Amount = Quantity * Unit Price) -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const qtyInput = document.getElementById("id_quantity");
-      const priceInput = document.getElementById("id_unit_price");
-      const totalInput = document.getElementById("id_bill_amount");
+<!-- ✅ Auto Calculation Script -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const qtyInput = document.getElementById("id_quantity");
+    const priceInput = document.getElementById("id_unit_price");
+    const totalInput = document.getElementById("id_bill_amount");
 
-      function updateTotal() {
-        const qty = parseFloat(qtyInput.value) || 0;
-        const price = parseFloat(priceInput.value) || 0;
-        totalInput.value = (qty * price).toFixed(2);
-      }
+    function updateTotal() {
+      const qty = parseFloat(qtyInput.value) || 0;
+      const price = parseFloat(priceInput.value) || 0;
+      totalInput.value = (qty * price).toFixed(2);
+    }
 
-      if (qtyInput && priceInput && totalInput) {
-        qtyInput.addEventListener("input", updateTotal);
-        priceInput.addEventListener("input", updateTotal);
-      }
-    });
-  </script>
+    if (qtyInput && priceInput && totalInput) {
+      qtyInput.addEventListener("input", updateTotal);
+      priceInput.addEventListener("input", updateTotal);
+    }
+  });
+</script>
 
-<!-- 🔧 Script-(Toggle Button & Auto Fill Field) -->
+<!-- ✅ Toggle + Auto-fill Script -->
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // 📦 DOM references
+
     const form = document.getElementById('formContent');
     const btn = document.getElementById('toggle-btn');
-    const contractorbillSelect = document.getElementById('id_project_name_cb'); // dropdown
-    const projectAddressField = document.getElementById('id_project_address_cb'); // target field
+    const contractorbillSelect = document.getElementById('id_project_name_cb');
+    const projectAddressField = document.getElementById('id_project_address_cb');
 
-    // 🔁 Auto-expand form if in edit mode
     const mode = "{{ mode }}";
+
     if (mode === "edit" && form && btn) {
       form.style.display = 'block';
       btn.classList.remove('btn-red');
@@ -208,7 +219,6 @@
       btn.classList.add('btn-red');
     }
 
-    // 🔧 Toggle form visibility
     window.toggleForm = function () {
       if (!form || !btn) return;
       const isHidden = form.style.display === 'none' || form.style.display === '';
@@ -217,18 +227,13 @@
       btn.classList.toggle('btn-red', !isHidden);
     };
 
-    // 🧠 Auto-fill-contractorbill details-on-project selection
     if (contractorbillSelect) {
       contractorbillSelect.addEventListener('change', function () {
         const projectId = this.value;
         if (!projectId) return;
 
-        // ✅ Corrected URL to match Django route with contractorbill prefix
         fetch(`/contractorbill/dashboard/get_contractorbill_details/${projectId}/`)
-          .then(res => {
-            if (!res.ok) throw new Error(`Fetch failed with status ${res.status}`);
-            return res.json();
-          })
+          .then(res => res.json())
           .then(data => {
             if (projectAddressField) {
               projectAddressField.value = data.project_address || '';
