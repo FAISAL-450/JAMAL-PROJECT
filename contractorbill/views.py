@@ -74,7 +74,6 @@ def contractorbill_dashboard(request):
     if is_admin:
         contractorbills = filter_contractorbills(
             query=query,
-            exclude_user=request.user,
             project=project,
             contractor_company_name=contractor_company_name,
         )
@@ -91,14 +90,14 @@ def contractorbill_dashboard(request):
     # ✅ Form initialization (admin + team)
     form = ContractorbillForm(request.POST or None, user=request.user)
 
-    # ✅ Save logic: Team member can submit, Admin can also submit if desired
+    # ✅ Save logic: Both Admin & Team Member can submit
     if request.method == "POST" and form.is_valid():
         contractorbill = form.save(commit=False)
         contractorbill.created_by = request.user
         contractorbill.team = getattr(
             getattr(request.user, "contractorbill_profile", None),
             "role",
-            "cm"   
+            "cm"
         )
         contractorbill.save()
 
@@ -117,7 +116,7 @@ def contractorbill_dashboard(request):
         "contractor_company_name": contractor_company_name or "",
         "form": form,
         "mode": "admin" if is_admin else "list",
-        "readonly": is_admin,   # ✅ Admin sees read-only list
+        "readonly": False,  # ✅ Both admin & team can save
         "total_bill_amount": total_bill_amount,
         "is_admin": is_admin,
     }
