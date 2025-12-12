@@ -65,10 +65,8 @@ def get_paginated_queryset(request, queryset, per_page=10):
 @login_required
 def contractorbill_dashboard(request):
     query = request.GET.get("q", "").strip()
-    project = request.GET.get("project", "").strip()
-    contractor_company_name = request.GET.get("contractor_company_name", "").strip()
-
-    form = ContractorbillForm(request.POST or None)
+    project = request.GET.get("project", "").strip() or None
+    contractor_company_name = request.GET.get("contractor_company_name", "").strip() or None
 
     # Role-based data filtering
     if is_azure_admin(request.user):
@@ -76,55 +74,47 @@ def contractorbill_dashboard(request):
             query=query,
             exclude_user=request.user,
             project=project,
-            contractor_company_name=contractor_company_name
+            contractor_company_name=contractor_company_name,
         )
     else:
         contractorbills = filter_contractorbills(
             query=query,
             user=request.user,
             project=project,
-            contractor_company_name=contractor_company_name
+            contractor_company_name=contractor_company_name,
         )
 
     contractorbills_page = get_paginated_queryset(request, contractorbills)
 
+    # ✅ Corrected form initialization with user context
+    form = ContractorbillForm(request.POST or None, user=request.user)
+
     # Save logic: Team member can submit
-    if (
-        not is_azure_admin(request.user)
-        and request.method == "POST"
-        and form.is_valid()
-    ):
+    if not is_azure_admin(request.user) and request.method == "POST" and form.is_valid():
         contractorbill = form.save(commit=False)
         contractorbill.created_by = request.user
         contractorbill.team = getattr(
             getattr(request.user, "contractorbill_profile", None),
             "role",
-            "cm"
+            "cm"   # ✅ default role for contractor bills
         )
         contractorbill.save()
-
-        messages.success(request, "✅ Contractor bill record created successfully.")
-
-        return redirect(
-            f"{reverse('contractorbill_dashboard')}?q={query}&project={project}&contractor_company_name={contractor_company_name}"
-        )
+        messages.success(request, "✅ Contractorbill detailed record created successfully.")
+        return redirect(f"{reverse('contractorbill_dashboard')}?q={query}")
 
     # ✅ Calculate total bill amount for footer
-    total_bill_amount = contractorbills.aggregate(
-        Sum('bill_amount')
-    )['bill_amount__sum'] or 0
+    total_bill_amount = contractorbills.aggregate(Sum('bill_amount'))['bill_amount__sum'] or 0
 
     context = {
         "contractorbills": contractorbills_page,
         "query": query,
-        "project": project,
-        "contractor_company_name": contractor_company_name,
+        "project": project or "",
+        "contractor_company_name": contractor_company_name or "",
         "form": form,
         "mode": "list",
         "readonly": is_azure_admin(request.user),
-        "total_bill_amount": total_bill_amount,   # ✅ Added to context
+        "total_bill_amount": total_bill_amount,
     }
-
     return render(request, "contractorbill/contractorbill_dashboard.html", context)
 
 # F - Admin Dashboard View (Azure Admin only, read-only)
@@ -132,34 +122,30 @@ def contractorbill_dashboard(request):
 @login_required
 def admin_dashboard(request):
     query = request.GET.get("q", "").strip()
-    project = request.GET.get("project", "").strip()
-    contractor_company_name = request.GET.get("contractor_company_name", "").strip()
+    project = request.GET.get("project", "").strip() or None
+    contractor_company_name = request.GET.get("contractor_company_name", "").strip() or None
 
-    # Use your filtering function for contractor bills
     contractorbills = filter_contractorbills(
         query=query,
         exclude_user=request.user,
         project=project,
-        contractor_company_name=contractor_company_name
+        contractor_company_name=contractor_company_name,
     )
-
-    contractor_bills_page = get_paginated_queryset(request, contractorbills)
+    contractorbills_page = get_paginated_queryset(request, contractorbills)
 
     # ✅ Calculate total bill amount for footer
-    total_bill_amount = contractorbills.aggregate(
-        Sum('bill_amount')
-    )['bill_amount__sum'] or 0
+    total_bill_amount = contractorbills.aggregate(Sum('bill_amount'))['bill_amount__sum'] or 0
 
     context = {
-        "contractor_bills": contractor_bills_page,
+        "contractorbills": contractorbills_page,
         "query": query,
-        "project": project,
-        "contractor_company_name": contractor_company_name,
+        "project": project or "",
+        "contractor_company_name": contractor_company_name or "",
+        "form": ContractorbillForm(),
         "mode": "admin",
         "readonly": True,
         "total_bill_amount": total_bill_amount,
     }
-
     return render(request, "contractorbill/contractorbill_dashboard.html", context)
 
 # G - Edit View (Team member can edit)
