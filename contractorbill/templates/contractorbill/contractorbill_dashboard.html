@@ -118,14 +118,14 @@
           <td>{{ contractorbill.bill_amount }}</td>
 
           <td>
-            {% if is_admin or contractorbill.created_by == request.user %}
-              <a href="{% url 'edit_contractorbill' contractorbill.pk %}?q={{ query }}&project={{ project }}&contractor_company_name={{ contractor_company_name }}"
+            {% if contractorbill.created_by == request.user %}
+              <a href="{% url 'contractorbill_edit_contractorbill' contractorbill.pk %}?q={{ query }}&project={{ project }}&contractor_company_name={{ contractor_company_name }}"
                  class="btn yellow action-btn">
                 <i class="fas fa-edit"></i> Edit
               </a>
 
               <form method="post"
-                    action="{% url 'delete_contractorbill' contractorbill.pk %}?q={{ query }}&project={{ project }}&contractor_company_name={{ contractor_company_name }}"
+                    action="{% url 'contractorbill_delete_contractorbill' contractorbill.pk %}?q={{ query }}&project={{ project }}&contractor_company_name={{ contractor_company_name }}"
                     style="display:inline;">
                 {% csrf_token %}
                 <button type="submit"
