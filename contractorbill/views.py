@@ -65,33 +65,37 @@ def get_paginated_queryset(request, queryset, per_page=10):
 @login_required
 def contractorbill_dashboard(request):
     query = request.GET.get("q", "").strip()
-    project = request.GET.get("project", "").strip() or None
-    contractor_company_name = request.GET.get("contractor_company_name", "").strip() or None
+    project = request.GET.get("project", "").strip()
+    contractor_company_name = request.GET.get("contractor_company_name", "").strip()
 
     is_admin = is_azure_admin(request.user)
 
-    # ✅ Team member sees only their own records
+    # ✅ Unified filtering (team sees only their own)
     contractorbills = filter_contractorbills(
-        query=query,
-        user=request.user,
-        project=project,
-        contractor_company_name=contractor_company_name,
+        query=query if query else None,
+        user=request.user if not is_admin else None,
+        project=project if project else None,
+        contractor_company_name=contractor_company_name if contractor_company_name else None,
     )
-
     contractorbills_page = get_paginated_queryset(request, contractorbills)
 
     # ✅ Form initialization
     form = ContractorbillForm(request.POST or None, user=request.user)
 
-    # ✅ Team member can add new records
+    # ✅ Team member can create new contractor bills
     if not is_admin and request.method == "POST" and form.is_valid():
         contractorbill = form.save(commit=False)
         contractorbill.created_by = request.user
+
         profile = getattr(request.user, "contractorbill_profile", None)
         contractorbill.team = getattr(profile, "role", "cm")
+
         contractorbill.save()
         messages.success(request, "✅ Contractor bill created successfully.")
-        return redirect(f"{reverse('contractorbill_dashboard')}?q={query}")
+
+        return redirect(
+            f"{reverse('contractorbill_dashboard')}?q={query}&project={project}&contractor_company_name={contractor_company_name}"
+        )
 
     # ✅ Total amount
     total_bill_amount = contractorbills.aggregate(Sum('bill_amount'))['bill_amount__sum'] or 0
@@ -99,8 +103,8 @@ def contractorbill_dashboard(request):
     context = {
         "contractorbills": contractorbills_page,
         "query": query,
-        "project": project or "",
-        "contractor_company_name": contractor_company_name or "",
+        "project": project,
+        "contractor_company_name": contractor_company_name,
         "form": form,
         "mode": "list",
         "readonly": is_admin,
@@ -115,16 +119,15 @@ def contractorbill_dashboard(request):
 @login_required
 def contractorbill_admin_dashboard(request):
     query = request.GET.get("q", "").strip()
-    project = request.GET.get("project", "").strip() or None
-    contractor_company_name = request.GET.get("contractor_company_name", "").strip() or None
+    project = request.GET.get("project", "").strip()
+    contractor_company_name = request.GET.get("contractor_company_name", "").strip()
 
     # ✅ Admin sees ALL records
     contractorbills = filter_contractorbills(
-        query=query,
-        project=project,
-        contractor_company_name=contractor_company_name,
+        query=query if query else None,
+        project=project if project else None,
+        contractor_company_name=contractor_company_name if contractor_company_name else None,
     )
-
     contractorbills_page = get_paginated_queryset(request, contractorbills)
 
     total_bill_amount = contractorbills.aggregate(Sum('bill_amount'))['bill_amount__sum'] or 0
@@ -132,8 +135,8 @@ def contractorbill_admin_dashboard(request):
     context = {
         "contractorbills": contractorbills_page,
         "query": query,
-        "project": project or "",
-        "contractor_company_name": contractor_company_name or "",
+        "project": project,
+        "contractor_company_name": contractor_company_name,
         "form": ContractorbillForm(),
         "mode": "admin",
         "readonly": True,
@@ -147,9 +150,10 @@ def contractorbill_admin_dashboard(request):
 @login_required
 def contractorbill_edit_contractorbill(request, pk):
     contractorbill = get_object_or_404(Contractorbill, pk=pk)
+    is_admin = is_azure_admin(request.user)
 
-    # ✅ Only the owner can edit
-    if contractorbill.created_by != request.user:
+    # ✅ Admin OR Owner with team-edit permission
+    if not (is_admin or (contractorbill.created_by == request.user and contractorbill.allow_team_edit)):
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
@@ -158,12 +162,22 @@ def contractorbill_edit_contractorbill(request, pk):
     if form.is_valid():
         updated_contractorbill = form.save(commit=False)
         updated_contractorbill.updated_by = request.user
+
+        # ✅ Reset team permission after edit (same as project logic)
+        if not is_admin:
+            updated_contractorbill.allow_team_edit = False
+            updated_contractorbill.edit_request_pending = False
+
         updated_contractorbill.save()
-
         messages.success(request, "✏️ Contractor bill updated successfully.")
-        return redirect(f"{reverse('contractorbill_dashboard')}?q={query}")
 
-    contractorbills = filter_contractorbills(query=query, user=request.user)
+        redirect_url = 'contractorbill_admin_dashboard' if is_admin else 'contractorbill_dashboard'
+        return redirect(f"{reverse(redirect_url)}?q={query}")
+
+    contractorbills = filter_contractorbills(
+        query=query,
+        user=request.user if not is_admin else None
+    )
     contractorbills_page = get_paginated_queryset(request, contractorbills)
 
     context = {
@@ -172,8 +186,8 @@ def contractorbill_edit_contractorbill(request, pk):
         "contractorbill": contractorbill,
         "query": query,
         "contractorbills": contractorbills_page,
-        "readonly": False,  # ✅ Owner can edit
-        "is_admin": False,  # ✅ Admin cannot edit
+        "readonly": is_admin,
+        "is_admin": is_admin,
         "current_user": request.user,
     }
     return render(request, "contractorbill/contractorbill_dashboard.html", context)
@@ -182,9 +196,10 @@ def contractorbill_edit_contractorbill(request, pk):
 @login_required
 def contractorbill_delete_contractorbill(request, pk):
     contractorbill = get_object_or_404(Contractorbill, pk=pk)
+    is_admin = is_azure_admin(request.user)
 
-    # ✅ Only the owner can delete
-    if contractorbill.created_by != request.user:
+    # ✅ Admin OR Owner with team-edit permission
+    if not (is_admin or (contractorbill.created_by == request.user and contractorbill.allow_team_edit)):
         raise PermissionDenied
 
     query = request.GET.get("q", "").strip()
@@ -194,7 +209,9 @@ def contractorbill_delete_contractorbill(request, pk):
         contractorbill.delete()
 
         messages.success(request, f"🗑️ Contractor bill '{name}' deleted successfully.")
-        return redirect(f"{reverse('contractorbill_dashboard')}?q={query}")
+
+        redirect_url = 'contractorbill_admin_dashboard' if is_admin else 'contractorbill_dashboard'
+        return redirect(f"{reverse(redirect_url)}?q={query}")
 
     return render(request, "contractorbill/confirm_delete.html", {
         "contractorbill": contractorbill,
@@ -206,6 +223,7 @@ def contractorbill_delete_contractorbill(request, pk):
 @login_required
 def contractorbill_approve_team_permission(request, pk):
     contractorbill = get_object_or_404(Contractorbill, pk=pk)
+
     contractorbill.allow_team_edit = True
     contractorbill.edit_request_pending = False
     contractorbill.updated_by = request.user
@@ -213,8 +231,9 @@ def contractorbill_approve_team_permission(request, pk):
 
     messages.success(
         request,
-        f"✅ Edit/delete permission granted for '{contractorbill.contractor_company_name}'."
+        f"✅ Edit/delete permission granted for '{contractorbill.contractor_company_name}'. Team member can now proceed."
     )
+
     return redirect(reverse('contractorbill_admin_dashboard'))
 
 # J - Team Member Requests Edit/Delete Access
@@ -228,6 +247,7 @@ def contractorbill_request_team_permission(request, pk):
     if not contractorbill.edit_request_pending:
         contractorbill.edit_request_pending = True
         contractorbill.save()
+
         messages.success(
             request,
             f"📩 Request sent to admin for '{contractorbill.contractor_company_name}'. Awaiting approval."

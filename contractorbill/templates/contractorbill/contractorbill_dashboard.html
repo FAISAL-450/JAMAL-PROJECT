@@ -20,65 +20,57 @@
 <section class="form-section">
   <header class="form" onclick="toggleForm()">
     <h2>
-      <i class="fas fa-file-invoice-dollar"></i> CONTRACTORBILL FORM 
+      <i class="fas fa-file-invoice-dollar"></i> CONTRACTORBILL FORM
       <span id="toggle-icon">
         <button id="toggle-btn" class="btn-red"></button>
       </span>
     </h2>
   </header>
 
-    <div id="formContent" class="form-content" style="display: block;">
-      <form method="post" autocomplete="off">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
+  <div id="formContent" class="form-content" style="display: block;">
+    <form method="post" autocomplete="off">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
 
-        <div class="form-grid">
-          <div class="form-cell">{{ form.project_name_cb.label_tag }}{{ form.project_name_cb }}</div>
-          <div class="form-cell">{{ form.project_address_cb.label_tag }}{{ form.project_address_cb }}</div>
-          <div class="form-cell">{{ form.contractor_company_name.label_tag }}{{ form.contractor_company_name }}</div>
-          <div class="form-cell">{{ form.name_of_work.label_tag }}{{ form.name_of_work }}</div>
-          <div class="form-cell">{{ form.work_unit.label_tag }}{{ form.work_unit }}</div>
-          <div class="form-cell">{{ form.bill_date.label_tag }}{{ form.bill_date }}</div>
-          <div class="form-cell">{{ form.bill_no.label_tag }}{{ form.bill_no }}</div>
-          <div class="form-cell">{{ form.quantity.label_tag }}{{ form.quantity }}</div>
-          <div class="form-cell">{{ form.unit_price.label_tag }}{{ form.unit_price }}</div>
-          <div class="form-cell">{{ form.bill_amount.label_tag }}{{ form.bill_amount }}</div>
-        </div>
+      <div class="form-grid">
+        <div class="form-cell">{{ form.project_name_cb.label_tag }}{{ form.project_name_cb }}</div>
+        <div class="form-cell">{{ form.project_address_cb.label_tag }}{{ form.project_address_cb }}</div>
+        <div class="form-cell">{{ form.contractor_company_name.label_tag }}{{ form.contractor_company_name }}</div>
+        <div class="form-cell">{{ form.name_of_work.label_tag }}{{ form.name_of_work }}</div>
+        <div class="form-cell">{{ form.work_unit.label_tag }}{{ form.work_unit }}</div>
+        <div class="form-cell">{{ form.bill_date.label_tag }}{{ form.bill_date }}</div>
+        <div class="form-cell">{{ form.bill_no.label_tag }}{{ form.bill_no }}</div>
+        <div class="form-cell">{{ form.quantity.label_tag }}{{ form.quantity }}</div>
+        <div class="form-cell">{{ form.unit_price.label_tag }}{{ form.unit_price }}</div>
+        <div class="form-cell">{{ form.bill_amount.label_tag }}{{ form.bill_amount }}</div>
+      </div>
 
-        <div class="form-actions">
-          <button type="submit" class="btn green">
-            {% if mode == 'edit' %}Update{% else %}Save{% endif %}
-          </button>
+      <div class="form-actions">
+        <button type="submit" class="btn green">
+          {% if mode == 'edit' %}Update{% else %}Save{% endif %}
+        </button>
 
-          {% if mode != 'list' %}
-            <a href="{% url 'contractorbill_dashboard' %}?q={{ query }}&project={{ project }}&contractor_company_name={{ contractor_company_name }}" 
-               class="btn gray">Cancel</a>
-          {% endif %}
-        </div>
-      </form>
-    </div>
-  </section>
+        {% if mode != 'list' %}
+          <a href="{% url 'contractorbill_dashboard' %}?q={{ query }}&project={{ project }}&contractor_company_name={{ contractor_company_name }}"
+             class="btn gray">Cancel</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</section>
 {% endif %}
 
-<!-- 🔍 Search Section -->
+<!-- 🔍 Filter/Search -->
 <section class="filter-section">
   <h2>🔍 FILTERING</h2>
-  <form method="get" class="filter-form">
-
-    <div class="filter-row">
-      <input type="text" name="project" value="{{ project }}" placeholder="Search by Project Name">
-      <button type="submit" class="btn blue">Filter</button>
-    </div>
-
-    <div class="filter-row">
-      <input type="text" name="contractor_company_name" value="{{ contractor_company_name }}" placeholder="Search by Contractor Company Name">
-      <button type="submit" class="btn blue">Filter</button>
-    </div>
-
+  <form method="get">
+    <input type="text" name="project" value="{{ project|default:'' }}" placeholder="Search by Project Name">
+    <input type="text" name="contractor_company_name" value="{{ contractor_company_name|default:'' }}" placeholder="Search by Contractor Company Name">
+    <button type="submit" class="btn blue">Filter</button>
   </form>
 </section>
 
-<!-- 📋 Contractorbill List -->
+<!-- 📋 Contractorbill List Section -->
 <section class="table-section">
   <header class="table-header">
     <h2><i class="fas fa-list"></i> CONTRACTORBILL LIST</h2>
@@ -118,22 +110,49 @@
           <td>{{ contractorbill.bill_amount }}</td>
 
           <td>
-            {% if contractorbill.created_by == request.user %}
-              <a href="{% url 'contractorbill_edit_contractorbill' contractorbill.pk %}?q={{ query }}&project={{ project }}&contractor_company_name={{ contractor_company_name }}"
-                 class="btn yellow action-btn">
-                <i class="fas fa-edit"></i> Edit
-              </a>
 
-              <form method="post"
-                    action="{% url 'contractorbill_delete_contractorbill' contractorbill.pk %}?q={{ query }}&project={{ project }}&contractor_company_name={{ contractor_company_name }}"
-                    style="display:inline;">
-                {% csrf_token %}
-                <button type="submit"
-                        class="btn red action-btn"
-                        onclick="return confirm('Delete this contractorbill?');">
-                  <i class="fas fa-trash-alt"></i> Delete
-                </button>
-              </form>
+            <!-- ✅ Admin sees pending requests -->
+            {% if is_admin and contractorbill.edit_request_pending %}
+              <a href="{% url 'contractorbill_approve_team_permission' contractorbill.pk %}"
+                 class="btn blue action-btn">
+                <i class="fas fa-check-circle"></i> Approve Request
+              </a>
+            {% endif %}
+
+            <!-- ✅ Team member actions -->
+            {% if contractorbill.created_by == current_user %}
+
+              {% if contractorbill.allow_team_edit %}
+                <!-- ✅ Edit -->
+                <a href="{% url 'contractorbill_edit_contractorbill' contractorbill.pk %}?q={{ query }}&project={{ project }}&contractor_company_name={{ contractor_company_name }}"
+                   class="btn yellow action-btn">
+                  <i class="fas fa-edit"></i> Edit
+                </a>
+
+                <!-- ✅ Delete -->
+                <form method="post"
+                      action="{% url 'contractorbill_delete_contractorbill' contractorbill.pk %}?q={{ query }}&project={{ project }}&contractor_company_name={{ contractor_company_name }}"
+                      style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn red action-btn"
+                          onclick="return confirm('Delete this contractorbill?');">
+                    <i class="fas fa-trash-alt"></i> Delete
+                  </button>
+                </form>
+
+              {% elif contractorbill.edit_request_pending %}
+                <!-- ⏳ Pending -->
+                <span class="badge badge-warning">
+                  <i class="fas fa-hourglass-half"></i> Request Pending
+                </span>
+
+              {% else %}
+                <!-- 📩 Request permission -->
+                <a href="{% url 'contractorbill_request_team_permission' contractorbill.pk %}"
+                   class="btn btn-outline-primary action-btn">
+                  <i class="fas fa-paper-plane"></i> Request Edit/Delete
+                </a>
+              {% endif %}
             {% endif %}
           </td>
         </tr>
