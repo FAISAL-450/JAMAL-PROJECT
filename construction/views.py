@@ -87,4 +87,18 @@ def construction_cb_list(request):
         'query': query
     })
 
+# 🏗️ Construction Resource List View
+def construction_rl_list(request):
+    query = request.GET.get('q', '').strip()
+    resources = Resource.objects.filter(department='construction')  
+
+    if query:
+        resources = resources.filter(name_of_resource__icontains=query)
+
+    resources_page = get_paginated_queryset(request, resources, per_page=10)
+
+    return render(request, 'construction/construction_rl_list.html', {
+        'resources': resources_page,
+        'query': query
+    })
 
