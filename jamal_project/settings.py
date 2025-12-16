@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     'requisition',
     'contractorbill',
     'resource',
+    'pr',
 
 ]
 

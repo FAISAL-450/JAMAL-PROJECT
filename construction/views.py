@@ -102,3 +102,18 @@ def construction_rl_list(request):
         'query': query
     })
 
+# 🏗️ Construction PR List View
+def construction_ppr_list(request):
+    query = request.GET.get('q', '').strip()
+    prs = Pr.objects.filter(department='construction')  
+
+    if query:
+        prs = prs.filter(resource_name_pr__icontains=query)
+
+    prs_page = get_paginated_queryset(request, prs, per_page=10)
+
+    return render(request, 'construction/construction_ppr_list.html', {
+        'prs': prs_page,
+        'query': query
+    })
+

@@ -9,5 +9,6 @@ urlpatterns = [
     path('requisition-detailed/', views.construction_pr_list, name='construction_pr_list'),
     path('contractorbill-detailed/', views.construction_cb_list, name='construction_cb_list'),
     path('resource-detailed/', views.construction_rl_list, name='construction_rl_list'),
+    path('pr-detailed/', views.construction_ppr_list, name='construction_ppr_list'),
 
 ]
