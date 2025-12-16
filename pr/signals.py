@@ -2,10 +2,12 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
-from .models import PrProfile   
+from .models import PrProfile
 
-# B - Signal: Create PRProfile When User Is Created
+# B - Signal: Create PrProfile When User Is Created
 @receiver(post_save, sender=User)
 def create_pr_profile(sender, instance, created, **kwargs):
     if created:
-        PRProfile.objects.create(user=instance)   
+        PrProfile.objects.create(user=instance)
+
+
