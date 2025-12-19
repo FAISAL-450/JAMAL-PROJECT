@@ -91,7 +91,7 @@ class Resource(models.Model):
     )
 
     def __str__(self):
-        return f"{self.name_of_resource} ({self.resource_unit})"
+        return f"{self.name_of_resource}"
 
     class Meta:
         ordering = ['-created_at']
