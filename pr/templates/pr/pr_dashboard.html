@@ -183,7 +183,8 @@
         const resourceId = this.value;
         if (!resourceId) return;
 
-        fetch(`/dashboard/get_pr_details/${resourceId}/`)
+        // ✅ Correct fetch path matches Django URL: /pr/dashboard/get_pr_details/<pk>/
+        fetch(`/pr/dashboard/get_pr_details/${resourceId}/`)
           .then(res => {
             if (!res.ok) throw new Error(`Fetch failed with status ${res.status}`);
             return res.json();

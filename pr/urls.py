@@ -22,4 +22,5 @@ urlpatterns = [
 
     # 🔎 Auto-fill API endpoint (used by JavaScript)
     path('dashboard/get_pr_details/<int:pk>/', views.get_pr_details, name='get_pr_details'),
+
 ]

@@ -45,7 +45,7 @@ class PrForm(forms.ModelForm):
             }),
             'unit_resource_pr': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Enter unit (e.g., pcs, kg)',
+                'placeholder': 'Enter unit ',
             }),
             'quantity_pr': forms.NumberInput(attrs={
                 'class': 'form-control',
