@@ -10,6 +10,7 @@ from django.core.exceptions import PermissionDenied
 from .models import Pr
 from .forms import PrForm
 from project.models import Project
+from resource.models import Resource
 
 # B - Azure Admin Check
 def is_azure_admin(user):
