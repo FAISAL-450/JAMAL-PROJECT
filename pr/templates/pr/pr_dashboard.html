@@ -191,7 +191,7 @@
           })
           .then(data => {
             if (resourceUnitField) {
-              resourceUnitField.value = data.resource_unit_pr || '';
+              resourceUnitField.value = data.resource_unit || '';
               resourceUnitField.classList.add('autofilled');
               setTimeout(() => resourceUnitField.classList.remove('autofilled'), 3000);
             }
