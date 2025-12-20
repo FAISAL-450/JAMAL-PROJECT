@@ -37,7 +37,7 @@
         <div class="form-cell">{{ form.requisition_date_pr.label_tag }}{{ form.requisition_date_pr }}</div>
         <div class="form-cell">{{ form.requisition_no.label_tag }}{{ form.requisition_no }}</div>
         <div class="form-cell">{{ form.resource_name_pr.label_tag }}{{ form.resource_name_pr }}</div>
-        <div class="form-cell">{{ form.unit_resource_pr.label_tag }}{{ form.unit_resource_pr }}</div>
+        <div class="form-cell">{{ form.resource_unit_pr.label_tag }}{{ form.unit_resource_pr }}</div>
         <div class="form-cell">{{ form.quantity_pr.label_tag }}{{ form.quantity_pr }}</div>
         <div class="form-cell">{{ form.delivery_date_pr.label_tag }}{{ form.delivery_date_pr }}</div>
         <div class="form-cell">{{ form.remarks.label_tag }}{{ form.remarks }}</div>
@@ -97,7 +97,7 @@
           <td>{{ pr.requisition_date_pr|date:"d-m-y" }}</td>
           <td>{{ pr.requisition_no }}</td>
           <td>{{ pr.resource_name_pr }}</td>
-          <td>{{ pr.unit_resource_pr }}</td>
+          <td>{{ pr.resource_unit_pr }}</td>
           <td>{{ pr.quantity_pr }}</td>
           <td>{{ pr.delivery_date_pr|date:"d-m-y" }}</td>
           <td>{{ pr.remarks }}</td>
@@ -154,7 +154,7 @@
     const form = document.getElementById('formContent');
     const btn = document.getElementById('toggle-btn');
     const prSelect = document.getElementById('id_resource_name_pr'); // dropdown
-    const resourceUnitField = document.getElementById('id_unit_resource_pr'); // target field
+    const resourceUnitField = document.getElementById('id_resource_unit_pr'); // target field
 
     // 🔁 Auto-expand form if in edit mode
     const mode = "{{ mode }}";

@@ -11,7 +11,7 @@ class PrForm(forms.ModelForm):
             'requisition_date_pr',
             'requisition_no',
             'resource_name_pr',
-            'unit_resource_pr',
+            'resource_unit_pr',
             'quantity_pr',
             'delivery_date_pr',
             'remarks',
@@ -22,7 +22,7 @@ class PrForm(forms.ModelForm):
             'requisition_date_pr': 'Requisition Date',
             'requisition_no': 'Requisition Number',
             'resource_name_pr': 'Resource Name',
-            'unit_resource_pr': 'Unit',
+            'resource_unit_pr': 'Unit',
             'quantity_pr': 'Quantity',
             'delivery_date_pr': 'Delivery Date',
             'remarks': 'Remarks',
@@ -43,7 +43,7 @@ class PrForm(forms.ModelForm):
             'resource_name_pr': forms.Select(attrs={
                 'class': 'form-control',
             }),
-            'unit_resource_pr': forms.TextInput(attrs={
+            'resource_unit_pr': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Auto-fill unit',
             }),

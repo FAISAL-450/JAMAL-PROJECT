@@ -50,7 +50,7 @@ class Pr(models.Model):
         related_name='pr_resource_name_pr',
         verbose_name="Resource Name"
     )
-    unit_resource_pr = models.CharField(max_length=200, blank=True)
+    resource_unit_pr = models.CharField(max_length=200, blank=True)
     quantity_pr = models.DecimalField(max_digits=12, decimal_places=2)
     delivery_date_pr = models.DateField()
     remarks = models.CharField(max_length=50)
