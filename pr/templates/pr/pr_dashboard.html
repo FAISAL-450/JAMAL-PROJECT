@@ -151,13 +151,16 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
 
+    // Elements
     const form = document.getElementById('formContent');
     const btn = document.getElementById('toggle-btn');
-    const prSelect = document.getElementById('id_resource_name_pr');   // dropdown
-    const resourceUnitField = document.getElementById('id_resource_unit_pr'); // target field
+    const prSelect = document.getElementById('id_resource_name_pr');
+    const resourceUnitField = document.getElementById('id_resource_unit_pr');
 
+    // Mode from backend (e.g., Django template variable)
     const mode = "{{ mode }}";
 
+    // Initial toggle state
     if (mode === "edit" && form && btn) {
       form.style.display = 'block';
       btn.classList.remove('btn-red');
@@ -168,6 +171,7 @@
       btn.classList.add('btn-red');
     }
 
+    // Toggle function (exposed globally)
     window.toggleForm = function () {
       if (!form || !btn) return;
       const isHidden = form.style.display === 'none' || form.style.display === '';
@@ -176,6 +180,7 @@
       btn.classList.toggle('btn-red', !isHidden);
     };
 
+    // Auto-fill resource unit when resource changes
     if (prSelect) {
       prSelect.addEventListener('change', function () {
         const resourceId = this.value;
