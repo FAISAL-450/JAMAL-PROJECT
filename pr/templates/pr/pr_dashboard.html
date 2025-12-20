@@ -147,17 +147,17 @@
 
 </div>
 
-<!-- 🔧 Script-(Toggle Button & Auto Fill Field) -->
+<!-- ✅ Toggle + Auto-fill Script -->
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // 📦 DOM references
+
     const form = document.getElementById('formContent');
     const btn = document.getElementById('toggle-btn');
-    const prSelect = document.getElementById('id_resource_name_pr'); // dropdown
+    const prSelect = document.getElementById('id_resource_name_pr');   // dropdown
     const resourceUnitField = document.getElementById('id_resource_unit_pr'); // target field
 
-    // 🔁 Auto-expand form if in edit mode
     const mode = "{{ mode }}";
+
     if (mode === "edit" && form && btn) {
       form.style.display = 'block';
       btn.classList.remove('btn-red');
@@ -168,7 +168,6 @@
       btn.classList.add('btn-red');
     }
 
-    // 🔧 Toggle form visibility
     window.toggleForm = function () {
       if (!form || !btn) return;
       const isHidden = form.style.display === 'none' || form.style.display === '';
@@ -177,18 +176,13 @@
       btn.classList.toggle('btn-red', !isHidden);
     };
 
-    // 🧠 Auto-fill-pr details-on-resource selection
     if (prSelect) {
       prSelect.addEventListener('change', function () {
         const resourceId = this.value;
         if (!resourceId) return;
 
-        // ✅ Correct fetch path matches Django URL: /pr/dashboard/get_pr_details/<pk>/
         fetch(`/pr/dashboard/get_pr_details/${resourceId}/`)
-          .then(res => {
-            if (!res.ok) throw new Error(`Fetch failed with status ${res.status}`);
-            return res.json();
-          })
+          .then(res => res.json())
           .then(data => {
             if (resourceUnitField) {
               resourceUnitField.value = data.resource_unit || '';
