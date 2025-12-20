@@ -2,6 +2,7 @@ from django import forms
 from .models import Pr
 from .models import Project
 from .models import Resource
+from resource.models import WORK_UNIT_CHOICES  # ✅ import choices
 
 class PrForm(forms.ModelForm):
     class Meta:
@@ -43,9 +44,9 @@ class PrForm(forms.ModelForm):
             'resource_name_pr': forms.Select(attrs={
                 'class': 'form-control',
             }),
-            'unit_resource_pr': forms.TextInput(attrs={
+            # 🔑 Change TextInput → Select with choices
+            'unit_resource_pr': forms.Select(choices=WORK_UNIT_CHOICES, attrs={
                 'class': 'form-control',
-                'placeholder': 'Enter unit ',
             }),
             'quantity_pr': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -95,3 +96,4 @@ class PrForm(forms.ModelForm):
             selected = Resource.objects.filter(pk=self.instance.resource_name_pr.pk)
             queryset = (queryset | selected).distinct()
         self.fields['resource_name_pr'].queryset = queryset
+
