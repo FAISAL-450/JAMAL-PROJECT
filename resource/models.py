@@ -6,16 +6,6 @@ ROLE_CHOICES = [
     ('rm', 'RM'),
 ]
 
-# Unit choices
-WORK_UNIT_CHOICES = [
-    ('cft', 'Cft'),
-    ('sft', 'Sft'),
-    ('nos', 'Nos'),
-    ('pcs', 'Pcs'),
-    ('rm', 'Rm'),
-    ('rft', 'Rft'),
-]
-
 # Group choices
 GROUP_CHOICES = [
     ('civil work', 'Civil Work'),
@@ -47,11 +37,7 @@ class ResourceProfile(models.Model):
 
 class Resource(models.Model):
     name_of_resource = models.CharField(max_length=100, blank=True)
-    resource_unit = models.CharField(
-        max_length=20,
-        choices=WORK_UNIT_CHOICES,
-        help_text="Unit of measurement for the work"
-    )
+    resource_unit = models.CharField(max_length=100, blank=True)
     resource_group = models.CharField(
         max_length=20,
         choices=GROUP_CHOICES,

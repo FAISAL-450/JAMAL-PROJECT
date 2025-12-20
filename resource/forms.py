@@ -23,8 +23,10 @@ class ResourceForm(forms.ModelForm):
             }),
             'resource_unit': forms.Select(attrs={
                 'class': 'form-control',
+                'placeholder': 'Enter resource unit'
             }),
             'resource_group': forms.Select(attrs={
                 'class': 'form-control',
             }),
         }
+
