@@ -76,7 +76,6 @@ class Pr(models.Model):
         default=False,
         help_text="Admin approval status"
     )
-
     created_by = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
