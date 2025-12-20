@@ -37,7 +37,11 @@ class ResourceProfile(models.Model):
 
 class Resource(models.Model):
     name_of_resource = models.CharField(max_length=100, blank=True)
-    resource_unit = models.CharField(max_length=100, blank=True)
+    resource_unit = models.CharField(
+    max_length=200,
+    blank=True,
+    help_text="Unit of measurement for the resource"
+)
     resource_group = models.CharField(
         max_length=20,
         choices=GROUP_CHOICES,
