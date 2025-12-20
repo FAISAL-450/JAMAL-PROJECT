@@ -231,7 +231,7 @@ def approve_pr(request, pk):
 def get_pr_details(request, pk):
     resource = get_object_or_404(Resource, pk=pk)
     return JsonResponse({
-        "resource_unit": resource.get_resource_unit_display() or "",
+        "resource_unit": resource.resource_unit or "",
     })
 
 
