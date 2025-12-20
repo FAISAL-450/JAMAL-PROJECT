@@ -227,11 +227,17 @@ def approve_pr(request, pk):
     messages.success(request, "✅ PR approved successfully.")
     return redirect(reverse('admin_dashboard'))
 
-
 # K - Auto-Fill API (Used by JavaScript)
 def get_pr_details(request, pk):
     resource = get_object_or_404(Resource, pk=pk)
     return JsonResponse({
-        "resource_unit": resource.resource_unit or "",
+        "resource_unit": resource.get_resource_unit_display() or "",
     })
+
+
+
+
+
+
+
 
