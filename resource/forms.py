@@ -21,7 +21,7 @@ class ResourceForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Enter resource name'
             }),
-            'resource_unit': forms.Select(attrs={
+            'resource_unit': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Enter resource unit'
             }),
@@ -29,4 +29,5 @@ class ResourceForm(forms.ModelForm):
                 'class': 'form-control',
             }),
         }
+
 
