@@ -36,7 +36,10 @@ class ResourceProfile(models.Model):
         verbose_name_plural = "Resource Role Profiles"
 
 class Resource(models.Model):
-    name_of_resource = models.CharField(max_length=100, blank=True)
+    name_of_resource = models.CharField(
+    max_length=100,
+    help_text="Name of the resource"
+)
     resource_unit = models.CharField(
     max_length=200,
     blank=True,
