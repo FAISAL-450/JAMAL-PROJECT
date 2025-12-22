@@ -117,3 +117,17 @@ def construction_ppr_list(request):
         'query': query
     })
 
+# 🏗️ Construction Supplier List View
+def construction_sl_list(request):
+    query = request.GET.get('q', '').strip()
+    suppliers = Supplier.objects.filter(department='construction')  
+
+    if query:
+        suppliers = suppliers.filter(name_of_supplier__icontains=query)
+
+    suppliers_page = get_paginated_queryset(request, suppliers, per_page=10)
+
+    return render(request, 'construction/construction_sl_list.html', {
+        'suppliers': suppliers_page,
+        'query': query
+    })

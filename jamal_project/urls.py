@@ -40,6 +40,7 @@ path('requisition/', include('requisition.urls')),
 path('contractorbill/', include('contractorbill.urls')),
 path('resource/', include('resource.urls')),
 path('pr/', include('pr.urls')),
+path('supplier/', include('supplier.urls')),
 
 
 ]
